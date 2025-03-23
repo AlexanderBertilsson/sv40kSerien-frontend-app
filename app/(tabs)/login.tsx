@@ -1,13 +1,20 @@
 import { useState, useMemo, useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuthRequest, exchangeCodeAsync, revokeAsync, ResponseType, AccessTokenRequestConfig, TokenResponse } from 'expo-auth-session';
-import { Button, Alert, View } from 'react-native';
+import { Button, Alert, View, Text } from 'react-native';
+import axios  from "axios"
 
 WebBrowser.maybeCompleteAuthSession();
 
 const clientId = '2lg4jikgmjccck95t78lf4g3jc';
 const userPoolUrl = 'https://eu-north-1qq0zhyyi5.auth.eu-north-1.amazoncognito.com';
 const redirectUri = 'myapp://';
+type User = {
+  username: string,
+  email: string,
+}
+export const [user, setUser] = useState<User | null>(null);
+
 
 export default function LoginScreen() {
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
@@ -16,7 +23,8 @@ export default function LoginScreen() {
     tokenEndpoint: userPoolUrl + '/oauth2/token',
     revocationEndpoint: userPoolUrl + '/oauth2/revoke',
   }), []);
-
+  console.log(authTokens);
+  
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId,
@@ -26,7 +34,7 @@ export default function LoginScreen() {
     },
     discoveryDocument
   );
-  console.log(authTokens);
+
   useEffect(() => {
     const exchangeFn = async (exchangeTokenReq: AccessTokenRequestConfig) => {
       try {
@@ -72,6 +80,15 @@ export default function LoginScreen() {
     }
   }, [discoveryDocument, request, response]);
 
+  useEffect(() => {
+    if(!user && authTokens){
+      axios.get(userPoolUrl + '/oauth2/userinfo', {headers: {"Authorization": "Bearer "+authTokens.accessToken}}).then((res) => {
+       
+        setUser(res.data);
+      })
+    }
+  }, [authTokens])
+
   const logout = async () => {
     console.log('authTokens: ' + JSON.stringify(authTokens));
     if(!authTokens || authTokens.refreshToken === undefined){
@@ -93,11 +110,16 @@ export default function LoginScreen() {
     }
   };
   console.log('authTokens: ' + JSON.stringify(authTokens));
-  return authTokens ? (
+  return user ? (
+    <>
     <View>
+      <View>
+        <Text>{user.username}</Text>
+      </View>
       <Button title="Logout" onPress={() => logout()} />
-
+    
     </View>
+    </>
   ) : (
     <View>
       <Button disabled={!request} title="Login" onPress={() => promptAsync()} />

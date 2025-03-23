@@ -26,6 +26,15 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen 
+                name='profile' 
+                options={{ 
+                    title: 'Profile',
+                    tabBarIcon: ({ color, focused}) => (
+                        <Ionicons name={focused ? 'person' : 'person-outline'} color={color} size={24}/>
+                    ),
+                }}
+            />
+            <Tabs.Screen 
                 name='about' 
                 options={{ 
                     title: 'About',
@@ -34,12 +43,12 @@ export default function TabLayout() {
                     ),
                 }}
             />
-                <Tabs.Screen 
+            <Tabs.Screen 
                 name='login' 
                 options={{ 
                     title: 'Login',
                     tabBarIcon: ({ color, focused}) => (
-                        <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+                        <Ionicons name={focused ? 'log-in' : 'log-in-outline'} color={color} size={24}/>
                     ),
                 }}
             />

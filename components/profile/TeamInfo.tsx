@@ -1,38 +1,55 @@
 import { View, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { ThemedText } from '../ThemedText';
+import { colors } from '@/constants/theme';
+import { useState } from 'react';
 
 interface TeamInfoProps {
   teamName: string;
   teamLogo: string;
   role: string;
-  sportsmanshipRating?: number;
+  sportsmanshipRating: number;
 }
 
+const fallbackLogo = 'https://images.unsplash.com/photo-1599753894977-bc6c46289a76?q=80&w=400';
+
 export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: TeamInfoProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.sectionTitle}>Team</ThemedText>
-      
-      <View style={styles.teamCard}>
-        <View style={styles.teamHeader}>
-          <Image
-            source={teamLogo}
-            style={styles.teamLogo}
-            contentFit="cover"
-          />
-          <View style={styles.teamDetails}>
-            <ThemedText style={styles.teamName}>{teamName}</ThemedText>
-            <ThemedText style={styles.role}>{role}</ThemedText>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <ThemedText style={styles.title}>Team Information</ThemedText>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={imageError ? fallbackLogo : teamLogo}
+              style={styles.logo}
+              contentFit="cover"
+              onError={() => setImageError(true)}
+            />
+          </View>
+
+          <View style={styles.info}>
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.label}>Team:</ThemedText>
+              <ThemedText style={styles.value}>{teamName}</ThemedText>
+            </View>
+
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.label}>Role:</ThemedText>
+              <ThemedText style={styles.value}>{role}</ThemedText>
+            </View>
+
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.label}>Sportsmanship:</ThemedText>
+              <ThemedText style={styles.value}>{sportsmanshipRating.toFixed(1)} / 5.0</ThemedText>
+            </View>
           </View>
         </View>
-        
-        {sportsmanshipRating !== undefined && (
-          <View style={styles.ratingContainer}>
-            <ThemedText style={styles.ratingLabel}>Sportsmanship</ThemedText>
-            <ThemedText style={styles.ratingValue}>{sportsmanshipRating}/5</ThemedText>
-          </View>
-        )}
       </View>
     </View>
   );
@@ -40,62 +57,61 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: Team
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    width: '100%',
   },
-  sectionTitle: {
+  card: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  header: {
+    marginBottom: 20,
+  },
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray text
-    marginBottom: 12,
+    color: colors.silver,
   },
-  teamCard: {
-    backgroundColor: '#02040F',  // Nearly black background
+  content: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  logoContainer: {
+    width: 80,
+    height: 80,
     borderRadius: 12,
-    padding: 16,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#840032',  // Deep red border
+    borderColor: colors.steel,
   },
-  teamHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  logo: {
+    width: '100%',
+    height: '100%',
   },
-  teamLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-    borderWidth: 2,
-    borderColor: '#E59500',  // Orange border
-  },
-  teamDetails: {
+  info: {
     flex: 1,
+    gap: 12,
   },
-  teamName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray text
-    marginBottom: 4,
-  },
-  role: {
-    fontSize: 14,
-    color: '#E59500',  // Orange text
-  },
-  ratingContainer: {
+  infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#840032',  // Deep red border
   },
-  ratingLabel: {
+  label: {
     fontSize: 14,
-    color: '#E5DADA',  // Light gray text
+    color: colors.slate,
+    marginRight: 12,
+    width: 100,
+    lineHeight: 18,
   },
-  ratingValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#E59500',  // Orange text
+  value: {
+    fontSize: 14,
+    color: colors.silver,
+    flex: 1,
+    lineHeight: 18,
   },
 });

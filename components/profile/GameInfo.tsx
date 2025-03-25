@@ -1,5 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '../ThemedText';
+import { colors } from '@/constants/theme';
 
 interface Army {
   name: string;
@@ -7,25 +8,25 @@ interface Army {
 }
 
 interface GameInfoProps {
-  armies: Army[];
   role: string;
+  armies: Army[];
 }
 
-export function GameInfo({ armies, role }: GameInfoProps) {
+export function GameInfo({ role, armies }: GameInfoProps) {
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.sectionTitle}>Gaming Profile</ThemedText>
-      
       <View style={styles.card}>
-        <View style={styles.roleSection}>
-          <ThemedText style={styles.label}>Preferred Role</ThemedText>
-          <ThemedText style={styles.roleText}>{role}</ThemedText>
+        <ThemedText style={styles.title}>Battle History</ThemedText>
+        
+        <View style={styles.roleContainer}>
+          <ThemedText style={styles.label}>Preferred Role:</ThemedText>
+          <ThemedText style={styles.value}>{role}</ThemedText>
         </View>
 
-        <View style={styles.armiesSection}>
-          <ThemedText style={styles.label}>Most Played Armies</ThemedText>
+        <View style={styles.armiesContainer}>
+          <ThemedText style={styles.label}>Armies:</ThemedText>
           {armies.map((army, index) => (
-            <View key={index} style={styles.armyRow}>
+            <View key={index} style={styles.armyItem}>
               <ThemedText style={styles.armyName}>{army.name}</ThemedText>
               <ThemedText style={styles.gamesPlayed}>
                 {army.gamesPlayed} {army.gamesPlayed === 1 ? 'game' : 'games'}
@@ -40,52 +41,61 @@ export function GameInfo({ armies, role }: GameInfoProps) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#E5DADA',  
-    marginBottom: 12,
+    width: '100%',
   },
   card: {
-    backgroundColor: '#02040F',  
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#840032',  
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
-  roleSection: {
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.silver,
+    marginBottom: 20,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  armiesSection: {
-    borderTopWidth: 1,
-    borderTopColor: '#840032',  
-    paddingTop: 16,
-  },
   label: {
-    fontSize: 14,
-    color: '#E5DADA',  
-    marginBottom: 8,
-  },
-  roleText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#E59500',  
+    color: colors.slate,
+    marginRight: 8,
   },
-  armyRow: {
+  value: {
+    fontSize: 16,
+    color: colors.silver,
+    fontWeight: '500',
+  },
+  armiesContainer: {
+    gap: 16,
+  },
+  armyItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: colors.darkNavy,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.steel,
   },
   armyName: {
     fontSize: 16,
+    color: colors.silver,
     fontWeight: '500',
-    color: '#E5DADA',  
+    lineHeight: 20,
   },
   gamesPlayed: {
     fontSize: 14,
-    color: '#E59500',  
+    color: colors.slate,
+    lineHeight: 18,
   },
 });

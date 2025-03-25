@@ -1,6 +1,7 @@
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { ThemedText } from '../ThemedText';
+import { colors } from '@/constants/theme';
 
 interface Achievement {
   icon: string;
@@ -15,23 +16,25 @@ interface AchievementsPreviewProps {
 export function AchievementsPreview({ achievements }: AchievementsPreviewProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText style={styles.sectionTitle}>Battle Honors</ThemedText>
-        <Link href="/(tabs)/(profile)/stats" style={styles.viewAll}>
-          <ThemedText style={styles.viewAllText}>View All</ThemedText>
-        </Link>
-      </View>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <ThemedText style={styles.title}>Battle Honors</ThemedText>
+          <Link href="/(tabs)/(profile)/stats" style={styles.viewAll}>
+            <ThemedText style={styles.viewAllText}>View All</ThemedText>
+          </Link>
+        </View>
 
-      <View style={styles.achievementsGrid}>
-        {achievements.map((achievement, index) => (
-          <View key={index} style={styles.achievementCard}>
-            <ThemedText style={styles.achievementIcon}>{achievement.icon}</ThemedText>
-            <View style={styles.achievementInfo}>
-              <ThemedText style={styles.achievementTitle}>{achievement.title}</ThemedText>
-              <ThemedText style={styles.achievementDesc}>{achievement.description}</ThemedText>
+        <View style={styles.achievementsGrid}>
+          {achievements.map((achievement, index) => (
+            <View key={index} style={styles.achievementCard}>
+              <ThemedText style={styles.achievementIcon}>{achievement.icon}</ThemedText>
+              <View style={styles.achievementInfo}>
+                <ThemedText style={styles.achievementTitle}>{achievement.title}</ThemedText>
+                <ThemedText style={styles.achievementDesc}>{achievement.description}</ThemedText>
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -39,53 +42,65 @@ export function AchievementsPreview({ achievements }: AchievementsPreviewProps) 
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    width: '100%',
+  },
+  card: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  sectionTitle: {
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray from our palette
+    color: colors.silver,
   },
   viewAll: {
-    textDecorationLine: 'none',
+    padding: 8,
   },
   viewAllText: {
-    fontSize: 16,
-    color: '#E59500',  // Orange from our palette
+    color: colors.slate,
+    fontSize: 14,
   },
   achievementsGrid: {
-    gap: 12,
+    gap: 16,
   },
   achievementCard: {
     flexDirection: 'row',
-    backgroundColor: '#02040F',  // Nearly black from our palette
-    borderRadius: 8,
-    padding: 12,
-    gap: 12,
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: colors.darkNavy,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#840032',  // Deep red from our palette
+    borderColor: colors.steel,
   },
   achievementIcon: {
     fontSize: 24,
+    marginRight: 16,
   },
   achievementInfo: {
     flex: 1,
   },
   achievementTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray from our palette
+    fontWeight: '500',
+    color: colors.silver,
     marginBottom: 4,
+    lineHeight: 20,
   },
   achievementDesc: {
     fontSize: 14,
-    color: '#E5DADA',  // Light gray from our palette
-    opacity: 0.8,
+    color: colors.slate,
+    lineHeight: 18,
   },
 });

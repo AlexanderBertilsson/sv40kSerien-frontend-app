@@ -1,5 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '../ThemedText';
+import { colors } from '@/constants/theme';
 
 interface StatItemProps {
   value: string | number;
@@ -23,39 +24,63 @@ interface StatsOverviewProps {
 
 export function StatsOverview({ battles, winRate, points }: StatsOverviewProps) {
   return (
-    <View style={styles.statsGrid}>
-      <StatItem value={battles} label="Battles" />
-      <StatItem value={`${winRate}%`} label="Win Rate" />
-      <StatItem value={points} label="Points" />
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <ThemedText style={styles.title}>Statistics</ThemedText>
+        <View style={styles.statsColumn}>
+          <StatItem value={battles} label="Battles" />
+          <StatItem value={`${winRate}%`} label="Win Rate" />
+          <StatItem value={points} label="Points" />
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  container: {
     width: '100%',
-    paddingHorizontal: 16,
-    marginTop: 24,
+  },
+  card: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.silver,
+    marginBottom: 20,
+  },
+  statsColumn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
   },
   statCard: {
+    flex: 1,
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#02040F',  
+    backgroundColor: colors.darkNavy,
     borderRadius: 12,
-    minWidth: 100,
     borderWidth: 1,
-    borderColor: '#840032',  
+    borderColor: colors.steel,
   },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#E59500',  
-    marginBottom: 4,
+    color: colors.silver,
+    marginBottom: 8,
+    lineHeight: 28,
   },
   statLabel: {
     fontSize: 14,
-    color: '#E5DADA',  
+    color: colors.slate,
+    lineHeight: 18,
   },
 });

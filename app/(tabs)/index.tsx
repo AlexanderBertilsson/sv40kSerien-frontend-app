@@ -1,11 +1,17 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { Colors } from '@/constants/Colors';
 
 export default function HomeScreen() {
+  const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
+  const theme = Colors[colorScheme];
+
   return (
-    <View style={styles.container}>
-      <ThemedText style={styles.title}>Welcome to Warhammer 40k League</ThemedText>
-      <ThemedText style={styles.subtitle}>Track your battles, achievements, and glory!</ThemedText>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ThemedText style={[styles.title, { color: theme.text }]}>Home</ThemedText>
+      <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
+      <ThemedText style={[styles.text, { color: theme.text }]}>Welcome to Warhammer 40k League</ThemedText>
+      <ThemedText style={[styles.text, { color: theme.text }]}>Track your battles, achievements, and glory!</ThemedText>
     </View>
   );
 }
@@ -13,7 +19,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#002642',  // Dark blue from our palette
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -21,13 +26,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray from our palette
     textAlign: 'center',
     marginBottom: 16,
   },
-  subtitle: {
+  separator: {
+    height: 1,
+    width: '80%',
+    marginVertical: 24,
+  },
+  text: {
     fontSize: 16,
-    color: '#E59500',  // Orange from our palette
     textAlign: 'center',
+    paddingHorizontal: 16,
   },
 });

@@ -1,6 +1,6 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { ThemedText } from '../ThemedText';
-import { colors } from '@/constants/theme';
+import { Colors } from '@/constants/Colors';
 
 interface Army {
   name: string;
@@ -13,22 +13,50 @@ interface GameInfoProps {
 }
 
 export function GameInfo({ role, armies }: GameInfoProps) {
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
+
+  const cardStyle = {
+    ...styles.card,
+    backgroundColor: theme.secondary,
+  };
+
+  const labelStyle = {
+    ...styles.label,
+    color: theme.icon,
+  };
+
+  const valueStyle = {
+    ...styles.value,
+    color: theme.text,
+  };
+
+  const armyNameStyle = {
+    ...styles.armyName,
+    color: theme.text,
+  };
+
+  const gamesPlayedStyle = {
+    ...styles.gamesPlayed,
+    color: theme.icon,
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <ThemedText style={styles.title}>Battle History</ThemedText>
         
         <View style={styles.roleContainer}>
-          <ThemedText style={styles.label}>Preferred Role:</ThemedText>
-          <ThemedText style={styles.value}>{role}</ThemedText>
+          <ThemedText style={labelStyle}>Preferred Role:</ThemedText>
+          <ThemedText style={valueStyle}>{role}</ThemedText>
         </View>
 
         <View style={styles.armiesContainer}>
-          <ThemedText style={styles.label}>Armies:</ThemedText>
+          <ThemedText style={labelStyle}>Armies:</ThemedText>
           {armies.map((army, index) => (
             <View key={index} style={styles.armyItem}>
-              <ThemedText style={styles.armyName}>{army.name}</ThemedText>
-              <ThemedText style={styles.gamesPlayed}>
+              <ThemedText style={armyNameStyle}>{army.name}</ThemedText>
+              <ThemedText style={gamesPlayedStyle}>
                 {army.gamesPlayed} {army.gamesPlayed === 1 ? 'game' : 'games'}
               </ThemedText>
             </View>
@@ -44,58 +72,46 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   card: {
-    backgroundColor: colors.navy,
     borderRadius: 16,
     padding: 20,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.silver,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   roleContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
+  armiesContainer: {
+    gap: 12,
+  },
   label: {
     fontSize: 16,
-    color: colors.slate,
-    marginRight: 8,
   },
   value: {
     fontSize: 16,
-    color: colors.silver,
-    fontWeight: '500',
-  },
-  armiesContainer: {
-    gap: 16,
+    fontWeight: 'bold',
   },
   armyItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.darkNavy,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.steel,
+    marginTop: 8,
   },
   armyName: {
     fontSize: 16,
-    color: colors.silver,
-    fontWeight: '500',
-    lineHeight: 20,
+    fontWeight: 'bold',
   },
   gamesPlayed: {
     fontSize: 14,
-    color: colors.slate,
-    lineHeight: 18,
   },
 });

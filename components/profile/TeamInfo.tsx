@@ -1,7 +1,7 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { Image } from 'expo-image';
 import { ThemedText } from '../ThemedText';
-import { colors } from '@/constants/theme';
+import { Colors } from '@/constants/Colors';
 import { useState } from 'react';
 
 interface TeamInfoProps {
@@ -15,16 +15,38 @@ const fallbackLogo = 'https://images.unsplash.com/photo-1599753894977-bc6c46289a
 
 export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: TeamInfoProps) {
   const [imageError, setImageError] = useState(false);
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
+
+  const cardStyle = {
+    ...styles.card,
+    backgroundColor: theme.secondary,
+  };
+
+  const logoContainerStyle = {
+    ...styles.logoContainer,
+    borderColor: theme.icon,
+  };
+
+  const labelStyle = {
+    ...styles.label,
+    color: theme.text,
+  };
+
+  const valueStyle = {
+    ...styles.value,
+    color: theme.text,
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <View style={styles.header}>
           <ThemedText style={styles.title}>Team Information</ThemedText>
         </View>
 
         <View style={styles.content}>
-          <View style={styles.logoContainer}>
+          <View style={logoContainerStyle}>
             <Image
               source={imageError ? fallbackLogo : teamLogo}
               style={styles.logo}
@@ -35,18 +57,18 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: Team
 
           <View style={styles.info}>
             <View style={styles.infoRow}>
-              <ThemedText style={styles.label}>Team:</ThemedText>
-              <ThemedText style={styles.value}>{teamName}</ThemedText>
+              <ThemedText style={labelStyle}>Team:</ThemedText>
+              <ThemedText style={valueStyle}>{teamName}</ThemedText>
             </View>
 
             <View style={styles.infoRow}>
-              <ThemedText style={styles.label}>Role:</ThemedText>
-              <ThemedText style={styles.value}>{role}</ThemedText>
+              <ThemedText style={labelStyle}>Role:</ThemedText>
+              <ThemedText style={valueStyle}>{role}</ThemedText>
             </View>
 
             <View style={styles.infoRow}>
-              <ThemedText style={styles.label}>Sportsmanship:</ThemedText>
-              <ThemedText style={styles.value}>{sportsmanshipRating.toFixed(1)} / 5.0</ThemedText>
+              <ThemedText style={labelStyle}>Sportsmanship:</ThemedText>
+              <ThemedText style={valueStyle}>{sportsmanshipRating.toFixed(1)} / 5.0</ThemedText>
             </View>
           </View>
         </View>
@@ -60,7 +82,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   card: {
-    backgroundColor: colors.navy,
     borderRadius: 16,
     padding: 20,
     elevation: 5,
@@ -75,7 +96,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.silver,
   },
   content: {
     flexDirection: 'row',
@@ -87,7 +107,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.steel,
   },
   logo: {
     width: '100%',
@@ -103,14 +122,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: colors.slate,
     marginRight: 12,
     width: 100,
     lineHeight: 18,
   },
   value: {
     fontSize: 14,
-    color: colors.silver,
     flex: 1,
     lineHeight: 18,
   },

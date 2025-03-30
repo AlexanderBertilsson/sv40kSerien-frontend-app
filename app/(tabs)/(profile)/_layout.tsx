@@ -1,31 +1,39 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 export default function ProfileLayout() {
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
+
   return (
     <Stack
       screenOptions={{
+        headerShown: true,
         headerStyle: {
-          backgroundColor: '#002642',  // Dark blue from our palette
+          backgroundColor: theme.background,
         },
-        headerTintColor: '#E5DADA',  // Light gray from our palette
-        headerShadowVisible: false,
+        headerTintColor: theme.text,
+        headerTitleStyle: {
+          color: theme.text,
+        },
+        contentStyle: {
+          backgroundColor: theme.background,
+        },
       }}
     >
       <Stack.Screen
         name="index"
         options={{
-          title: "Profile",
-          headerShown: false,  // Hide header on main profile
+          title: 'Profile',
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="stats"
         options={{
-          title: "Statistics",
-          headerStyle: {
-            backgroundColor: '#002642',  // Dark blue from our palette
-          },
-          headerTintColor: '#E5DADA',  // Light gray from our palette
+          title: 'Statistics',
+          headerShown: true,
         }}
       />
     </Stack>

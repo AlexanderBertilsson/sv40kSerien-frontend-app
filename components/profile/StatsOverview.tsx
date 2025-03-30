@@ -1,6 +1,6 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { ThemedText } from '../ThemedText';
-import { colors } from '@/constants/theme';
+import { Colors } from '@/constants/Colors';
 
 interface StatItemProps {
   value: string | number;
@@ -8,8 +8,17 @@ interface StatItemProps {
 }
 
 function StatItem({ value, label }: StatItemProps) {
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
+
+  const statCardStyle = {
+    ...styles.statCard,
+    backgroundColor: theme.background,
+    borderColor: theme.icon,
+  };
+
   return (
-    <View style={styles.statCard}>
+    <View style={statCardStyle}>
       <ThemedText style={styles.statValue}>{value}</ThemedText>
       <ThemedText style={styles.statLabel}>{label}</ThemedText>
     </View>
@@ -25,13 +34,11 @@ interface StatsOverviewProps {
 export function StatsOverview({ battles, winRate, points }: StatsOverviewProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <ThemedText style={styles.title}>Statistics</ThemedText>
-        <View style={styles.statsColumn}>
-          <StatItem value={battles} label="Battles" />
-          <StatItem value={`${winRate}%`} label="Win Rate" />
-          <StatItem value={points} label="Points" />
-        </View>
+      <ThemedText style={styles.title}>Statistics</ThemedText>
+      <View style={styles.statsColumn}>
+        <StatItem value={battles} label="Battles" />
+        <StatItem value={`${winRate}%`} label="Win Rate" />
+        <StatItem value={points} label="Points" />
       </View>
     </View>
   );
@@ -41,20 +48,9 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
-  card: {
-    backgroundColor: colors.navy,
-    borderRadius: 16,
-    padding: 20,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.silver,
     marginBottom: 20,
   },
   statsColumn: {
@@ -66,21 +62,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 16,
-    backgroundColor: colors.darkNavy,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.steel,
   },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.silver,
     marginBottom: 8,
     lineHeight: 28,
   },
   statLabel: {
     fontSize: 14,
-    color: colors.slate,
     lineHeight: 18,
   },
 });

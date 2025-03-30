@@ -1,8 +1,8 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedText } from '../ThemedText';
-import { colors } from '@/constants/theme';
+import { Colors } from '@/constants/Colors';
 
 interface ProfileHeaderProps {
   username: string;
@@ -23,9 +23,11 @@ function getSportsmanshipLevel(progress: number, level: number): { level: number
 
 export function ProfileHeader({ username, title, team, sportsmanship, sportsmanshipLevel }: ProfileHeaderProps) {
   const { level, progress } = getSportsmanshipLevel(sportsmanship, sportsmanshipLevel);
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.bannerContainer}>
         <Image
           source="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000"
@@ -33,15 +35,15 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
           contentFit="cover"
         />
         <LinearGradient
-          colors={['transparent', colors.darkNavy]}
+          colors={['transparent', theme.background]}
           style={styles.bannerGradient}
         />
       </View>
 
       <View style={styles.contentContainer}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.secondary }]}>
           <View style={styles.profileContent}>
-            <View style={styles.profilePictureContainer}>
+            <View style={[styles.profilePictureContainer, { borderColor: theme.icon }]}>
               <Image
                 source="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400"
                 style={styles.profilePicture}
@@ -50,25 +52,25 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
             </View>
 
             <View style={styles.info}>
-              <ThemedText style={styles.username}>{username}</ThemedText>
+              <ThemedText style={[styles.username, { color: theme.text }]}>{username}</ThemedText>
               <View style={styles.infoRow}>
-                <ThemedText style={styles.label}>Team:</ThemedText>
-                <ThemedText style={styles.value}>{team}</ThemedText>
+                <ThemedText style={[styles.label, { color: theme.text }]}>{'Team: '}</ThemedText>
+                <ThemedText style={[styles.value, { color: theme.text }]}>{team}</ThemedText>
               </View>
-              <ThemedText style={styles.title}>{title}</ThemedText>
+              <ThemedText style={[styles.title, { color: theme.text }]}>{title}</ThemedText>
             </View>
           </View>
 
-          <View style={styles.sportsmanshipContainer}>
+          <View style={[styles.sportsmanshipContainer, { borderTopColor: theme.icon }]}>
             <View style={styles.sportsmanshipHeader}>
-              <ThemedText style={styles.sportsmanshipLabel}>Sportsmanship Level</ThemedText>
+              <ThemedText style={[styles.sportsmanshipLabel, { color: theme.icon }]}>Sportsmanship Level</ThemedText>
               <View style={styles.levelBadge}>
-                <ThemedText style={styles.levelText}>{level}</ThemedText>
+                <ThemedText style={[styles.levelText, { color: theme.text }]}>{level}</ThemedText>
               </View>
             </View>
             <View style={styles.progressContainer}>
-              <View style={styles.progressTrack}>
-                <View style={[styles.progressFill, { width: `${progress}%` }]} />
+              <View style={[styles.progressTrack, { backgroundColor: theme.background }]}>
+                <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: theme.tint }]} />
               </View>
               <ThemedText style={styles.progressText}>{progress}%</ThemedText>
             </View>
@@ -82,7 +84,6 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: colors.darkNavy,
   },
   bannerContainer: {
     position: 'relative',
@@ -104,7 +105,6 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -50 }],
   },
   card: {
-    backgroundColor: colors.navy,
     borderRadius: 16,
     padding: 20,
     elevation: 5,
@@ -121,10 +121,10 @@ const styles = StyleSheet.create({
   profilePictureContainer: {
     width: 80,
     height: 80,
-    borderRadius: 12,
+    borderRadius: 40,
     overflow: 'hidden',
+    marginRight: 16,
     borderWidth: 1,
-    borderColor: colors.steel,
   },
   profilePicture: {
     width: '100%',
@@ -132,13 +132,11 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
-    gap: 12,
   },
   username: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.silver,
-    lineHeight: 28,
+    marginBottom: 4,
   },
   infoRow: {
     flexDirection: 'row',
@@ -146,24 +144,20 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: colors.slate,
     marginRight: 8,
     lineHeight: 18,
   },
   value: {
     fontSize: 14,
-    color: colors.silver,
     fontWeight: '500',
     lineHeight: 18,
   },
   title: {
     fontSize: 16,
-    color: colors.slate,
-    lineHeight: 20,
+    marginBottom: 4,
   },
   sportsmanshipContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.steel,
     paddingTop: 16,
   },
   sportsmanshipHeader: {
@@ -174,23 +168,19 @@ const styles = StyleSheet.create({
   },
   sportsmanshipLabel: {
     fontSize: 14,
-    color: colors.slate,
     lineHeight: 18,
   },
   levelBadge: {
-    backgroundColor: colors.darkNavy,
     width: 28,
     height: 28,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.steel,
   },
   levelText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.silver,
   },
   progressContainer: {
     flexDirection: 'row',
@@ -200,18 +190,15 @@ const styles = StyleSheet.create({
   progressTrack: {
     flex: 1,
     height: 8,
-    backgroundColor: colors.darkNavy,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.orange,
     borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
-    color: colors.slate,
     width: 36,
     textAlign: 'right',
   },

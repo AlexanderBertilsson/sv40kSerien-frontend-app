@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Platform } from 'react-native';
-import { useAuthRequest, exchangeCodeAsync, revokeAsync, ResponseType, AccessTokenRequestConfig, TokenResponse, makeRedirectUri } from 'expo-auth-session';
+import { useAuthRequest, exchangeCodeAsync, revokeAsync, ResponseType, AccessTokenRequestConfig, TokenResponse } from 'expo-auth-session';
 import axios from "axios";
+import * as WebBrowser from 'expo-web-browser';
 
 const clientId = '2lg4jikgmjccck95t78lf4g3jc';
 const userPoolUrl = 'https://eu-north-1qq0zhyyi5.auth.eu-north-1.amazoncognito.com';
-const redirectUri = 'myapp://';
+const redirectUri = 'myapp://login';
 
 export type User = {
   username: string;
@@ -13,6 +14,7 @@ export type User = {
 }
 
 export function useAuth() {
+  WebBrowser.maybeCompleteAuthSession();
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);

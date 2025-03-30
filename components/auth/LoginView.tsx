@@ -1,20 +1,35 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
 import { ThemedText } from '../ThemedText';
 import { useAuth } from '@/hooks/useAuth';
+import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
 
 export function LoginView() {
+
+
   const { user, error, isAuthenticated, login, logout } = useAuth();
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
 
   if (isAuthenticated && user) {
     return (
-      <View style={styles.container}>
-        <ThemedText style={styles.title}>Welcome, {user.username}!</ThemedText>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <TouchableOpacity 
+          style={[styles.backButton, { backgroundColor: theme.secondary }]}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+          <ThemedText style={[styles.backButtonText, { color: theme.text }]}>Back</ThemedText>
+        </TouchableOpacity>
+        <ThemedText style={[styles.title, { color: theme.text }]}>Welcome, {user.username}!</ThemedText>
         {error && (
-          <ThemedText style={styles.error}>{error}</ThemedText>
+          <ThemedText style={[styles.error, { color: theme.tint }]}>{error}</ThemedText>
         )}
-        <View style={styles.buttonContainer}>
+        <View style={[styles.buttonContainer, { backgroundColor: theme.tint }]}>
           <ThemedText 
-            style={styles.button}
+            style={[styles.button, { color: theme.ctaText }]}
             onPress={logout}
           >
             Logout
@@ -25,15 +40,22 @@ export function LoginView() {
   }
 
   return (
-    <View style={styles.container}>
-      <ThemedText style={styles.title}>Welcome to Warhammer 40k League</ThemedText>
-      <ThemedText style={styles.subtitle}>Please log in to continue</ThemedText>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <TouchableOpacity 
+        style={[styles.backButton, { backgroundColor: theme.secondary }]}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color={theme.text} />
+        <ThemedText style={[styles.backButtonText, { color: theme.text }]}>Back</ThemedText>
+      </TouchableOpacity>
+      <ThemedText style={[styles.title, { color: theme.text }]}>Welcome to Warhammer 40k League</ThemedText>
+      <ThemedText style={[styles.subtitle, { color: theme.tint }]}>Please log in to continue</ThemedText>
       {error && (
-        <ThemedText style={styles.error}>{error}</ThemedText>
+        <ThemedText style={[styles.error, { color: theme.tint }]}>{error}</ThemedText>
       )}
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, { backgroundColor: theme.tint }]}>
         <ThemedText 
-          style={styles.button}
+          style={[styles.button, { color: theme.ctaText }]}
           onPress={login}
         >
           Login with Cognito
@@ -46,38 +68,47 @@ export function LoginView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#002642',  // Dark blue from our palette
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    gap: 8,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#E5DADA',  // Light gray from our palette
     textAlign: 'center',
     marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: '#E59500',  // Orange from our palette
     textAlign: 'center',
     marginBottom: 32,
   },
   error: {
     fontSize: 14,
-    color: '#840032',  // Deep red from our palette
     textAlign: 'center',
     marginBottom: 16,
   },
   buttonContainer: {
-    backgroundColor: '#840032',  // Deep red from our palette
     borderRadius: 8,
     overflow: 'hidden',
   },
   button: {
     fontSize: 18,
-    color: '#E5DADA',  // Light gray from our palette
     paddingVertical: 12,
     paddingHorizontal: 24,
     textAlign: 'center',

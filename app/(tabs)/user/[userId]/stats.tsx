@@ -1,13 +1,10 @@
-import { StyleSheet, View, ScrollView, useColorScheme, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, useColorScheme } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function StatsScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const router = useRouter();
 
   const containerStyle = {
     ...styles.container,

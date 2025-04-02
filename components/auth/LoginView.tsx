@@ -1,15 +1,13 @@
 import { View, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
-import { ThemedText } from '../ThemedText';
-import { useAuth } from '@/hooks/useAuth';
+import { ThemedText } from '@/components/ThemedText';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { Colors } from '@/constants/Colors';
+import { Button } from '@/components/ui/Button';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-
 export function LoginView() {
-
-
-  const { user, error, isAuthenticated, login, logout } = useAuth();
+  const { user, error, isAuthenticated, login, logout } = useAuthContext();
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
@@ -23,17 +21,22 @@ export function LoginView() {
           <Ionicons name="arrow-back" size={24} color={theme.text} />
           <ThemedText style={[styles.backButtonText, { color: theme.text }]}>Back</ThemedText>
         </TouchableOpacity>
-        <ThemedText style={[styles.title, { color: theme.text }]}>Welcome, {user.username}!</ThemedText>
-        {error && (
-          <ThemedText style={[styles.error, { color: theme.tint }]}>{error}</ThemedText>
-        )}
-        <View style={[styles.buttonContainer, { backgroundColor: theme.tint }]}>
-          <ThemedText 
-            style={[styles.button, { color: theme.ctaText }]}
-            onPress={logout}
-          >
-            Logout
+        <View style={styles.content}>
+          <ThemedText style={[styles.title, { color: theme.text }]}>
+            Welcome back
           </ThemedText>
+          <ThemedText style={[styles.subtitle, { color: theme.text }]}>
+            {user.username}
+          </ThemedText>
+          {error && (
+            <ThemedText style={[styles.error, { color: theme.tint }]}>
+              {error}
+            </ThemedText>
+          )}
+          <Button 
+            onPress={logout}
+            title="Logout"
+          />
         </View>
       </View>
     );
@@ -48,18 +51,22 @@ export function LoginView() {
         <Ionicons name="arrow-back" size={24} color={theme.text} />
         <ThemedText style={[styles.backButtonText, { color: theme.text }]}>Back</ThemedText>
       </TouchableOpacity>
-      <ThemedText style={[styles.title, { color: theme.text }]}>Welcome to Warhammer 40k League</ThemedText>
-      <ThemedText style={[styles.subtitle, { color: theme.tint }]}>Please log in to continue</ThemedText>
-      {error && (
-        <ThemedText style={[styles.error, { color: theme.tint }]}>{error}</ThemedText>
-      )}
-      <View style={[styles.buttonContainer, { backgroundColor: theme.tint }]}>
-        <ThemedText 
-          style={[styles.button, { color: theme.ctaText }]}
-          onPress={login}
-        >
-          Login with Cognito
+      <View style={styles.content}>
+        <ThemedText style={[styles.title, { color: theme.text }]}>
+          Welcome to SV40K Series
         </ThemedText>
+        <ThemedText style={[styles.subtitle, { color: theme.text }]}>
+          Please log in to continue
+        </ThemedText>
+        {error && (
+          <ThemedText style={[styles.error, { color: theme.tint }]}>
+            {error}
+          </ThemedText>
+        )}
+        <Button 
+          onPress={login}
+          title="Login with Cognito"
+        />
       </View>
     </View>
   );
@@ -68,49 +75,40 @@ export function LoginView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 8,
-    gap: 8,
-    zIndex: 1,
   },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
+  content: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 20,
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 8,
     textAlign: 'center',
-    marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
+    marginBottom: 24,
     textAlign: 'center',
-    marginBottom: 32,
   },
   error: {
     fontSize: 14,
-    textAlign: 'center',
     marginBottom: 16,
-  },
-  buttonContainer: {
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  button: {
-    fontSize: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
     textAlign: 'center',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });

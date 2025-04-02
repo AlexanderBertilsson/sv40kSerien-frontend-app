@@ -1,0 +1,106 @@
++++++++++++++++++++++++++++++++++++++++++++++++
++ FACTION KEYWORD: Chaos - Chaos Daemons
++ DETACHMENT: Shadow Legion
++ TOTAL ARMY POINTS: 1995pts
++
++ WARLORD: Char1: Be'lakor
++ ENHANCEMENT: 
++ NUMBER OF UNITS: 15
++ SECONDARY: - Bring It Down: (1x4) + (2x6) - Assassination: 3 Characters
++++++++++++++++++++++++++++++++++++++++++++++++
+
+CHARACTER
+
+1x Be'lakor (375 pts)
+• 1x Betraying Shades
+• 1x The Blade of Shadows
+• Warlord
+
+1x Bloodthirster (305 pts)
+• 1x Hellfire breath
+• 1x Great axe of Khorne
+
+1x Great Unclean One (250 pts)
+• 1x Putrid vomit
+• 1x Bilesword
+• 1x Plague flail
+
+BATTLELINE
+
+10x Bloodletters (110 pts)
+• 9x Bloodletter
+    • 9x Hellblade
+• 1x Bloodreaper
+    • 1x Hellblade
+
+10x Blue Horrors (125 pts)
+• 10x Blue Horror
+    • 10x Blue claws
+    • 10x Coruscating Blue flames
+
+10x Daemonettes (100 pts)
+• 1x Alluress
+    • 1x Slashing claws
+• 9x Daemonette
+    • 9x Slashing claws
+
+3x Nurglings (35 pts)
+• 3x Nurgling Swarm
+    • 3x Diseased claws and teeth
+
+3x Nurglings (35 pts)
+• 3x Nurgling Swarm
+    • 3x Diseased claws and teeth
+
+OTHER DATASHEETS
+
+3x Flamers (65 pts)
+• 2x Flamer
+    • 2x Flamer mouths
+    • 2x Flickering Flames
+• 1x Pyrocaster
+    • 1x Flamer mouths
+    • 1x Flickering Flames
+
+3x Flamers (65 pts)
+• 2x Flamer
+    • 2x Flamer mouths
+    • 2x Flickering Flames
+• 1x Pyrocaster
+    • 1x Flamer mouths
+    • 1x Flickering Flames
+
+3x Flamers (65 pts)
+• 2x Flamer
+    • 2x Flamer mouths
+    • 2x Flickering Flames
+• 1x Pyrocaster
+    • 1x Flamer mouths
+    • 1x Flickering Flames
+
+3x Bloodcrushers (110 pts)
+• 2x Bloodcrusher
+    • 2x Hellblade
+    • 2x Juggernaut's bladed horn
+• 1x Bloodhunter
+    • 1x Hellblade
+    • 1x Juggernaut's bladed horn
+
+1x Burning Chariot (115 pts)
+• 1x Fires of Tzeentch
+• 1x Flamer mouths
+• 1x Screamer bites
+
+3x Pox Riders [Legends] (160 pts)
+• 3x Pox Rider
+    • 3x Grasping tongue
+    • 3x Pox rider plaguesword
+    • 3x Yawning maw
+
+5x Seekers (80 pts)
+• 1x Heartseeker
+    • 1x Lashing tongues
+    • 1x Slashing claws
+• 4x Seeker
+    • 4x Lashing tongues
+    • 4x Slashing claws

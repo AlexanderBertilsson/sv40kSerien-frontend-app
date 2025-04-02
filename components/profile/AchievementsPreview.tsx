@@ -37,7 +37,7 @@ export function AchievementsPreview({ achievements }: AchievementsPreviewProps) 
       <View style={cardStyle}>
         <View style={styles.header}>
           <ThemedText style={styles.title}>Battle Honors</ThemedText>
-          <Link href="/(tabs)/(profile)/stats" style={viewAllStyle}>
+          <Link href="/user/[userId]/stats" style={viewAllStyle}>
             <ThemedText style={styles.viewAllText}>View All</ThemedText>
           </Link>
         </View>

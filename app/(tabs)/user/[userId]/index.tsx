@@ -1,18 +1,20 @@
 import { View, StyleSheet, ScrollView, useColorScheme } from 'react-native';
-import { ProfileHeader } from '../../../components/profile/ProfileHeader';
-import { StatsOverview } from '../../../components/profile/StatsOverview';
-import { TeamInfo } from '../../../components/profile/TeamInfo';
-import { GameInfo } from '../../../components/profile/GameInfo';
-import { AchievementsPreview } from '../../../components/profile/AchievementsPreview';
+import { ProfileHeader } from '../../../../components/profile/ProfileHeader';
+import { StatsOverview } from '../../../../components/profile/StatsOverview';
+import { TeamInfo } from '../../../../components/profile/TeamInfo';
+import { GameInfo } from '../../../../components/profile/GameInfo';
+import { AchievementsPreview } from '../../../../components/profile/AchievementsPreview';
 import { Colors } from '@/constants/Colors';
 import { useRef } from 'react';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuthContext } from '@/contexts/AuthContext';
 
-export default function ProfileScreen() {
+export default function UserScreen() {
   const scrollViewRef = useRef(null);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const { user } = useAuthContext();
 
   const containerStyle = {
     ...styles.container,
@@ -36,7 +38,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <ProfileHeader
-          username="Commander_Shadowblade"
+          username={user?.username ?? ""}
           title="Adeptus Mechanicus Veteran"
           team="Forge World Metalica"
           sportsmanship={85}
@@ -52,9 +54,8 @@ export default function ProfileScreen() {
               sportsmanshipRating={4.8}
             />
           </View>
-          
           <View style={styles.section}>
-            <Link href="/(tabs)/(profile)/stats" asChild>
+            <Link href="/user/[userId]/stats" asChild>
               <View style={statsLinkStyle}>
                 <StatsOverview
                   battles={127}

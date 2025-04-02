@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Animated, StyleSheet, useColorScheme, Platform } from 'react-native';
 import { Link, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,6 @@ import { Colors } from '@/constants/Colors';
 import { Text } from 'react-native';
 
 const MENU_WIDTH = 200;
-const BUTTON_WIDTH = 44;
 
 export function SideMenu() {
   const [isExpanded, setIsExpanded] = useState(false);

@@ -14,6 +14,8 @@ export const Colors = {
     tabIconDefault: colors.slate,
     tabIconSelected: colors.orange,
     ctaText: colors.silver,  // Bright text for CTAs
+    success: '#4CAF50',
+    error: '#F44336',
   },
   dark: {
     text: colors.silver,
@@ -24,5 +26,7 @@ export const Colors = {
     tabIconDefault: colors.steel,
     tabIconSelected: colors.orange,
     ctaText: colors.silver,  // Bright text for CTAs
+    success: '#4CAF50',
+    error: '#F44336',
   },
 };

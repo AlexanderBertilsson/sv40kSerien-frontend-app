@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Pressable, Image, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Image, Modal, Platform } from 'react-native';
 import { ThemedText } from '../../../../components/ThemedText';
 import { Colors } from '../../../../constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -43,20 +43,18 @@ export default function MatchHistoryScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
-  const showArmyList = (listUrl: string) => {
+  const showArmyList = (listName: string) => {
     try {
-      // Extract list name from URL (e.g., 'NewRecruit-WTC' from '/Docs/ArmyLists/NewRecruit-WTC.txt')
-      const listName = listUrl.split('/').pop()?.replace('.txt', '');
-      if (listName && ARMY_LISTS[listName]) {
+      if (ARMY_LISTS[listName]) {
         setArmyListContent(ARMY_LISTS[listName]);
-        setSelectedArmyList(listUrl);
+        setSelectedArmyList(listName);
       } else {
         throw new Error('Army list not found');
       }
     } catch (error) {
       console.error('Error loading army list:', error);
       setArmyListContent('Error loading army list. Please try again.');
-      setSelectedArmyList(listUrl);
+      setSelectedArmyList(listName);
     }
   };
 
@@ -70,14 +68,14 @@ export default function MatchHistoryScreen() {
         name: 'John Doe',
         profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
         faction: 'Chaos Daemons',
-        armyListUrl: '/Docs/ArmyLists/NewRecruit-WTC.txt'
+        armyListUrl: 'NewRecruit-WTC'
       },
       player2: {
         id: '2',
         name: 'Jane Smith',
         profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
         faction: 'Space Marines',
-        armyListUrl: '/Docs/ArmyLists/NewRecruit-GW.txt'
+        armyListUrl: 'NewRecruit-GW'
       },
       games: [
         { player1Score: 15, player2Score: 5 },
@@ -187,17 +185,22 @@ export default function MatchHistoryScreen() {
       </View>
 
       <Modal visible={!!selectedArmyList} animationType="slide" transparent>
-        <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
-          <View style={styles.modalContent}>
+        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
             <View style={styles.modalHeader}>
               <ThemedText style={styles.modalTitle}>Army List</ThemedText>
               <Pressable onPress={() => setSelectedArmyList(null)}>
                 <FontAwesome name="close" size={24} color={theme.text} />
               </Pressable>
             </View>
-            <ScrollView style={styles.armyListContent}>
-              <ThemedText style={styles.armyListText}>{armyListContent}</ThemedText>
-            </ScrollView>
+            <View style={{ flex: 1 }}>
+              <ScrollView 
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                <ThemedText style={styles.armyListText}>{armyListContent || 'No content available'}</ThemedText>
+              </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -327,31 +330,43 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
+    flex: 1,
     width: '90%',
-    maxHeight: '80%',
-    borderRadius: 12,
-    padding: 16,
+    maxHeight: '90%',
+    borderRadius: 10,
+    padding: 20,
+    margin: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  armyListContent: {
-    flex: 1,
-  },
   armyListText: {
     fontSize: 14,
     lineHeight: 20,
-    fontFamily: 'monospace',
-    whiteSpace: 'pre',
+    fontFamily: Platform.select({
+      ios: 'Courier',
+      android: 'monospace',
+      default: 'monospace',
+    }),
   },
 });

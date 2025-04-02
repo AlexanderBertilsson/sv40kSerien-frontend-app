@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Pressable, Image, Modal, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Image, Modal } from 'react-native';
 import { ThemedText } from '../../../../components/ThemedText';
 import { Colors } from '../../../../constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -186,22 +186,17 @@ export default function MatchHistoryScreen() {
         ))}
       </View>
 
-      <Modal
-        visible={!!selectedArmyList}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setSelectedArmyList(null)}
-      >
+      <Modal visible={!!selectedArmyList} animationType="slide" transparent>
         <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.secondary }]}>
+          <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <ThemedText style={styles.modalTitle}>Army List</ThemedText>
               <Pressable onPress={() => setSelectedArmyList(null)}>
-                <FontAwesome name="times" size={24} color={theme.text} />
+                <FontAwesome name="close" size={24} color={theme.text} />
               </Pressable>
             </View>
             <ScrollView style={styles.armyListContent}>
-              <Text style={styles.armyListText}>{armyListContent}</Text>
+              <ThemedText style={styles.armyListText}>{armyListContent}</ThemedText>
             </ScrollView>
           </View>
         </View>
@@ -356,5 +351,7 @@ const styles = StyleSheet.create({
   armyListText: {
     fontSize: 14,
     lineHeight: 20,
+    fontFamily: 'monospace',
+    whiteSpace: 'pre',
   },
 });

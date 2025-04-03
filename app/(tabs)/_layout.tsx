@@ -37,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="user/[userId]"
         options={{
-          href: isAuthenticated || Platform.OS === 'web' ? `/user/[userId]` : `/team/[teamId]`,
+          href: isAuthenticated || Platform.OS === 'web' ? `/user/[userId]` : `/user/[userId]`,
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />

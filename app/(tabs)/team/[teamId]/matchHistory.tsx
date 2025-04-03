@@ -2,6 +2,7 @@ import { View, StyleSheet, ScrollView, Pressable, Image, Modal, Platform } from 
 import { ThemedText } from '../../../../components/ThemedText';
 import { Colors } from '../../../../constants/Colors';
 import { useColorScheme } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ARMY_LISTS } from '../../../../assets/constants/Armylists';
@@ -34,6 +35,18 @@ interface Match {
     opponent: number;
   };
   event: string;
+  team: {
+    name: string;
+    logo: string;
+    players: Player[];
+    score: number;
+  };
+  opponent: {
+    name: string;
+    logo: string;
+    players: Player[];
+    score: number;
+  };
 }
 
 export default function MatchHistoryScreen() {
@@ -63,6 +76,48 @@ export default function MatchHistoryScreen() {
     {
       id: '1',
       date: '2025-03-28',
+      team: {
+        name: "Team 1",
+        logo: "string",
+        players: [
+            {
+                id: '1',
+                name: 'John Doe',
+                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
+                faction: 'Chaos Daemons',
+                armyListUrl: 'NewRecruit-WTC'
+            },
+            {
+                id: '2',
+                name: 'Jane Smith',
+                profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
+                faction: 'Space Marines',
+                armyListUrl: 'NewRecruit-GW'
+            }
+        ],
+        score: 60,
+      },
+      opponent: {
+        name: "Team 2",
+        logo: "string",
+        players: [
+            {
+                id: '3',
+                name: 'John Doe',
+                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
+                faction: 'Chaos Daemons',
+                armyListUrl: 'NewRecruit-WTC'
+            },
+            {
+                id: '4',
+                name: 'Jane Smith',
+                profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
+                faction: 'Space Marines',
+                armyListUrl: 'NewRecruit-GW'
+            }
+        ],
+        score: 40,
+      },
       player1: {
         id: '1',
         name: 'John Doe',
@@ -117,16 +172,27 @@ export default function MatchHistoryScreen() {
             onPress={() => toggleMatch(match.id)}
           >
             <View style={styles.matchHeader}>
-              <View style={styles.matchInfo}>
-                <ThemedText style={styles.date}>{match.date}</ThemedText>
-                <ThemedText style={styles.event}>{match.event}</ThemedText>
+              <View style={styles.teamsInfo}>
+                <ThemedText style={styles.date}>{match.team.name}</ThemedText>
               </View>
-              <View style={styles.scoreContainer}>
+              <View style={styles.scoreContainer} >
                 <ThemedText 
                   style={[styles.score, { color: getScoreColor(match.score.team, match.score.opponent) }]}
                 >
                   {match.score.team} - {match.score.opponent}
+                  
                 </ThemedText>
+                <MaterialCommunityIcons name="sword-cross" size={24} color={theme.tint} />
+
+              </View>
+              <View style={styles.teamsInfo}>
+                <ThemedText style={styles.date}>{match.opponent.name}</ThemedText>
+              </View>
+            </View>
+            <View style={styles.matchHeader}>
+              <View style={styles.matchInfo}>
+                <ThemedText style={styles.date}>{match.date}</ThemedText>
+                <ThemedText style={styles.event}>{match.event}</ThemedText>
               </View>
               <FontAwesome
                 name={expandedMatch === match.id ? 'chevron-up' : 'chevron-down'}

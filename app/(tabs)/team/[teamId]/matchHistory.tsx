@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Pressable, Image, Modal, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Image, Modal, Platform, useWindowDimensions } from 'react-native';
 import { ThemedText } from '../../../../components/ThemedText';
 import { Colors } from '../../../../constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -23,8 +23,6 @@ interface Game {
 interface Match {
   id: string;
   date: string;
-  player1: Player;
-  player2: Player;
   games: Game[];
   primaryMission: string;
   deploymentMap: string;
@@ -55,6 +53,8 @@ export default function MatchHistoryScreen() {
   const [armyListContent, setArmyListContent] = useState<string>('');
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const { width } = useWindowDimensions();
+  const isDeviceSize = width < 768; // Tablet/desktop breakpoint
 
   const showArmyList = (listName: string) => {
     try {
@@ -77,60 +77,88 @@ export default function MatchHistoryScreen() {
       id: '1',
       date: '2025-03-28',
       team: {
-        name: "Team 1",
-        logo: "string",
+        name: "Imperial Fists",
+        logo: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=200&h=200&fit=crop",
         players: [
-            {
-                id: '1',
-                name: 'John Doe',
-                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-                faction: 'Chaos Daemons',
-                armyListUrl: 'NewRecruit-WTC'
-            },
-            {
-                id: '2',
-                name: 'Jane Smith',
-                profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
-                faction: 'Space Marines',
-                armyListUrl: 'NewRecruit-GW'
-            }
+          {
+            id: '1',
+            name: 'Marcus Aurelius',
+            profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
+            faction: 'Space Marines',
+            armyListUrl: 'NewRecruit-GW'
+          },
+          {
+            id: '2',
+            name: 'Julia Domna',
+            profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
+            faction: 'Imperial Knights',
+            armyListUrl: 'NewRecruit-GW'
+          },
+          {
+            id: '3',
+            name: 'Lucius Verus',
+            profileImage: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=400",
+            faction: 'Adeptus Mechanicus',
+            armyListUrl: 'NewRecruit-WTC'
+          },
+          {
+            id: '4',
+            name: 'Claudia Augusta',
+            profileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400",
+            faction: 'Sisters of Battle',
+            armyListUrl: 'NewRecruit-GW'
+          },
+          {
+            id: '5',
+            name: 'Septimius Severus',
+            profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400",
+            faction: 'Imperial Guard',
+            armyListUrl: 'NewRecruit-WTC'
+          }
         ],
         score: 60,
       },
       opponent: {
-        name: "Team 2",
-        logo: "string",
+        name: "Chaos Warband",
+        logo: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=200&h=200&fit=crop",
         players: [
-            {
-                id: '3',
-                name: 'John Doe',
-                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-                faction: 'Chaos Daemons',
-                armyListUrl: 'NewRecruit-WTC'
-            },
-            {
-                id: '4',
-                name: 'Jane Smith',
-                profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
-                faction: 'Space Marines',
-                armyListUrl: 'NewRecruit-GW'
-            }
+          {
+            id: '6',
+            name: 'Abaddon',
+            profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
+            faction: 'Black Legion',
+            armyListUrl: 'NewRecruit-WTC'
+          },
+          {
+            id: '7',
+            name: 'Mortarion',
+            profileImage: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=400",
+            faction: 'Death Guard',
+            armyListUrl: 'NewRecruit-GW'
+          },
+          {
+            id: '8',
+            name: 'Magnus',
+            profileImage: "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?q=80&w=400",
+            faction: 'Thousand Sons',
+            armyListUrl: 'NewRecruit-WTC'
+          },
+          {
+            id: '9',
+            name: 'Lucius',
+            profileImage: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=400",
+            faction: "Emperor's Children",
+            armyListUrl: 'NewRecruit-GW'
+          },
+          {
+            id: '10',
+            name: 'Typhus',
+            profileImage: "https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?q=80&w=400",
+            faction: 'Death Guard',
+            armyListUrl: 'NewRecruit-WTC'
+          }
         ],
         score: 40,
-      },
-      player1: {
-        id: '1',
-        name: 'John Doe',
-        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-        faction: 'Chaos Daemons',
-        armyListUrl: 'NewRecruit-WTC'
-      },
-      player2: {
-        id: '2',
-        name: 'Jane Smith',
-        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
-        faction: 'Space Marines',
-        armyListUrl: 'NewRecruit-GW'
       },
       games: [
         { player1Score: 15, player2Score: 5 },
@@ -143,7 +171,7 @@ export default function MatchHistoryScreen() {
       deploymentMap: 'Hammer and Anvil',
       missionRules: ['No Man\'s Land', 'Objective Secured'],
       result: 'win',
-      score: { team: 95, opponent: 85 },
+      score: { team: 60, opponent: 40 },
       event: 'League Match'
     },
   ];
@@ -172,21 +200,31 @@ export default function MatchHistoryScreen() {
             onPress={() => toggleMatch(match.id)}
           >
             <View style={styles.matchHeader}>
-              <View style={styles.teamsInfo}>
-                <ThemedText style={styles.date}>{match.team.name}</ThemedText>
+              <View style={[styles.teamsInfo, isDeviceSize && styles.teamsInfoMobile]}>
+                <Image 
+                  source={{ uri: match.team.logo }} 
+                  style={styles.teamLogo} 
+                />
+                <ThemedText style={[styles.teamName, isDeviceSize && styles.teamNameMobile]} numberOfLines={1}>
+                  {match.team.name}
+                </ThemedText>
               </View>
-              <View style={styles.scoreContainer} >
+              <View style={styles.scoreContainer}>
+                <MaterialCommunityIcons name="sword-cross" size={24} color={theme.tint} />
                 <ThemedText 
                   style={[styles.score, { color: getScoreColor(match.score.team, match.score.opponent) }]}
                 >
                   {match.score.team} - {match.score.opponent}
-                  
                 </ThemedText>
-                <MaterialCommunityIcons name="sword-cross" size={24} color={theme.tint} />
-
               </View>
-              <View style={styles.teamsInfo}>
-                <ThemedText style={styles.date}>{match.opponent.name}</ThemedText>
+              <View style={[styles.teamsInfo, styles.teamsInfoRight, isDeviceSize && styles.teamsInfoMobile]}>
+                <Image 
+                  source={{ uri: match.opponent.logo }} 
+                  style={styles.teamLogo} 
+                />
+                <ThemedText style={[styles.teamName, styles.textAlignRight, isDeviceSize && styles.teamNameMobile]} numberOfLines={1}>
+                  {match.opponent.name}
+                </ThemedText>
               </View>
             </View>
             <View style={styles.matchHeader}>
@@ -215,31 +253,35 @@ export default function MatchHistoryScreen() {
                   {match.games.map((game, index) => (
                     <View key={index} style={styles.gameRow}>
                       <View style={styles.playerInfo}>
-                        <Image source={{ uri: match.player1.profileImage }} style={styles.playerImage} />
+                        <Image source={{ uri: match.team.players[index].profileImage }} style={styles.playerImage} />
                         <View style={styles.playerDetails}>
-                          <ThemedText style={styles.playerName}>{match.player1.name}</ThemedText>
-                          <ThemedText style={styles.faction}>{match.player1.faction}</ThemedText>
-                          <Pressable onPress={() => showArmyList(match.player1.armyListUrl)}>
+                          <ThemedText style={styles.playerName}>{match.team.players[index].name}</ThemedText>
+                          <ThemedText style={styles.faction}>{match.team.players[index].faction}</ThemedText>
+                          <Pressable onPress={() => showArmyList(match.team.players[index].armyListUrl)}>
                             <ThemedText style={styles.armyListLink}>View Army List</ThemedText>
                           </Pressable>
                         </View>
                       </View>
 
-                      <ThemedText style={[styles.gameScore, { 
-                        color: getScoreColor(game.player1Score, game.player2Score)
-                      }]}>
-                        {game.player1Score} - {game.player2Score}
-                      </ThemedText>
+                      <View style={styles.gameScoreContainer}>
+                        <MaterialCommunityIcons name="sword-cross" size={20} color={theme.tint} />
+                        <ThemedText style={[
+                          styles.gameScore,
+                          { color: getScoreColor(game.player1Score, game.player2Score) }
+                        ]}>
+                          {game.player1Score} - {game.player2Score}
+                        </ThemedText>
+                      </View>
 
                       <View style={[styles.playerInfo, styles.playerInfoRight]}>
-                        <View style={styles.playerDetails}>
-                          <ThemedText style={styles.playerName}>{match.player2.name}</ThemedText>
-                          <ThemedText style={styles.faction}>{match.player2.faction}</ThemedText>
-                          <Pressable onPress={() => showArmyList(match.player2.armyListUrl)}>
-                            <ThemedText style={styles.armyListLink}>View Army List</ThemedText>
+                        <View style={[styles.playerDetails, styles.playerDetailsRight]}>
+                          <ThemedText style={[styles.playerName, styles.textAlignRight]}>{match.opponent.players[index].name}</ThemedText>
+                          <ThemedText style={[styles.faction, styles.textAlignRight]}>{match.opponent.players[index].faction}</ThemedText>
+                          <Pressable onPress={() => showArmyList(match.opponent.players[index].armyListUrl)}>
+                            <ThemedText style={[styles.armyListLink, styles.textAlignRight]}>View Army List</ThemedText>
                           </Pressable>
                         </View>
-                        <Image source={{ uri: match.player2.profileImage }} style={styles.playerImage} />
+                        <Image source={{ uri: match.opponent.players[index].profileImage }} style={styles.playerImage} />
                       </View>
                     </View>
                   ))}
@@ -251,7 +293,7 @@ export default function MatchHistoryScreen() {
       </View>
 
       <Modal visible={!!selectedArmyList} animationType="slide" transparent>
-        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+        <ScrollView style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
             <View style={styles.modalHeader}>
               <ThemedText style={styles.modalTitle}>Army List</ThemedText>
@@ -268,7 +310,7 @@ export default function MatchHistoryScreen() {
               </ScrollView>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     </ScrollView>
   );
@@ -300,8 +342,52 @@ const styles = StyleSheet.create({
   },
   matchHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    gap: 8,
+  },
+  teamsInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minWidth: 0,
+  },
+  teamsInfoMobile: {
+    flexDirection: 'column',
+    gap: 4,
+    alignItems: 'center',
+  },
+  teamsInfoRight: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+  teamLogo: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    flexShrink: 0,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
+  teamNameMobile: {
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  scoreContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    flexShrink: 0,
+  },
+  score: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 4,
   },
   matchInfo: {
     flex: 1,
@@ -314,13 +400,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.7,
     marginTop: 2,
-  },
-  scoreContainer: {
-    marginHorizontal: 16,
-  },
-  score: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   expandedContent: {
     marginTop: 16,
@@ -351,17 +430,16 @@ const styles = StyleSheet.create({
   },
   gameRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    marginVertical: 8,
+    gap: 8,
   },
   playerInfo: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   playerInfoRight: {
     justifyContent: 'flex-end',
@@ -373,24 +451,40 @@ const styles = StyleSheet.create({
   },
   playerDetails: {
     marginHorizontal: 8,
+    flex: 1,
   },
   playerName: {
     fontSize: 14,
     fontWeight: '500',
+    flexWrap: 'wrap',
   },
   faction: {
     fontSize: 12,
     opacity: 0.7,
+    flexWrap: 'wrap',
   },
   armyListLink: {
     fontSize: 12,
     color: '#4a9eff',
     marginTop: 2,
   },
+  gameScoreContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '20%',
+  },
   gameScore: {
     fontSize: 16,
     fontWeight: '600',
-    marginHorizontal: 8,
+    marginTop: 4,
+  },
+  playerDetailsRight: {
+    alignItems: 'flex-end',
+    marginLeft: 0,
+    marginRight: 8,
+  },
+  textAlignRight: {
+    textAlign: 'right',
   },
   modalContainer: {
     flex: 1,

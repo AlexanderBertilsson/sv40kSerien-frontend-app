@@ -293,20 +293,20 @@ export default function MatchHistoryScreen() {
       </View>
 
       <Modal visible={!!selectedArmyList} animationType="slide" transparent>
-        <ScrollView style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+        <ScrollView style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
             <View style={styles.modalHeader}>
               <ThemedText style={styles.modalTitle}>Army List</ThemedText>
-              <Pressable onPress={() => setSelectedArmyList(null)}>
-                <FontAwesome name="close" size={24} color={theme.text} />
+              <Pressable 
+                onPress={() => setSelectedArmyList(null)}
+                style={styles.closeButton}
+              >
+                <MaterialCommunityIcons name="close" size={24} color={theme.text} />
               </Pressable>
             </View>
-            <View style={{ flex: 1 }}>
-              <ScrollView 
-                style={{ flex: 1 }}
-                contentContainerStyle={{ paddingBottom: 20 }}
-              >
-                <ThemedText style={styles.armyListText}>{armyListContent || 'No content available'}</ThemedText>
+            <View style={styles.modalBody}>
+              <ScrollView contentContainerStyle={styles.modalScrollContent}>
+                <ThemedText style={styles.modalText}>{armyListContent || 'No army list available'}</ThemedText>
               </ScrollView>
             </View>
           </View>
@@ -488,43 +488,48 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   modalContent: {
-    flex: 1,
-    width: '90%',
-    maxHeight: '90%',
-    borderRadius: 10,
-    padding: 20,
     margin: 20,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  armyListText: {
-    fontSize: 14,
-    lineHeight: 20,
+  closeButton: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  modalBody: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    paddingBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    lineHeight: 24,
     fontFamily: Platform.select({
-      ios: 'Courier',
+      ios: 'Menlo',
       android: 'monospace',
       default: 'monospace',
     }),

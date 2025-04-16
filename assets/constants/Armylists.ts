@@ -1,4 +1,4 @@
-export const ARMY_LISTS = {
+export const ARMY_LISTS: { [key: string]: string } = {
   'NewRecruit-WTC': `+++++++++++++++++++++++++++++++++++++++++++++++
 + FACTION KEYWORD: Chaos - Chaos Daemons
 + DETACHMENT: Shadow Legion

@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         redirectUri,
         extraParams: {
           code_verifier: request.codeVerifier,
+          platform: Platform.OS,
         },
       });
     }

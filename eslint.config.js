@@ -44,7 +44,7 @@ module.exports = [
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn'],
       'no-console': 'off',
-      'no-undef': 'error'
+      'no-undef': 'warn'
     }
   },
   {

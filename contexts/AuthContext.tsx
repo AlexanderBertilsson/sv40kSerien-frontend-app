@@ -1,16 +1,20 @@
-import { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useMemo, useCallback, ReactNode, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { useAuthRequest, ResponseType, TokenResponse, AccessTokenRequestConfig, exchangeCodeAsync } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import axios from "axios";
+import mockData from '../mock-data.json';
+import { jwtDecode } from 'jwt-decode';
+import * as SecureStore from 'expo-secure-store';
 
 const clientId = '2lg4jikgmjccck95t78lf4g3jc';
 const userPoolUrl = 'https://eu-north-1qq0zhyyi5.auth.eu-north-1.amazoncognito.com';
 const redirectUri = 'myapp://login';
 
 export type User = {
-  username: string;
-  email: string;
+  username?: string;
+  email?: string;
+  uuid?: string; 
 }
 
 type AuthContextType = {
@@ -28,6 +32,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore authTokens and user uuid from SecureStore on mount (device only)
+  useEffect(() => {
+    const restoreFromStorage = async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          const accessToken = await SecureStore.getItemAsync('accessToken');
+          const idToken = await SecureStore.getItemAsync('idToken');
+          const refreshToken = await SecureStore.getItemAsync('refreshToken');
+          const uuid = await SecureStore.getItemAsync('userUuid');
+          if (accessToken && idToken && refreshToken) {
+            setAuthTokens({
+              accessToken,
+              idToken,
+              refreshToken,
+              tokenType: 'bearer',
+              expiresIn: 3600,
+              scope: 'openid profile email'
+            } as TokenResponse);
+          }
+          if (uuid) {
+            setUser((prev) => ({ ...(prev || {}), uuid }));
+          }
+        } catch (err) {
+          console.error('Failed to restore tokens from SecureStore', err);
+        }
+      }
+    };
+    restoreFromStorage();
+  }, []);
 
   const discoveryDocument = useMemo(() => ({
     authorizationEndpoint: userPoolUrl + '/oauth2/authorize',
@@ -83,6 +117,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [discoveryDocument, request, response]);
 
+  // On device: decode accessToken, extract uuid, and store tokens/uuid in SecureStore
+  useEffect(() => {
+    const storeTokensAndUuid = async () => {
+      if (Platform.OS !== 'web' && authTokens?.accessToken) {
+        try {
+          const decoded: { sub: string } = jwtDecode(authTokens.accessToken);
+          setUser((prev) => ({ ...(prev || {}), uuid: decoded.sub }));
+          await SecureStore.setItemAsync('userUuid', decoded.sub);
+          await SecureStore.setItemAsync('accessToken', authTokens.accessToken);
+          if(authTokens.idToken )
+            await SecureStore.setItemAsync('idToken', authTokens.idToken);
+          if(authTokens.refreshToken)
+            await SecureStore.setItemAsync('refreshToken', authTokens.refreshToken);
+        } catch (err) {
+          setError('Failed to decode token or store in SecureStore');
+          console.error(err);
+        }
+      }
+    };
+    storeTokensAndUuid();
+  }, [authTokens]);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!user && authTokens?.accessToken) {
@@ -90,7 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const res = await axios.get(userPoolUrl + '/oauth2/userinfo', {
             headers: { "Authorization": "Bearer " + authTokens.accessToken }
           });
-          setUser(res.data);
+          setUser({
+            username: res.data.username,
+            email: res.data.email,
+            uuid: res.data.sub
+          });
           setError(null);
 
           // Store token in cookie if on web platform
@@ -107,23 +167,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUserInfo();
   }, [authTokens, user]);
 
-  const login = async () => {
+  
+const login = useCallback(async () => {
+  console.log("login");
     try {
       if (Platform.OS === 'web') {
-        window.location.href = `${userPoolUrl}/oauth2/authorize?` +
-          `client_id=${clientId}&` +
-          `response_type=code&` +
-          `redirect_uri=https://ymun8qwnt1.execute-api.eu-north-1.amazonaws.com/oauth2/callback`;
+        setUser({
+          username: mockData.users[5].username,
+          email: mockData.users[5].email,
+          uuid: "mock-uuid"
+        });
+        setAuthTokens(new TokenResponse({
+          accessToken: "mock-access-token",
+          idToken: "mock-id-token",
+          refreshToken: "mock-refresh-token",
+          tokenType: "bearer",
+          expiresIn: 3600,
+          scope: "openid profile email"
+        }));
+        // window.location.href = `${userPoolUrl}/oauth2/authorize?` +
+        //   `client_id=${clientId}&` +
+        //   `response_type=code&` +
+        //   `redirect_uri=https://ymun8qwnt1.execute-api.eu-north-1.amazonaws.com/oauth2/callback`;
       } else {
+        console.log("prompt");
         await promptAsync();
       }
     } catch (error) {
       setError('Failed to start login flow');
       console.error('Login error:', error);
     }
-  };
+  }, [promptAsync, setError]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       if (authTokens?.refreshToken) {
         await axios.post(discoveryDocument.revocationEndpoint + `?client_id=${clientId}&logout_uri=${redirectUri}`, {
@@ -144,7 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError('Failed to logout');
       console.error('Logout error:', error);
     }
-  };
+  }, [authTokens, discoveryDocument.revocationEndpoint]);
 
   const value = useMemo(() => ({
     user,

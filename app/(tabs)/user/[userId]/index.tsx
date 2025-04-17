@@ -1,4 +1,5 @@
-import { View, StyleSheet, ScrollView, useColorScheme } from 'react-native';
+/// <reference lib="dom" />
+import { View, StyleSheet, ScrollView, useColorScheme, ActivityIndicator, Text } from 'react-native';
 import { ProfileHeader } from '../../../../components/profile/ProfileHeader';
 import { StatsOverview } from '../../../../components/profile/StatsOverview';
 import { TeamInfo } from '../../../../components/profile/TeamInfo';
@@ -9,13 +10,24 @@ import { useRef } from 'react';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useUser } from '@/hooks/useUser';
+import { useTeam } from '@/hooks/useTeam';
+import { Profile } from '@/types/utils/types/Profile';
 
 export default function UserScreen() {
   const scrollViewRef = useRef(null);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const { user } = useAuthContext();
+  const { user: authUser, authTokens } = useAuthContext();
+  const { user, loading: userLoading, error: userError } = useUser(authUser?.username, authTokens);
+  const { team, loading: teamLoading, error: teamError } = useTeam(user?.teamId, authTokens);
+  const loading = userLoading || teamLoading;
+  const error = userError || teamError;
 
+  let profile: Profile | null = null;
+  if (user && team) {
+    profile = { ...user, team } as Profile;
+  }
   const containerStyle = {
     ...styles.container,
     backgroundColor: theme.background,
@@ -31,6 +43,28 @@ export default function UserScreen() {
     backgroundColor: theme.secondary,
   };
 
+  if (loading) {
+    return (
+      <View style={[containerStyle, { justifyContent: 'center', alignItems: 'center', flex: 1 }]}> 
+        <ActivityIndicator size="large" color={theme.text} />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={[containerStyle, { justifyContent: 'center', alignItems: 'center', flex: 1 }]}> 
+        <Text style={{ color: theme.text }}>{error}</Text>
+      </View>
+    );
+  }
+  if (!profile) {
+    return (
+      <View style={[containerStyle, { justifyContent: 'center', alignItems: 'center', flex: 1 }]}> 
+        <Text style={{ color: theme.text }}>Profile not found.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={containerStyle}>
       <ScrollView 
@@ -38,20 +72,22 @@ export default function UserScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <ProfileHeader
-          username={user?.username ?? ""}
-          title="Adeptus Mechanicus Veteran"
-          team="Forge World Metalica"
-          sportsmanship={85}
-          sportsmanshipLevel={3}
+          username={profile.username}
+          title={""}
+          team={profile.team.name}
+          sportsmanship={profile.sportsmanship}
+          sportsmanshipLevel={profile.sportsmanshipLevel}
+          profilePicture={profile.profilePicture}
+          heroImage={profile.heroImage}
         />
 
         <View style={contentContainerStyle}>
           <View style={styles.section}>
             <TeamInfo
-              teamName="Forge World Metalica"
-              teamLogo="https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=400"
-              role="Team Captain"
-              sportsmanshipRating={4.8}
+              teamName={profile.team.name}
+              teamLogo={profile.team.logo ?? ""}
+              role={profile.role}
+              sportsmanshipRating={profile.sportsmanship}
             />
           </View>
           <View style={styles.section}>

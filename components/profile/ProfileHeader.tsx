@@ -10,6 +10,8 @@ interface ProfileHeaderProps {
   team: string;
   sportsmanship: number;
   sportsmanshipLevel: number;
+  profilePicture: string;
+  heroImage: string;
 }
 
 function getSportsmanshipLevel(progress: number, level: number): { level: number; progress: number } {
@@ -21,7 +23,7 @@ function getSportsmanshipLevel(progress: number, level: number): { level: number
   return { level, progress };
 }
 
-export function ProfileHeader({ username, title, team, sportsmanship, sportsmanshipLevel }: ProfileHeaderProps) {
+export function ProfileHeader({ username, title, team, sportsmanship, sportsmanshipLevel, profilePicture, heroImage }: ProfileHeaderProps) {
   const { level, progress } = getSportsmanshipLevel(sportsmanship, sportsmanshipLevel);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
@@ -30,7 +32,7 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.bannerContainer}>
         <Image
-          source="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000"
+          source={heroImage}
           style={styles.heroBanner}
           contentFit="cover"
         />
@@ -45,7 +47,7 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
           <View style={styles.profileContent}>
             <View style={[styles.profilePictureContainer, { borderColor: theme.icon }]}>
               <Image
-                source="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400"
+                source={profilePicture}
                 style={styles.profilePicture}
                 contentFit="cover"
               />

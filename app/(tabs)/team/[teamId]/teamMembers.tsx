@@ -4,65 +4,25 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
-
-type MatchRole = 'First Defender' | 'Second Defender' | 'Attacker' | 'Blunter' | 'Refused';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  sportsmanshipRating: number;
-  favoriteArmy: string;
-  gamesPlayed: number;
-  winRate: number;
-  profileImage: string;
-  commonMatchRole: MatchRole;
-}
+import { useLocalSearchParams } from 'expo-router';
+import { useUsers } from '@/hooks/useUsers';
+import { Link } from 'expo-router';
 
 export default function TeamMembersScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
-
-  // TODO: Replace with API call
-  const members: TeamMember[] = [
-    {
-      id: '1',
-      name: 'John Doe',
-      role: 'Team Captain',
-      sportsmanshipRating: 4.5,
-      favoriteArmy: 'Space Marines',
-      gamesPlayed: 15,
-      winRate: 70,
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-      commonMatchRole: 'First Defender',
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      role: 'Coach',
-      sportsmanshipRating: 4.8,
-      favoriteArmy: 'Tyranids',
-      gamesPlayed: 20,
-      winRate: 65,
-      profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
-      commonMatchRole: 'Attacker',
-    },
-    {
-      id: '3',
-      name: 'Mike Johnson',
-      role: 'Player',
-      sportsmanshipRating: 4.2,
-      favoriteArmy: 'Orks',
-      gamesPlayed: 10,
-      winRate: 60,
-      profileImage: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=400",
-      commonMatchRole: 'Blunter',
-    },
-  ];
+  const { teamId } = useLocalSearchParams();
+  const { users } = useUsers({ teamId: teamId as string });
 
   const toggleMember = (memberId: string) => {
     setExpandedMember(expandedMember === memberId ? null : memberId);
+  };
+
+  const linkStyle = {
+    ...styles.memberName,
+    ...styles.link,
+    color: theme.tint
   };
 
   return (
@@ -71,73 +31,80 @@ export default function TeamMembersScreen() {
         <ThemedText style={styles.title}>Team Members</ThemedText>
       </View>
       <View style={styles.membersList}>
-        {members.map((member) => (
+        {users.map((user) => (
           <Pressable
-            key={member.id}
+            key={user.id}
             style={[
               styles.memberCard,
               { backgroundColor: theme.secondary },
             ]}
-            onPress={() => toggleMember(member.id)}
+            onPress={() => toggleMember(user.id)}
           >
             <View style={styles.memberHeader}>
-              <Image
-                source={{ uri: member.profileImage }}
-                style={styles.profileImage}
-              />
+              <Link href={`/user/${user.id}`} asChild>
+                <Image
+                  source={{ uri: user.profilePicture }}
+                  style={styles.profileImage}
+                />
+              </Link>
               <View style={styles.memberBasicInfo}>
-                <ThemedText style={styles.memberName}>{member.name}</ThemedText>
-                <ThemedText style={styles.memberRole}>{member.role}</ThemedText>
+                <Link href={`/user/${user.id}`} asChild>
+                  <ThemedText style={linkStyle}>{user.username}</ThemedText>
+                </Link>
+                <ThemedText style={styles.memberRole}>{user.role}</ThemedText>
               </View>
               <FontAwesome
-                name={expandedMember === member.id ? 'chevron-up' : 'chevron-down'}
+                name={expandedMember === user.id ? 'chevron-up' : 'chevron-down'}
                 size={16}
-                color={theme.text}
+                color={theme.text}      
               />
             </View>
-            {expandedMember === member.id && (
+            {expandedMember === user.id && (
               <View style={styles.memberDetails}>
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
                     <FontAwesome name="star" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Sportsmanship</ThemedText>
                     <ThemedText style={styles.detailValue}>
-                      {member.sportsmanshipRating.toFixed(1)}
+                      {user.sportsmanshipLevel.toFixed(1)}
+                    </ThemedText>
+                    <ThemedText style={styles.detailValue}>
+                      {user.sportsmanship.toFixed(1)}
                     </ThemedText>
                   </View>
                   <View style={styles.detailItem}>
                     <FontAwesome name="trophy" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Win Rate</ThemedText>
-                    <ThemedText style={styles.detailValue}>{member.winRate}%</ThemedText>
+                    <ThemedText style={styles.detailValue}>{user.winRate}%</ThemedText>
+                  </View>
+                </View>
+                <View style={[styles.detailRow, styles.matchRoleRow]}>
+                  <View style={styles.detailItem}>
+                    <FontAwesome 
+                      name={user.gameRole === 'Defender' ? 'shield' :
+                           user.gameRole === 'Attacker' ? 'bomb' :
+                           user.gameRole === 'Blunter' ? 'hand-rock-o' :
+                           'ban'} 
+                      size={16} 
+                      color={theme.text} 
+                    />
+                    <ThemedText style={styles.detailLabel}>Match Role</ThemedText>
+                    <ThemedText style={styles.detailValue}>{user.gameRole}</ThemedText>
                   </View>
                 </View>
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
                     <FontAwesome name="gamepad" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Games Played</ThemedText>
-                    <ThemedText style={styles.detailValue}>{member.gamesPlayed}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{user.mostPlayedArmies.map((army) => army.gamesPlayed).reduce((a, b) => a + b)}</ThemedText>
                   </View>
                   <View style={styles.detailItem}>
                     <FontAwesome name="cube" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Favorite Army</ThemedText>
-                    <ThemedText style={styles.detailValue}>{member.favoriteArmy}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{user.mostPlayedArmies.sort((a, b) => b.gamesPlayed - a.gamesPlayed)[0].army}</ThemedText>
                   </View>
                 </View>
-                <View style={[styles.detailRow, styles.matchRoleRow]}>
-                  <View style={styles.detailItem}>
-                    <FontAwesome 
-                      name={member.commonMatchRole === 'First Defender' ? 'shield' :
-                           member.commonMatchRole === 'Second Defender' ? 'shield' :
-                           member.commonMatchRole === 'Attacker' ? 'bomb' :
-                           member.commonMatchRole === 'Blunter' ? 'hand-rock-o' :
-                           'ban'} 
-                      size={16} 
-                      color={theme.text} 
-                    />
-                    <ThemedText style={styles.detailLabel}>Match Role</ThemedText>
-                    <ThemedText style={styles.detailValue}>{member.commonMatchRole}</ThemedText>
-                  </View>
-                </View>
+        
               </View>
             )}
           </Pressable>
@@ -221,5 +188,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginTop: 2,
-  },
+  },  
+  link: {
+    textDecorationLine: 'underline', 
+    fontWeight: 'bold'
+  }
 });

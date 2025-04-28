@@ -11,7 +11,7 @@ export function LoginView() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
-  if (isAuthenticated && user) {
+  if (isAuthenticated && user?.username) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <TouchableOpacity 
@@ -26,7 +26,7 @@ export function LoginView() {
             Welcome back
           </ThemedText>
           <ThemedText style={[styles.subtitle, { color: theme.text }]}>
-            {user.username}
+            {user?.username}
           </ThemedText>
           {error && (
             <ThemedText style={[styles.error, { color: theme.tint }]}>

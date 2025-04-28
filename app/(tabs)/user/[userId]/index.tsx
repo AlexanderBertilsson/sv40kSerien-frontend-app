@@ -1,15 +1,14 @@
-/// <reference lib="dom" />
+
 import { View, StyleSheet, ScrollView, useColorScheme, ActivityIndicator, Text } from 'react-native';
 import { ProfileHeader } from '../../../../components/profile/ProfileHeader';
 import { StatsOverview } from '../../../../components/profile/StatsOverview';
 import { TeamInfo } from '../../../../components/profile/TeamInfo';
 import { GameInfo } from '../../../../components/profile/GameInfo';
-import { AchievementsPreview } from '../../../../components/profile/AchievementsPreview';
+// import { AchievementsPreview } from '../../../../components/profile/AchievementsPreview';
 import { Colors } from '@/constants/Colors';
 import { useRef } from 'react';
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthContext } from '@/contexts/AuthContext';
 import { useUser } from '@/hooks/useUser';
 import { useTeam } from '@/hooks/useTeam';
 import { Profile } from '@/types/utils/types/Profile';
@@ -18,11 +17,12 @@ export default function UserScreen() {
   const scrollViewRef = useRef(null);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const { user: authUser, authTokens } = useAuthContext();
-  const { user, loading: userLoading, error: userError } = useUser(authUser?.username, authTokens);
-  const { team, loading: teamLoading, error: teamError } = useTeam(user?.teamId, authTokens);
+  const { userId } = useLocalSearchParams();
+  const { user, loading: userLoading, error: userError } = useUser(userId as string);
+  const { team, loading: teamLoading, error: teamError } = useTeam(user?.teamId);
   const loading = userLoading || teamLoading;
   const error = userError || teamError;
+  
 
   let profile: Profile | null = null;
   if (user && team) {
@@ -83,20 +83,21 @@ export default function UserScreen() {
 
         <View style={contentContainerStyle}>
           <View style={styles.section}>
-            <TeamInfo
-              teamName={profile.team.name}
-              teamLogo={profile.team.logo ?? ""}
-              role={profile.role}
-              sportsmanshipRating={profile.sportsmanship}
-            />
+              <TeamInfo
+                teamName={profile.team.name}
+                teamLogo={profile.team.logo ?? ""}
+                role={profile.role}
+                sportsmanshipRating={profile.sportsmanship}
+                teamId={profile.team.id}
+              />
           </View>
           <View style={styles.section}>
-            <Link href="/user/[userId]/stats" asChild>
+            <Link href={`/user/${userId}/stats`} asChild>
               <View style={statsLinkStyle}>
                 <StatsOverview
-                  battles={127}
-                  winRate={76}
-                  points={2187}
+                  battles={profile?.matchHistory?.length ?? 0}
+                  winRate={profile?.winRate ?? 0}
+                  points={profile?.avgVictoryPoints ?? 0}
                 />
                 <Ionicons 
                   name="chevron-forward" 
@@ -110,15 +111,11 @@ export default function UserScreen() {
 
           <View style={styles.section}>
             <GameInfo
-              role="Defender"
-              armies={[
-                { name: 'Adeptus Mechanicus', gamesPlayed: 85 },
-                { name: 'Imperial Knights', gamesPlayed: 32 },
-                { name: 'Necrons', gamesPlayed: 10 },
-              ]}
+              role={profile.gameRole}
+              armies={profile?.mostPlayedArmies ?? []}
             />
           </View>
-
+{/* 
           <View style={styles.section}>
             <AchievementsPreview
               achievements={[
@@ -139,7 +136,7 @@ export default function UserScreen() {
                 },
               ]}
             />
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </View>

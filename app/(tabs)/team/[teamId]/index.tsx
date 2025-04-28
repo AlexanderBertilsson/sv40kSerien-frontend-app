@@ -4,13 +4,9 @@ import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import TeamMembersPreview from '@/components/team/TeamMembersPreview';
-
-interface TeamStats {
-  sportsmanshipScore: number;
-  winRate: number;
-  gamesPlayed: number;
-  upcomingEvents: number;
-}
+import { useLocalSearchParams } from 'expo-router';
+import { useTeam } from '@/hooks/useTeam';
+import { useUsers } from '@/hooks/useUsers';
 
 interface StatItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -22,54 +18,24 @@ interface StatItemProps {
 export default function TeamScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-
-  // TODO: Replace with actual API call
-  const teamStats: TeamStats = {
-    sportsmanshipScore: 4.5,
-    winRate: 65,
-    gamesPlayed: 20,
-    upcomingEvents: 2
-  };
-
-  // Mock team members data
-  const teamMembers = [
-    {
-      id: '1',
-      name: 'John Doe',
-      role: 'Team Captain',
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      role: 'Coach',
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-    },
-    {
-      id: '3',
-      name: 'Mike Johnson',
-      role: 'Player',
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-    },
-    {
-      id: '4',
-      name: 'Sarah Wilson',
-      role: 'Player',
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
-    },
-  ];
-
+  const { teamId } = useLocalSearchParams();
+  const { users } = useUsers({ teamId: teamId as string });
+  const { team, error } = useTeam(teamId as string);
+  if(!team){
+    return null;
+  } 
+  if(error) return null;
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Hero Banner */}
       <View style={styles.heroBanner}>
         <Image
-          source={{ uri: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000" }}
+          source={{ uri: team.banner }}
           style={styles.bannerImage}
         />
         <View style={styles.logoContainer}>
           <Image
-            source={{ uri: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=160&h=160&fit=crop" }}
+            source={{ uri: team.logo }}
             style={styles.logoImage}
           />
         </View>
@@ -77,31 +43,31 @@ export default function TeamScreen() {
 
       {/* Team Info */}
       <View style={styles.teamInfo}>
-        <ThemedText style={styles.teamName}>Team Name</ThemedText>
+        <ThemedText style={styles.teamName}>{team.name}</ThemedText>
         <View style={styles.statsContainer}>
           <StatItem
             icon="star"
-            value={teamStats.sportsmanshipScore.toFixed(1)}
+            value={team.sportsmanshipScore.toFixed(1)}
             label="Sportsmanship"
             theme={theme}
           />
           <StatItem
             icon="trophy"
-            value={`${teamStats.winRate}%`}
+            value={`${team.gameStats.winRate}%`}
             label="Win Rate"
             theme={theme}
           />
           <StatItem
             icon="gamepad"
-            value={teamStats.gamesPlayed.toString()}
-            label="Games"
+            value={team.gameStats.avgVictoryPoints.toString()}
+            label="Average Victory Points"
             theme={theme}
           />
         </View>
       </View>
 
       {/* Team Members Preview */}
-      <TeamMembersPreview members={teamMembers} />
+      <TeamMembersPreview members={users} teamId={teamId as string} />
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
@@ -116,9 +82,9 @@ export default function TeamScreen() {
       {/* Upcoming Events */}
       <View style={styles.eventsSection}>
         <ThemedText style={styles.sectionTitle}>Upcoming Events</ThemedText>
-        {teamStats.upcomingEvents > 0 ? (
+        {team.calendar!.length > 0 ? (
           <ThemedText style={styles.eventCount}>
-            {teamStats.upcomingEvents} upcoming events
+            {team.calendar!.length} upcoming events
           </ThemedText>
         ) : (
           <ThemedText style={styles.noEvents}>No upcoming events</ThemedText>

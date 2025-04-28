@@ -1,6 +1,15 @@
 export interface Team {
-    id: number;
+    id: string;
     name: string;
     logo?: string;
-    // Add other team properties as needed
+    banner?: string;
+    sportsmanshipScore: number;
+    rank: number;
+    members: number[];
+    gameStats: {
+        winRate: number;
+        avgVictoryPoints: number; 
+    };
+    matchHistory: number[];
+    calendar: number[];
   }

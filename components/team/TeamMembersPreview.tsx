@@ -1,38 +1,41 @@
-import { View, StyleSheet, Image, Pressable } from 'react-native';
+import { View, StyleSheet, Image, Pressable, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  profileImage: string;
-}
+import { User } from '@/types/utils/User';
 
 interface TeamMembersPreviewProps {
-  members: TeamMember[];
+  members: User[];
+  teamId: string;
 }
 
-export default function TeamMembersPreview({ members }: TeamMembersPreviewProps) {
+export default function TeamMembersPreview({ members, teamId }: TeamMembersPreviewProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-
+  const linkStyle = {
+    ...styles.memberName,
+    ...styles.link,
+    color: theme.tint
+  };
   return (
-    <Link href="./[teamId]/teamMembers" asChild>
+    <Link href={`./${teamId}/teamMembers`} asChild>
       <Pressable>
         <View style={[styles.container, { backgroundColor: theme.secondary }]}>
           <ThemedText style={styles.title}>Team Members</ThemedText>
           <View style={styles.membersGrid}>
             {members.map((member) => (
               <View key={member.id} style={styles.memberCard}>
-                <Image
-                  source={{ uri: member.profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
-                  style={styles.profileImage}
-                />
+                <Link href={`/user/${member.id}`} asChild>
+                  <Image
+                    source={{ uri: member.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
+                    style={styles.profileImage}
+                  />
+                </Link>
                 <View style={styles.memberInfo}>
-                  <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                  <Link href={`/user/${member.id}`} asChild>
+                    <Text style={linkStyle}>{member.username}</Text>
+                  </Link>
                   <ThemedText style={styles.memberRole}>{member.role}</ThemedText>
                 </View>
               </View>
@@ -84,4 +87,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.7,
   },
+  link: {
+    textDecorationLine: 'underline', 
+    fontWeight: 'bold'
+  }
 });

@@ -1,10 +1,10 @@
-import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { SideMenu } from '@/components/navigation/SideMenu';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { UserProvider } from '@/contexts/ProfileContext';
+import { Drawer } from 'expo-router/drawer';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
@@ -12,9 +12,37 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <SafeAreaProvider>
+      <UserProvider>
+        <SafeAreaProvider>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-        <Stack
+        <Drawer
+         screenOptions={{ drawerPosition: 'left', title: ''}}>
+          <Drawer.Screen 
+              name="login"
+              options={{ 
+                title: 'Login',
+                headerShown: true,
+              }} 
+            />
+          <Drawer.Screen 
+            name="(tabs)" 
+            options={{ 
+              title: 'Home',
+              // drawerItemStyle: {
+              //   display: 'none',
+              // },
+            }} 
+          />
+          <Drawer.Screen 
+            name="+not-found" 
+            options={{ 
+              drawerItemStyle: {
+                display: 'none',
+              },
+            }} 
+          />
+        </Drawer>
+        {/* <Stack
           screenOptions={{
             headerStyle: {
               backgroundColor: theme.background,
@@ -34,13 +62,7 @@ export default function RootLayout() {
               headerShown: false,
             }} 
           />
-          <Stack.Screen 
-            name="login" 
-            options={{ 
-              headerShown: false,
-              presentation: 'modal',
-            }} 
-          />
+       
           <Stack.Screen 
             name="+not-found" 
             options={{ 
@@ -49,8 +71,9 @@ export default function RootLayout() {
             }} 
           />
         </Stack>
-        <SideMenu />
+        <SideMenu /> */}
       </SafeAreaProvider>
+      </UserProvider>
     </AuthProvider>
   );
 }

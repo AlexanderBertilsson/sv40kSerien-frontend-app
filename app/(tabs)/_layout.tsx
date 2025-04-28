@@ -3,12 +3,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { Platform } from 'react-native';
+import { useUserContext } from '@/contexts/ProfileContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
   const { isAuthenticated } = useAuthContext();
-
+  const { profile } = useUserContext();
   return (
     <Tabs
       screenOptions={{
@@ -27,7 +27,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="about"
-        options={{
+        options={{  
           title: 'About',
           tabBarIcon: ({ color }) => (
             <Ionicons name="information-circle-outline" size={24} color={color} />
@@ -37,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="user/[userId]"
         options={{
-          href: isAuthenticated || Platform.OS === 'web' ? `/user/[userId]` : `/user/[userId]`,
+          href: isAuthenticated && profile?.id ? `/user/${profile?.id}` : null,
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
@@ -47,10 +47,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="team/[teamId]"
         options={{
-          href: isAuthenticated || Platform.OS === 'web' ? `/team/[teamId]` : `/team/[teamId]`,
+          href: isAuthenticated && profile?.team?.id ? `/team/${profile?.team?.id}` : null,
           title: 'Team',
           tabBarIcon: ({ color }: { color: string }) => (
             <Ionicons name="flag-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ladder"
+        options={{
+          title: 'Ladder',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="trophy-outline" size={24} color={color} />
           ),
         }}
       />

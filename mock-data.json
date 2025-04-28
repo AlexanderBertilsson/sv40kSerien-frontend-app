@@ -1,16 +1,16 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "8e1b2a81-1c3f-4e2c-8f01-7e9a8a1e1e01",
       "username": "adeptus_mechanicus",
       "email": "adeptus@metalica.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/1.jpg",
       "heroImage": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800",
       "sportsmanship": 85,
       "sportsmanshipLevel": 3,
-      "teamId": 1,
+      "teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "role": "player",
-      "mostPlayedArmies": ["Adeptus Mechanicus", "Imperial Knights"],
+      "mostPlayedArmies": [{"army": "Adeptus Mechanicus", "gamesPlayed": 12}, {"army": "Imperial Knights", "gamesPlayed": 5}],
       "gameRole": "Defender",
       "matchHistory": [101, 102],
       "winRate": 0.65,
@@ -18,16 +18,16 @@
       "achievements": [201, 202]
     },
     {
-      "id": 2,
+      "id": "b9f4e6c2-5e3f-4b2a-9c0d-1e2f3e4b5c6d",
       "username": "skitarii_ranger",
       "email": "ranger@metalica.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/2.jpg",
       "heroImage": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800",
       "sportsmanship": 88,
       "sportsmanshipLevel": 4,
-      "teamId": 1,
+      "teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "role": "player",
-      "mostPlayedArmies": ["Adeptus Mechanicus"],
+      "mostPlayedArmies": [{" army": "Adeptus Mechanicus", "gamesPlayed": 8}],
       "gameRole": "Attacker",
       "matchHistory": [103],
       "winRate": 0.55,
@@ -35,16 +35,16 @@
       "achievements": [201]
     },
     {
-      "id": 3,
+      "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
       "username": "techpriest_dominus",
       "email": "dominus@metalica.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/3.jpg",
       "heroImage": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800",
       "sportsmanship": 90,
       "sportsmanshipLevel": 5,
-      "teamId": 1,
+      "teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "role": "player",
-      "mostPlayedArmies": ["Adeptus Mechanicus"],
+      "mostPlayedArmies": [{"army": "Adeptus Mechanicus", "gamesPlayed": 8}],
       "gameRole": "Support",
       "matchHistory": [104],
       "winRate": 0.60,
@@ -52,16 +52,16 @@
       "achievements": [202]
     },
     {
-      "id": 4,
+      "id": "d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
       "username": "kataphron_destroyer",
       "email": "destroyer@metalica.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/4.jpg",
       "heroImage": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800",
       "sportsmanship": 82,
       "sportsmanshipLevel": 3,
-      "teamId": 1,
+      "teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "role": "player",
-      "mostPlayedArmies": ["Adeptus Mechanicus"],
+      "mostPlayedArmies": [{"army": "Adeptus Mechanicus", "gamesPlayed": 8}],
       "gameRole": "Attacker",
       "matchHistory": [105],
       "winRate": 0.50,
@@ -69,16 +69,16 @@
       "achievements": [201]
     },
     {
-      "id": 5,
+      "id": "e3f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
       "username": "electropriest",
       "email": "electro@metalica.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/5.jpg",
       "heroImage": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800",
       "sportsmanship": 80,
       "sportsmanshipLevel": 2,
-      "teamId": 1,
+      "teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "role": "player",
-      "mostPlayedArmies": ["Adeptus Mechanicus"],
+      "mostPlayedArmies": [{"army": "Adeptus Mechanicus", "gamesPlayed": 8}],
       "gameRole": "Defender",
       "matchHistory": [106],
       "winRate": 0.45,
@@ -86,16 +86,16 @@
       "achievements": [202]
     },
     {
-      "id": 6,
+      "id": "f4a5b6c7-8d9e-0f1a-2b3c-4d5e6f7a8b9c",
       "username": "ultramarine_captain",
       "email": "captain@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/6.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 92,
       "sportsmanshipLevel": 5,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines", "Space Marines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 10}, {"army": "Space Marines", "gamesPlayed": 3}],
       "gameRole": "Defender",
       "matchHistory": [107, 108],
       "winRate": 0.70,
@@ -103,16 +103,16 @@
       "achievements": [203]
     },
     {
-      "id": 7,
+      "id": "a5b6c7d8-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
       "username": "tactical_marine",
       "email": "tactical@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/7.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 85,
       "sportsmanshipLevel": 4,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 7}],
       "gameRole": "Attacker",
       "matchHistory": [109],
       "winRate": 0.60,
@@ -120,16 +120,16 @@
       "achievements": [203]
     },
     {
-      "id": 8,
+      "id": "b6c7d8e9-0f1a-2b3c-4d5e-6f7a8b9c0d1e",
       "username": "apothecary",
       "email": "apothecary@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/8.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 89,
       "sportsmanshipLevel": 5,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 7}],
       "gameRole": "Support",
       "matchHistory": [110],
       "winRate": 0.58,
@@ -137,16 +137,16 @@
       "achievements": [204]
     },
     {
-      "id": 9,
+      "id": "c7d8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
       "username": "devastator_marine",
       "email": "devastator@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/9.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 80,
       "sportsmanshipLevel": 3,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 7}],
       "gameRole": "Attacker",
       "matchHistory": [111],
       "winRate": 0.52,
@@ -154,16 +154,16 @@
       "achievements": [203]
     },
     {
-      "id": 10,
+      "id": "d8e9f0a1-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
       "username": "assault_marine",
       "email": "assault@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/10.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 77,
       "sportsmanshipLevel": 2,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 7}],
       "gameRole": "Defender",
       "matchHistory": [112],
       "winRate": 0.47,
@@ -171,16 +171,16 @@
       "achievements": [204]
     },
     {
-      "id": 11,
+      "id": "406cc91c-e061-70df-239c-206fbbe2c990",
       "username": "alexander",
       "email": "assault@ultramarines.com",
       "profilePicture": "https://randomuser.me/api/portraits/men/10.jpg",
       "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
       "sportsmanship": 77,
       "sportsmanshipLevel": 2,
-      "teamId": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "role": "player",
-      "mostPlayedArmies": ["Ultramarines"],
+      "mostPlayedArmies": [{"army": "Ultramarines", "gamesPlayed": 7}],
       "gameRole": "Defender",
       "matchHistory": [112],
       "winRate": 0.47,
@@ -190,13 +190,13 @@
   ],
   "teams": [
     {
-      "id": 1,
+      "id": "e6316935-d1e0-44ee-b823-8d829ddcd358",
       "name": "Forge World Metalica",
       "logo": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=400",
       "banner": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=1200",
       "sportsmanshipScore": 85,
       "rank": 2,
-      "members": [1,2,3,4,5],
+      "members": ["8e1b2a81-1c3f-4e2c-8f01-7e9a8a1e1e01","b9f4e6c2-5e3f-4b2a-9c0d-1e2f3e4b5c6d","c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f","d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a","e3f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b"],
       "gameStats": {
         "winRate": 0.55,
         "avgVictoryPoints": 70
@@ -205,19 +205,19 @@
       "calendar": [301]
     },
     {
-      "id": 2,
+      "id": "92e14263-f28f-46a1-973f-c17fd4e5355a",
       "name": "Ultramarines",
       "logo": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=400",
       "banner": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=1200",
       "sportsmanshipScore": 90,
       "rank": 1,
-      "members": [6,7,8,9,10],
+      "members": ["f4a5b6c7-8d9e-0f1a-2b3c-4d5e6f7a8b9c","a5b6c7d8-9e0f-1a2b-3c4d-5e6f7a8b9c0d","b6c7d8e9-0f1a-2b3c-4d5e-6f7a8b9c0d1e","c7d8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f","d8e9f0a1-2b3c-4d5e-6f7a-8b9c0d1e2f3a","406cc91c-e061-70df-239c-206fbbe2c990"],
       "gameStats": {
         "winRate": 0.63,
         "avgVictoryPoints": 76
       },
-      "matchHistory": [107,108,109,110,111,112],
-      "calendar": [302]
+      "matchHistory": ["107-108-109-110-111-112"],
+      "calendar": ["302"]
     }
   ],
   "events": [
@@ -225,7 +225,7 @@
       "id": 301,
       "title": "Battle for Metalica",
       "date": "2025-04-20T18:00:00Z",
-      "teamIds": [1],
+      "teamIds": ["e6316935-d1e0-44ee-b823-8d829ddcd358"],
       "description": "Annual Metalica league showdown.",
       "rounds": 3
     },
@@ -233,24 +233,24 @@
       "id": 302,
       "title": "Ultramarines Gauntlet",
       "date": "2025-05-10T18:00:00Z",
-      "teamIds": [2],
+      "teamIds": ["92e14263-f28f-46a1-973f-c17fd4e5355a"],
       "description": "Ultramarines home event.",
       "rounds": 4
     }
   ],
   "matches": [
-    {"id": 101, "teamA": 1, "teamB": 2, "scoreA": 52, "scoreB": 48, "date": "2025-03-01T12:00:00Z"},
-    {"id": 102, "teamA": 1, "teamB": 2, "scoreA": 41, "scoreB": 59, "date": "2025-03-15T12:00:00Z"},
-    {"id": 103, "teamA": 1, "teamB": 2, "scoreA": 60, "scoreB": 40, "date": "2025-03-29T12:00:00Z"},
-    {"id": 104, "teamA": 1, "teamB": 2, "scoreA": 44, "scoreB": 56, "date": "2025-04-05T12:00:00Z"},
-    {"id": 105, "teamA": 1, "teamB": 2, "scoreA": 33, "scoreB": 67, "date": "2025-04-12T12:00:00Z"},
-    {"id": 106, "teamA": 1, "teamB": 2, "scoreA": 47, "scoreB": 53, "date": "2025-04-19T12:00:00Z"},
-    {"id": 107, "teamA": 2, "teamB": 1, "scoreA": 62, "scoreB": 38, "date": "2025-03-02T12:00:00Z"},
-    {"id": 108, "teamA": 2, "teamB": 1, "scoreA": 58, "scoreB": 42, "date": "2025-03-16T12:00:00Z"},
-    {"id": 109, "teamA": 2, "teamB": 1, "scoreA": 55, "scoreB": 45, "date": "2025-03-30T12:00:00Z"},
-    {"id": 110, "teamA": 2, "teamB": 1, "scoreA": 51, "scoreB": 49, "date": "2025-04-06T12:00:00Z"},
-    {"id": 111, "teamA": 2, "teamB": 1, "scoreA": 54, "scoreB": 46, "date": "2025-04-13T12:00:00Z"},
-    {"id": 112, "teamA": 2, "teamB": 1, "scoreA": 57, "scoreB": 43, "date": "2025-04-20T12:00:00Z"}
+    {"id": 101, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 52, "scoreB": 48, "date": "2025-03-01T12:00:00Z"},
+    {"id": 102, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 41, "scoreB": 59, "date": "2025-03-15T12:00:00Z"},
+    {"id": 103, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 60, "scoreB": 40, "date": "2025-03-29T12:00:00Z"},
+    {"id": 104, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 44, "scoreB": 56, "date": "2025-04-05T12:00:00Z"},
+    {"id": 105, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 33, "scoreB": 67, "date": "2025-04-12T12:00:00Z"},
+    {"id": 106, "teamA": "e6316935-d1e0-44ee-b823-8d829ddcd358", "teamB": "92e14263-f28f-46a1-973f-c17fd4e5355a", "scoreA": 47, "scoreB": 53, "date": "2025-04-19T12:00:00Z"},
+    {"id": 107, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 62, "scoreB": 38, "date": "2025-03-02T12:00:00Z"},
+    {"id": 108, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 58, "scoreB": 42, "date": "2025-03-16T12:00:00Z"},
+    {"id": 109, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 55, "scoreB": 45, "date": "2025-03-30T12:00:00Z"},
+    {"id": 110, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 51, "scoreB": 49, "date": "2025-04-06T12:00:00Z"},
+    {"id": 111, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 54, "scoreB": 46, "date": "2025-04-13T12:00:00Z"},
+    {"id": 112, "teamA": "92e14263-f28f-46a1-973f-c17fd4e5355a", "teamB": "e6316935-d1e0-44ee-b823-8d829ddcd358", "scoreA": 57, "scoreB": 43, "date": "2025-04-20T12:00:00Z"}
   ],
   "achievements": [
     {"id": 201, "name": "First Blood", "description": "Win your first match.", "completed": true},
@@ -259,12 +259,12 @@
     {"id": 204, "name": "Team Player", "description": "Participate in 5 team matches.", "completed": false}
   ],
   "ladder": [
-    {"teamId": 2, "rank": 1, "winRate": 0.63, "matchesPlayed": 12, "points": 76},
-    {"teamId": 1, "rank": 2, "winRate": 0.55, "matchesPlayed": 12, "points": 70}
+    {"teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a", "rank": 1, "winRate": 0.63, "matchesPlayed": 12, "points": 76},
+    {"teamId": "e6316935-d1e0-44ee-b823-8d829ddcd358", "rank": 2, "winRate": 0.55, "matchesPlayed": 12, "points": 70}
   ],
   "armyLists": [
     {
-      "id": 1,
+      "listId": "93f83221-64ac-45c9-a2fc-14df26ca22ca",
       "name": "Chaos Daemons - Shadow Legion (GW Format)",
       "format": "GW",
       "faction": "Chaos Daemons",
@@ -274,7 +274,7 @@
       "rawText": "+++++++++++++++++++++++++++++++++++++++++++++++\n+ FACTION KEYWORD: Chaos - Chaos Daemons\n+ DETACHMENT: Shadow Legion\n+ TOTAL ARMY POINTS: 1995pts\n+\n+ WARLORD: Char1: Be'lakor\n+ ENHANCEMENT: \n+ NUMBER OF UNITS: 15\n+ SECONDARY: - Bring It Down: (1x4) + (2x6) - Assassination: 3 Characters\n+++++++++++++++++++++++++++++++++++++++++++++++\n\nCHARACTER\n\n1x Be'lakor (375 pts)\n• 1x Betraying Shades\n• 1x The Blade of Shadows\n• Warlord\n\n1x Bloodthirster (305 pts)\n• 1x Hellfire breath\n• 1x Great axe of Khorne\n\n1x Great Unclean One (250 pts)\n• 1x Putrid vomit\n• 1x Bilesword\n• 1x Plague flail\n\nBATTLELINE\n\n10x Bloodletters (110 pts)\n• 9x Bloodletter\n    • 9x Hellblade\n• 1x Bloodreaper\n    • 1x Hellblade\n\n10x Blue Horrors (125 pts)\n• 10x Blue Horror\n    • 10x Blue claws\n    • 10x Coruscating Blue flames\n\n10x Daemonettes (100 pts)\n• 1x Alluress\n    • 1x Slashing claws\n• 9x Daemonette\n    • 9x Slashing claws\n\n3x Nurglings (35 pts)\n• 3x Nurgling Swarm\n    • 3x Diseased claws and teeth\n\n3x Nurglings (35 pts)\n• 3x Nurgling Swarm\n    • 3x Diseased claws and teeth\n\nOTHER DATASHEETS\n\n3x Flamers (65 pts)\n• 2x Flamer\n    • 2x Flamer mouths\n    • 2x Flickering Flames\n• 1x Pyrocaster\n"
     },
     {
-      "id": 2,
+      "listId": "2657b9f4-c080-42ff-90cf-12b82d6e3738",
       "name": "Chaos Daemons - Shadow Legion (WTC Format)",
       "format": "WTC",
       "faction": "Chaos Daemons",
@@ -284,7 +284,7 @@
       "rawText": "+++++++++++++++++++++++++++++++++++++++++++++++\n+ FACTION KEYWORD: Chaos - Chaos Daemons\n+ DETACHMENT: Shadow Legion\n+ TOTAL ARMY POINTS: 1995pts\n+\n+ WARLORD: Char1: Be'lakor\n+ ENHANCEMENT: \n+ NUMBER OF UNITS: 15\n+ SECONDARY: - Bring It Down: (1x4) + (2x6) - Assassination: 3 Characters\n+++++++++++++++++++++++++++++++++++++++++++++++\n\nCHARACTER\n\nChar1: 1x Be'lakor (375 pts)\n1 with Betraying Shades, The Blade of Shadows\n  • Warlord\n\nChar2: 1x Bloodthirster (305 pts)\n1 with Hellfire breath, Great axe of Khorne\n\nChar3: 1x Great Unclean One (250 pts)\n1 with Putrid vomit, Bilesword, Plague flail\n\nBATTLELINE\n\n10x Bloodletters (110 pts)\n• 9x Bloodletter\n    9 with Hellblade\n• 1x Bloodreaper\n    1 with Hellblade\n\n10x Blue Horrors (125 pts)\n• 10x Blue Horror\n    10 with Blue claws, Coruscating Blue flames\n\n10x Daemonettes (100 pts)\n• 1x Alluress\n    1 with Slashing claws\n• 9x Daemonette\n    9 with Slashing claws\n\n3x Nurglings (35 pts)\n• 3x Nurgling Swarm\n    3 with Diseased claws and teeth\n\n3x Nurglings (35 pts)\n• 3x Nurgling Swarm\n    3 with Diseased claws and teeth\n\nOTHER DATASHEETS\n\n3x Flamers (65 pts)\n• 2x Flamer\n    2 with Flamer mouths, Flickering Flames\n• 1x Pyrocaster\n    1 with Flamer mouths, Flickering Flames\n"
     },
     {
-      "id": 3,
+      "listId": "20d49d2e-f322-4b22-9b1d-a0025e74f1dc",
       "name": "Chaos Daemons (Short Format)",
       "format": "Short",
       "faction": "Chaos Daemons",

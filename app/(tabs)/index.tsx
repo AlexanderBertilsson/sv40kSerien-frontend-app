@@ -5,7 +5,6 @@ import { Colors } from '@/constants/Colors';
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ThemedText style={[styles.title, { color: theme.text }]}>Home</ThemedText>

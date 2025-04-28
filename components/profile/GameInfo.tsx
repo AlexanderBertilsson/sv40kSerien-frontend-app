@@ -2,14 +2,9 @@ import { View, StyleSheet, useColorScheme } from 'react-native';
 import { ThemedText } from '../ThemedText';
 import { Colors } from '@/constants/Colors';
 
-interface Army {
-  name: string;
-  gamesPlayed: number;
-}
-
 interface GameInfoProps {
-  role: string;
-  armies: Army[];
+  role?: string;
+  armies: { army: string, gamesPlayed: number }[];
 }
 
 export function GameInfo({ role, armies }: GameInfoProps) {
@@ -48,14 +43,14 @@ export function GameInfo({ role, armies }: GameInfoProps) {
         
         <View style={styles.roleContainer}>
           <ThemedText style={labelStyle}>Preferred Role:</ThemedText>
-          <ThemedText style={valueStyle}>{role}</ThemedText>
+          <ThemedText style={valueStyle}>{role ?? "Not specified"}</ThemedText>
         </View>
 
         <View style={styles.armiesContainer}>
           <ThemedText style={labelStyle}>Armies:</ThemedText>
           {armies.map((army, index) => (
             <View key={index} style={styles.armyItem}>
-              <ThemedText style={armyNameStyle}>{army.name}</ThemedText>
+              <ThemedText style={armyNameStyle}>{army.army}</ThemedText>
               <ThemedText style={gamesPlayedStyle}>
                 {army.gamesPlayed} {army.gamesPlayed === 1 ? 'game' : 'games'}
               </ThemedText>

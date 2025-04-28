@@ -3,17 +3,19 @@ import { Image } from 'expo-image';
 import { ThemedText } from '../ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useState } from 'react';
+import { Link } from 'expo-router';
 
 interface TeamInfoProps {
   teamName: string;
   teamLogo: string;
   role: string;
   sportsmanshipRating: number;
+  teamId: string;
 }
 
 const fallbackLogo = 'https://images.unsplash.com/photo-1599753894977-bc6c46289a76?q=80&w=400';
 
-export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: TeamInfoProps) {
+export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating, teamId }: TeamInfoProps) {
   const [imageError, setImageError] = useState(false);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
@@ -38,6 +40,11 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: Team
     color: theme.text,
   };
 
+  const linkStyle = {
+    ...styles.link,
+    color: theme.tint
+  };
+
   return (
     <View style={styles.container}>
       <View style={cardStyle}>
@@ -56,10 +63,14 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: Team
           </View>
 
           <View style={styles.info}>
-            <View style={styles.infoRow}>
-              <ThemedText style={labelStyle}>Team:</ThemedText>
-              <ThemedText style={valueStyle}>{teamName}</ThemedText>
-            </View>
+            <Link href={`/team/${teamId}`} asChild>
+  <View style={styles.infoRow}>
+    <ThemedText style={labelStyle}>Team:</ThemedText>
+    <ThemedText style={[valueStyle, linkStyle]}>
+      {teamName}
+    </ThemedText>
+  </View>
+</Link>
 
             <View style={styles.infoRow}>
               <ThemedText style={labelStyle}>Role:</ThemedText>
@@ -78,6 +89,7 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating }: Team
 }
 
 const styles = StyleSheet.create({
+
   container: {
     width: '100%',
   },
@@ -131,4 +143,8 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
+  link: {
+    textDecorationLine: 'underline', 
+    fontWeight: 'bold'
+  }
 });

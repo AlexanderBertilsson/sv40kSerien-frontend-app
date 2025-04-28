@@ -34,34 +34,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   // Restore authTokens and user uuid from SecureStore on mount (device only)
-  useEffect(() => {
-    const restoreFromStorage = async () => {
-      if (Platform.OS !== 'web') {
-        try {
-          const accessToken = await SecureStore.getItemAsync('accessToken');
-          const idToken = await SecureStore.getItemAsync('idToken');
-          const refreshToken = await SecureStore.getItemAsync('refreshToken');
-          const uuid = await SecureStore.getItemAsync('userUuid');
-          if (accessToken && idToken && refreshToken) {
-            setAuthTokens({
-              accessToken,
-              idToken,
-              refreshToken,
-              tokenType: 'bearer',
-              expiresIn: 3600,
-              scope: 'openid profile email'
-            } as TokenResponse);
-          }
-          if (uuid) {
-            setUser((prev) => ({ ...(prev || {}), uuid }));
-          }
-        } catch (err) {
-          console.error('Failed to restore tokens from SecureStore', err);
-        }
-      }
-    };
-    restoreFromStorage();
-  }, []);
+  // useEffect(() => {
+  //   const restoreFromStorage = async () => {
+  //     if (Platform.OS !== 'web') {
+  //       try {
+  //         const accessToken = await SecureStore.getItemAsync('accessToken');
+  //         const idToken = await SecureStore.getItemAsync('idToken');
+  //         const refreshToken = await SecureStore.getItemAsync('refreshToken');
+  //         const uuid = await SecureStore.getItemAsync('userUuid');
+  //         if (accessToken && idToken && refreshToken) {
+  //           setAuthTokens({
+  //             accessToken,
+  //             idToken,
+  //             refreshToken,
+  //             tokenType: 'bearer',
+  //             expiresIn: 3600,
+  //             scope: 'openid profile email'
+  //           } as TokenResponse);
+  //         }
+  //         if (uuid) {
+  //           setUser((prev) => ({ ...(prev || {}), uuid }));
+  //         }
+  //       } catch (err) {
+  //         console.error('Failed to restore tokens from SecureStore', err);
+  //       }
+  //     }
+  //   };
+  //   restoreFromStorage();
+  // }, []);
 
   const discoveryDocument = useMemo(() => ({
     authorizationEndpoint: userPoolUrl + '/oauth2/authorize',
@@ -138,35 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     storeTokensAndUuid();
   }, [authTokens]);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!user && authTokens?.accessToken) {
-        try {
-          const res = await axios.get(userPoolUrl + '/oauth2/userinfo', {
-            headers: { "Authorization": "Bearer " + authTokens.accessToken }
-          });
-          setUser({
-            username: res.data.username,
-            email: res.data.email,
-            uuid: res.data.sub
-          });
-          setError(null);
-
-          // Store token in cookie if on web platform
-          if (Platform.OS === 'web') {
-            document.cookie = `accessToken=${authTokens.accessToken}; path=/; secure; samesite=strict`;
-          }
-        } catch (error) {
-          setError('Failed to fetch user info');
-          console.error(error);
-        }
-      }
-    };
-
-    fetchUserInfo();
-  }, [authTokens, user]);
-
   
 const login = useCallback(async () => {
   console.log("login");
@@ -175,7 +146,7 @@ const login = useCallback(async () => {
         setUser({
           username: mockData.users[5].username,
           email: mockData.users[5].email,
-          uuid: "mock-uuid"
+          uuid: "f4a5b6c7-8d9e-0f1a-2b3c-4d5e6f7a8b9c"
         });
         setAuthTokens(new TokenResponse({
           accessToken: "mock-access-token",

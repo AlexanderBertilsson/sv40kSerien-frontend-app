@@ -1,5 +1,5 @@
 import { View, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import ThemedText from '@/components/ThemedText';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Colors } from '@/constants/Colors';
 import { Button } from '@/components/ui/Button';

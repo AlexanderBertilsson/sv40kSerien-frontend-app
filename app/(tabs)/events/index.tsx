@@ -2,15 +2,15 @@ import { View, StyleSheet, useColorScheme } from 'react-native';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 
-export default function HomeScreen() {
+export default function EventsScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ThemedText type='title'>Home</ThemedText>
+      <ThemedText type='title'>Events</ThemedText>
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
-      <ThemedText>Welcome to Warhammer 40k League</ThemedText>
-      <ThemedText>Track your battles, achievements, and glory!</ThemedText>
+      <ThemedText>View all upcoming events</ThemedText>
+      <ThemedText>Create new event</ThemedText>
     </View>
   );
 }

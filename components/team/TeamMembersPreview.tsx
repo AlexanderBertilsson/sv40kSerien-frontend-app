@@ -1,5 +1,5 @@
 import { View, StyleSheet, Image, Pressable, Text } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
@@ -19,31 +19,38 @@ export default function TeamMembersPreview({ members, teamId }: TeamMembersPrevi
     color: theme.tint
   };
   return (
-    <Link href={`./${teamId}/teamMembers`} asChild>
-      <Pressable>
-        <View style={[styles.container, { backgroundColor: theme.secondary }]}>
-          <ThemedText style={styles.title}>Team Members</ThemedText>
-          <View style={styles.membersGrid}>
-            {members.map((member) => (
-              <View key={member.id} style={styles.memberCard}>
-                <Link href={`/user/${member.id}`} asChild>
-                  <Image
-                    source={{ uri: member.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
-                    style={styles.profileImage}
-                  />
-                </Link>
-                <View style={styles.memberInfo}>
-                  <Link href={`/user/${member.id}`} asChild>
-                    <Text style={linkStyle}>{member.username}</Text>
-                  </Link>
-                  <ThemedText style={styles.memberRole}>{member.role}</ThemedText>
-                </View>
-              </View>
-            ))}
-          </View>
+    <>
+      
+      <View style={[styles.container, { backgroundColor: theme.secondary }]}>
+        
+        <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
+        <ThemedText style={styles.title}>Team Members</ThemedText>
+          <Link href={`./${teamId}/teamMembers`} asChild>
+          <Pressable>
+            <ThemedText style={linkStyle}>View all teamMembers</ThemedText>
+          </Pressable>
+        </Link>
         </View>
-      </Pressable>
-    </Link>
+        <View style={styles.membersGrid}>
+          {members.map((member) => (
+            <View key={member.id} style={styles.memberCard}>
+              <Link href={`/user/${member.id}`} asChild>
+                <Image
+                  source={{ uri: member.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
+                  style={styles.profileImage}
+                />
+              </Link>
+              <View style={styles.memberInfo}>
+                <Link href={`/user/${member.id}`} asChild>
+                  <Text style={linkStyle}>{member.username}</Text>
+                </Link>
+                <ThemedText style={styles.memberRole}>{member.role}</ThemedText>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -88,7 +95,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   link: {
-    textDecorationLine: 'underline', 
     fontWeight: 'bold'
   }
 });

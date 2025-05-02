@@ -1,5 +1,5 @@
 import { View, StyleSheet, useColorScheme } from 'react-native';
-import { ThemedText } from '../ThemedText';
+import ThemedText from '../ThemedText';
 import { Colors } from '@/constants/Colors';
 
 interface StatItemProps {

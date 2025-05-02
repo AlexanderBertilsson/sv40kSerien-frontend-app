@@ -9,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const clientId = '2lg4jikgmjccck95t78lf4g3jc';
 const userPoolUrl = 'https://eu-north-1qq0zhyyi5.auth.eu-north-1.amazoncognito.com';
-const redirectUri = 'myapp://login';
+const redirectUri = 'myapp://';
 
 export type User = {
   username?: string;

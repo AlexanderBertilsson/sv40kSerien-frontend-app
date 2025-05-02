@@ -26,15 +26,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="about"
-        options={{  
-          title: 'About',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="information-circle-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="user/[userId]"
         options={{
           href: isAuthenticated && profile?.id ? `/user/${profile?.id}` : null,
@@ -60,6 +51,15 @@ export default function TabLayout() {
           title: 'Ladder',
           tabBarIcon: ({ color }) => (
             <Ionicons name="trophy-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="events"
+        options={{
+          title: 'Events',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="calendar-outline" size={24} color={color} />
           ),
         }}
       />

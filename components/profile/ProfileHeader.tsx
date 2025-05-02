@@ -1,7 +1,7 @@
 import { View, StyleSheet, useColorScheme } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ThemedText } from '../ThemedText';
+import ThemedText from '../ThemedText';
 import { Colors } from '@/constants/Colors';
 
 interface ProfileHeaderProps {

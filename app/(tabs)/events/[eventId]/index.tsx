@@ -1,16 +1,19 @@
 import { View, StyleSheet, useColorScheme } from 'react-native';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
-
-export default function HomeScreen() {
+import { useLocalSearchParams } from 'expo-router';
+export default function EventScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
+  const {eventId} = useLocalSearchParams();
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ThemedText type='title'>Home</ThemedText>
+      <ThemedText type='title'>Event {eventId}</ThemedText>
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
-      <ThemedText>Welcome to Warhammer 40k League</ThemedText>
-      <ThemedText>Track your battles, achievements, and glory!</ThemedText>
+      <ThemedText>View the event info</ThemedText>
+      <ThemedText>Edit the event if you are the organizer</ThemedText>
+      <ThemedText>Join the event if you are a team or player</ThemedText>
     </View>
   );
 }

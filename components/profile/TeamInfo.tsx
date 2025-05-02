@@ -1,6 +1,6 @@
-import { View, StyleSheet, useColorScheme } from 'react-native';
+import { View, StyleSheet, useColorScheme, Pressable } from 'react-native';
 import { Image } from 'expo-image';
-import { ThemedText } from '../ThemedText';
+import ThemedText from '../ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useState } from 'react';
 import { Link } from 'expo-router';
@@ -53,25 +53,25 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating, teamId
         </View>
 
         <View style={styles.content}>
-          <View style={logoContainerStyle}>
-            <Image
-              source={imageError ? fallbackLogo : teamLogo}
-              style={styles.logo}
-              contentFit="cover"
-              onError={() => setImageError(true)}
-            />
+          <View style={logoContainerStyle}> 
+          <Link href={`/team/${teamId}`} asChild>
+              <Image
+                source={imageError ? fallbackLogo : teamLogo}
+                style={styles.logo}
+                contentFit="cover"
+                onError={() => setImageError(true)}
+                />
+          </Link>
           </View>
 
           <View style={styles.info}>
             <Link href={`/team/${teamId}`} asChild>
-  <View style={styles.infoRow}>
-    <ThemedText style={labelStyle}>Team:</ThemedText>
-    <ThemedText style={[valueStyle, linkStyle]}>
-      {teamName}
-    </ThemedText>
-  </View>
-</Link>
-
+              <Pressable style={styles.infoRow}>
+                <ThemedText style={labelStyle}>Team:</ThemedText>
+                <ThemedText style={[valueStyle, linkStyle]}>{teamName}</ThemedText>
+              </Pressable>
+            </Link>
+            
             <View style={styles.infoRow}>
               <ThemedText style={labelStyle}>Role:</ThemedText>
               <ThemedText style={valueStyle}>{role}</ThemedText>
@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   link: {
-    textDecorationLine: 'underline', 
     fontWeight: 'bold'
   }
 });

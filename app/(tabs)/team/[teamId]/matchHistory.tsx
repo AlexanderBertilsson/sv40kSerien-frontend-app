@@ -1,5 +1,5 @@
 import { View, StyleSheet, ScrollView, Pressable, Image, useWindowDimensions } from 'react-native';
-import { ThemedText } from '../../../../components/ThemedText';
+import ThemedText from '../../../../components/ThemedText';
 import { Colors } from '../../../../constants/Colors';
 import { useColorScheme } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';

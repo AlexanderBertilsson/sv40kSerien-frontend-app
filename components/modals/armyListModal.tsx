@@ -1,5 +1,5 @@
 import { Modal, Pressable, ScrollView, StyleSheet, View, Platform } from 'react-native';
-import { ThemedText } from '../ThemedText';
+import ThemedText from '../ThemedText';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { Colors } from '../../constants/Colors';

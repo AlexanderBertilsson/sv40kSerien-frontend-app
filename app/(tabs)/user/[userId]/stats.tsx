@@ -1,5 +1,5 @@
 import { StyleSheet, View, ScrollView, useColorScheme } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 
 export default function StatsScreen() {

@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView, Image, Text } from 'react-native';
 import { Link } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useTeams } from '@/hooks/useTeams';
 
@@ -32,7 +32,6 @@ export default function LadderScreen() {
             <View style={styles.teamInfo}>
               <Link href={`/team/${team.id}`} asChild>
                 <Text style={{
-                  textDecorationLine: 'underline',
                   fontWeight: 'bold',
                   color: theme.tint,
                   fontSize: 20,

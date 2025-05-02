@@ -1,5 +1,5 @@
 import { View, StyleSheet, useColorScheme, Image, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';

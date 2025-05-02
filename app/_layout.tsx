@@ -5,32 +5,37 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { UserProvider } from '@/contexts/ProfileContext';
 import { Drawer } from 'expo-router/drawer';
+import CustomDrawerContent from '@/components/navigation/CustomDrawerContent';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
   return (
+    <GestureHandlerRootView>
     <AuthProvider>
       <UserProvider>
         <SafeAreaProvider>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Drawer
-         screenOptions={{ drawerPosition: 'left', title: ''}}>
-          <Drawer.Screen 
-              name="login"
-              options={{ 
-                title: 'Login',
-                headerShown: true,
-              }} 
-            />
+         drawerContent={CustomDrawerContent}
+         screenOptions={() => ({
+           drawerPosition: 'left',
+           title: '',
+           headerStyle: { backgroundColor: theme.background },
+           headerTintColor: theme.text,
+           drawerStyle: { backgroundColor: theme.secondary },
+           drawerActiveTintColor: theme.tint,
+           drawerInactiveTintColor: theme.text,
+           drawerLabelStyle: { color: theme.text, fontWeight: 'bold' },
+         })}>
           <Drawer.Screen 
             name="(tabs)" 
             options={{ 
-              title: 'Home',
-              // drawerItemStyle: {
-              //   display: 'none',
-              // },
+              drawerItemStyle: {
+                display: 'none',
+              },
             }} 
           />
           <Drawer.Screen 
@@ -42,38 +47,9 @@ export default function RootLayout() {
             }} 
           />
         </Drawer>
-        {/* <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: theme.background,
-            },
-            headerTintColor: theme.text,
-            headerTitleStyle: {
-              color: theme.text,
-            },
-            contentStyle: {
-              backgroundColor: theme.background,
-            },
-          }}
-        >
-          <Stack.Screen 
-            name="(tabs)" 
-            options={{ 
-              headerShown: false,
-            }} 
-          />
-       
-          <Stack.Screen 
-            name="+not-found" 
-            options={{ 
-              title: 'Not Found',
-              headerShown: true,
-            }} 
-          />
-        </Stack>
-        <SideMenu /> */}
       </SafeAreaProvider>
       </UserProvider>
     </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

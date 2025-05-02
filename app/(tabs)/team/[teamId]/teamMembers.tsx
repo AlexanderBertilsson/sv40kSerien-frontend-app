@@ -1,5 +1,4 @@
 import { View, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
@@ -7,6 +6,7 @@ import { useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useUsers } from '@/hooks/useUsers';
 import { Link } from 'expo-router';
+import ThemedText from '@/components/ThemedText';
 
 export default function TeamMembersScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },  
   link: {
-    textDecorationLine: 'underline', 
     fontWeight: 'bold'
   }
 });

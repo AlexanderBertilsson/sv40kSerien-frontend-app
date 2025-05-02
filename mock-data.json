@@ -225,15 +225,19 @@
       "id": 301,
       "title": "Battle for Metalica",
       "date": "2025-04-20T18:00:00Z",
-      "teamIds": ["e6316935-d1e0-44ee-b823-8d829ddcd358"],
+      "location": "Metalica Arena",
+      "type": "8man",
+      "roster": [],
       "description": "Annual Metalica league showdown.",
       "rounds": 3
-    },
+    },  
     {
       "id": 302,
       "title": "Ultramarines Gauntlet",
       "date": "2025-05-10T18:00:00Z",
-      "teamIds": ["92e14263-f28f-46a1-973f-c17fd4e5355a"],
+      "type": "8man",
+      "roster": [],
+      "location": "Ultramarines Arena",
       "description": "Ultramarines home event.",
       "rounds": 4
     }

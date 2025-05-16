@@ -11,7 +11,7 @@ export interface Profile {
   role: string;
   mostPlayedArmies?: { army: string, gamesPlayed: number }[];
   gameRole?: string;
-  matchHistory?: number[];
+  matchHistory?: string[];
   winRate?: number;
   avgVictoryPoints?: number;
   achievements?: number[];  

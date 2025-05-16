@@ -4,6 +4,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
 import { User } from '@/types/utils/User';
+import { hexToRgba } from '@/constants/Colors';
 
 interface TeamMembersPreviewProps {
   members: User[];
@@ -18,10 +19,12 @@ export default function TeamMembersPreview({ members, teamId }: TeamMembersPrevi
     ...styles.link,
     color: theme.tint
   };
+
+  const color = hexToRgba(theme.secondary, 0.5);
   return (
     <>
       
-      <View style={[styles.container, { backgroundColor: theme.secondary }]}>
+      <View style={[styles.container, { backgroundColor: color }]}>
         
         <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
         <ThemedText style={styles.title}>Team Members</ThemedText>

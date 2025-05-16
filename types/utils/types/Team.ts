@@ -5,11 +5,11 @@ export interface Team {
     banner?: string;
     sportsmanshipScore: number;
     rank: number;
-    members: number[];
+    members: string[];
     gameStats: {
         winRate: number;
         avgVictoryPoints: number; 
     };
-    matchHistory: number[];
-    calendar: number[];
+    matchHistory: string[];
+    calendar: string[];
   }

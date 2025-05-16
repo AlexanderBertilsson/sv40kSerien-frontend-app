@@ -19,7 +19,7 @@ export default function UserScreen() {
   const theme = Colors[colorScheme];
   const { userId } = useLocalSearchParams();
   const { user, loading: userLoading, error: userError } = useUser(userId as string);
-  const { team, loading: teamLoading, error: teamError } = useTeam(user?.teamId);
+  const { teamQuery: { data: team, isLoading: teamLoading, error: teamError } } = useTeam(user?.teamId);
   const loading = userLoading || teamLoading;
   const error = userError || teamError;
   
@@ -53,7 +53,7 @@ export default function UserScreen() {
   if (error) {
     return (
       <View style={[containerStyle, { justifyContent: 'center', alignItems: 'center', flex: 1 }]}> 
-        <Text style={{ color: theme.text }}>{error}</Text>
+        {error instanceof Error ? <Text style={{ color: theme.text }}>{error.message}</Text> : <Text style={{ color: theme.text }}>{error}</Text>}
       </View>
     );
   }

@@ -15,7 +15,7 @@ export interface User {
   role: string;
   mostPlayedArmies: MostPlayedArmy[];
   gameRole: string;
-  matchHistory: number[];
+  matchHistory: string[];
   winRate: number;
   avgVictoryPoints: number;
   achievements: number[];

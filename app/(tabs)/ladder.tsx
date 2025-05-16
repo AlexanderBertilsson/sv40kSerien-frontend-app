@@ -8,7 +8,7 @@ import { useTeams } from '@/hooks/useTeams';
 export default function LadderScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const { teams, loading, error } = useTeams();
+  const { teamsQuery: { data: teams, isLoading: loading, error } } = useTeams();
 
   // Sort teams by rank ascending (1 is top)
   const sortedTeams = (teams || []).slice().sort((a, b) => a.rank - b.rank);
@@ -18,7 +18,7 @@ export default function LadderScreen() {
       <ThemedText style={[styles.title, { color: theme.text }]}>Team Ladder</ThemedText>
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
       {loading && <ThemedText style={{ color: theme.text }}>Loading teams...</ThemedText>}
-      {error && <ThemedText style={{ color: theme.error }}>{error}</ThemedText>}
+      {error && <ThemedText style={{ color: theme.error }}>{error instanceof Error ? error.message : 'Failed to fetch teams'}</ThemedText>}
       {!loading && !error && sortedTeams.map((team) => (
         <View key={team.id} style={[styles.card, { backgroundColor: theme.secondary }]}>  
           <View style={styles.row}>

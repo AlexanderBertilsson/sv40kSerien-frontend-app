@@ -10,4 +10,5 @@ export interface Event {
   location: string;
   type: '8man' | '5man' | 'single';
   roster: RosterTeam[] | RosterPlayer[];
+  userRole: 'organizer' | 'judge' | 'none';
 }

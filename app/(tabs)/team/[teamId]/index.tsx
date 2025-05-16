@@ -20,11 +20,10 @@ export default function TeamScreen() {
   const theme = Colors[colorScheme];
   const { teamId } = useLocalSearchParams();
   const { users } = useUsers({ teamId: teamId as string });
-  const { team, error } = useTeam(teamId as string);
+  const { teamQuery: { data: team } } = useTeam(teamId as string);
   if(!team){
     return null;
-  } 
-  if(error) return null;
+  }
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Hero Banner */}

@@ -1,30 +1,31 @@
+// hooks/useEvent.ts
 import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
-import { fetch } from 'expo/fetch';
+import { Event } from '@/types/utils/types/Event';
 
-export function useUser(userId: string | undefined) {
-  const [user, setUser] = useState<any>(null);
+export function useEvent(eventId: string | undefined) {
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!userId) return;
+    const fetchEvent = async () => {
+      if (!eventId) return;
       setLoading(true);
       try {
         const url = (Platform.OS === 'android' ? process.env.EXPO_PUBLIC_API_URL_ANDROID : process.env.EXPO_PUBLIC_API_URL);
-        const res = await fetch(`${url}/users/${userId}`);
+        const res = await fetch(`${url}/events/${eventId}`);
         const data = await res.json();
-        setUser(data);
+        setEvent(data);
       } catch (_err) {
-        console.log(_err, "useUser");
-        setError('Failed to fetch user');
+        console.log(_err, "useEvent");
+        setError('Failed to fetch event');
       } finally {
         setLoading(false);
       }
     };
-    fetchUser();
-  }, [userId]);
+    fetchEvent();
+  }, [eventId]);
 
-  return { user, loading, error };
+  return { event, loading, error };
 }

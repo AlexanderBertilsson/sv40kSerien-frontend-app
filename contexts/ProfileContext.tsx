@@ -17,7 +17,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const { user: authUser, isAuthenticated } = useAuthContext();
   const { user } = useUser(authUser?.uuid);
-  const { team } = useTeam(user?.teamId);
+  const { teamQuery } = useTeam(user?.teamId);
   // Error state is handled internally; expose via context if needed.
 
   useEffect(() => {
@@ -28,14 +28,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
-      setProfile({...user, team: team});
+      setProfile({...user, team: teamQuery.data});
       setLoading(false);
     };
     
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && teamQuery.data) {
+      console.log(teamQuery.data);
       loadUserProfile();
     }
-  }, [isAuthenticated, user, team]);
+  }, [isAuthenticated, user, teamQuery.data]);
   // Loads profile and team data for a given user (by uuid)
 
 

@@ -18,14 +18,29 @@ import {
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useUserContext } from '@/contexts/ProfileContext';
 
+// Helper function to convert Error objects to strings
+const getErrorMessage = (error: Error | null): string | null => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return error as string | null;
+};
+
 export default function EventScreen() {
   const { isAuthenticated } = useAuthContext();
   const { profile } = useUserContext();
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const { event, loading, error } = useEvent(eventId);
-  const { updateEvent, deleteEvent, joinEvent, loading: actionLoading, error: actionError } = useEventManagement();
+  const { eventQuery } = useEvent(eventId);
+  const { updateEventMutation, deleteEventMutation, joinEventMutation } = useEventManagement();
+  
+  // Extract data from queries
+  const event = eventQuery.data;
+  const loading = eventQuery.isLoading;
+  const error = eventQuery.error;
+  const actionLoading = updateEventMutation.isPending || deleteEventMutation.isPending || joinEventMutation.isPending;
+  const actionError = updateEventMutation.error || deleteEventMutation.error || joinEventMutation.error;
   
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -54,7 +69,7 @@ export default function EventScreen() {
   const handleUpdateEvent = async () => {
     if (!eventId) return;
     
-    const result = await updateEvent(eventId, editedEvent);
+    const result = await updateEventMutation.mutateAsync({ id: eventId, data: editedEvent });
     if (result) {
       setEditModalVisible(false);
     }
@@ -63,7 +78,7 @@ export default function EventScreen() {
   const handleDeleteEvent = async () => {
     if (!eventId) return;
     
-    const result = await deleteEvent(eventId);
+    const result = await deleteEventMutation.mutateAsync(eventId);
     if (result) {
       setConfirmDeleteVisible(false);
       router.back();
@@ -72,7 +87,7 @@ export default function EventScreen() {
 
   const handleJoinEvent = async () => {
     if (!eventId || !participantId) return;
-    const result = await joinEvent(eventId, participantId);
+    const result = await joinEventMutation.mutateAsync({ eventId, participantId });
     if (result) {
       setJoinModalVisible(false);
       setParticipantId('');
@@ -92,7 +107,7 @@ export default function EventScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ThemedText type="title">Error</ThemedText>
-        <ThemedText style={styles.errorText}>{error || 'Event not found'}</ThemedText>
+        <ThemedText style={styles.errorText}>{error instanceof Error ? error.message : error || 'Event not found'}</ThemedText>
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: theme.tint }]}
           onPress={() => router.back()}
@@ -166,7 +181,7 @@ export default function EventScreen() {
         setEditedEvent={setEditedEvent}
         theme={theme}
         loading={actionLoading}
-        error={actionError}
+        error={getErrorMessage(actionError)}
       />
       
       {/* Join Event Modal */}
@@ -177,7 +192,7 @@ export default function EventScreen() {
         eventType={event.type as '8man' | '5man'}
         theme={theme}
         loading={actionLoading}
-        error={actionError}
+        error={getErrorMessage(actionError)}
         teamId={profile!.team.id}
       />}
 
@@ -188,7 +203,7 @@ export default function EventScreen() {
         onJoin={handleJoinEvent}
         theme={theme}
         loading={actionLoading}
-        error={actionError}
+        error={getErrorMessage(actionError)}
       />}
       
       {/* Delete Confirmation Modal */}

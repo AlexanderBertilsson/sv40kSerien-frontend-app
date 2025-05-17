@@ -7,11 +7,26 @@ import { useEvents } from '@/hooks/useEvents';
 import { useEventManagement } from '@/hooks/useEventManagement';
 import { Event } from '@/types/utils/types/Event';
 
+// Helper function to convert Error objects to strings
+const getErrorMessage = (error: Error | unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
 export default function EventsScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
-  const { events, loading, error } = useEvents({ upcomingOnly: true });
-  const { createEvent, loading: createLoading, error: createError } = useEventManagement();
+  const { eventsQuery } = useEvents({ upcomingOnly: true });
+  const { createEventMutation } = useEventManagement();
+  
+  // Extract data from queries
+  const events = eventsQuery.data || [];
+  const loading = eventsQuery.isLoading;
+  const error = eventsQuery.error;
+  const createLoading = createEventMutation.isPending;
+  const createError = createEventMutation.error;
   
   const [modalVisible, setModalVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -32,8 +47,8 @@ export default function EventsScreen() {
       userRole: "organizer" as "none" | "organizer" | "judge" 
     };
     
-    const result = await createEvent(eventData);
-    if (result) {
+    try {
+      await createEventMutation.mutateAsync(eventData);
       setModalVisible(false);
       // Reset form
       setNewEvent({
@@ -46,6 +61,8 @@ export default function EventsScreen() {
         roster: [],
         userRole: "organizer" as "none" | "organizer" | "judge" 
       });
+    } catch (error) {
+      console.error('Error creating event:', error);
     }
   };
 
@@ -86,7 +103,7 @@ export default function EventsScreen() {
       {loading ? (
         <ActivityIndicator size="large" color={theme.tint} />
       ) : error ? (
-        <ThemedText style={styles.errorText}>Error loading events: {error}</ThemedText>
+        <ThemedText style={styles.errorText}>Error loading events: {getErrorMessage(error)}</ThemedText>
       ) : events.length === 0 ? (
         <ThemedText>No upcoming events found</ThemedText>
       ) : (
@@ -182,7 +199,7 @@ export default function EventsScreen() {
               </View>
               
               {createError && (
-                <ThemedText style={styles.errorText}>{createError}</ThemedText>
+                <ThemedText style={styles.errorText}>{getErrorMessage(createError)}</ThemedText>
               )}
             </ScrollView>
             

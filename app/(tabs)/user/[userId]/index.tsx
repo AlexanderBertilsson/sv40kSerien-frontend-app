@@ -18,15 +18,15 @@ export default function UserScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { userId } = useLocalSearchParams();
-  const { user, loading: userLoading, error: userError } = useUser(userId as string);
-  const { teamQuery: { data: team, isLoading: teamLoading, error: teamError } } = useTeam(user?.teamId);
-  const loading = userLoading || teamLoading;
-  const error = userError || teamError;
-  
+  const { userQuery } = useUser(userId as string);
+  const { teamQuery } = useTeam(userQuery.data?.teamId || '');
+
+  const loading = userQuery.isLoading || teamQuery.isLoading;
+  const error = userQuery.error || teamQuery.error;
 
   let profile: Profile | null = null;
-  if (user && team) {
-    profile = { ...user, team } as Profile;
+  if (userQuery.data && teamQuery.data) {
+    profile = { ...userQuery.data, team: teamQuery.data } as Profile;
   }
   const containerStyle = {
     ...styles.container,

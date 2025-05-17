@@ -358,26 +358,22 @@
   ],
   "events": [
     {
-      "id": "302",
-      "title": "Ultramarines Gauntlet",
-      "date": "2025-05-10T18:00:00Z",
-      "type": "5man",
-      "roster": [],
-      "location": "Ultramarines Arena",
+      "title": "Ultramarines Gauntlet 1",
       "description": "Ultramarines home event.",
       "rounds": 4,
-      "userRole": "organizer"
+      "date": "2025-05-10T18:00:00Z",
+      "location": "Ultramarines Arena",
+      "type": "5man",
+      "id": "302"
     },
     {
-      "id": "303",
-      "title": "Ultramarines Gauntlet singles",
-      "date": "2025-05-10T18:00:00Z",
-      "type": "single",
-      "roster": [],
-      "location": "Ultramarines Arena",
+      "title": "Ultramarines Gauntlet singles 2",
       "description": "Ultramarines home event.",
       "rounds": 4,
-      "userRole": "organizer"
+      "date": "2025-05-10T18:00:00Z",
+      "location": "Ultramarines Arena",
+      "type": "single",
+      "id": "303"
     },
     {
       "id": "9707",

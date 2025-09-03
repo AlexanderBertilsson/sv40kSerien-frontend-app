@@ -3,22 +3,21 @@ import { Platform } from 'react-native';
 import { useAuthRequest, ResponseType, TokenResponse, AccessTokenRequestConfig, exchangeCodeAsync } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import axios from "axios";
-import mockData from '../mock-data.json';
 import { jwtDecode } from 'jwt-decode';
 import * as SecureStore from 'expo-secure-store';
 
-const clientId = '2lg4jikgmjccck95t78lf4g3jc';
-const userPoolUrl = 'https://eu-north-1qq0zhyyi5.auth.eu-north-1.amazoncognito.com';
-const redirectUri = 'myapp://';
+const clientId = '2os37kanrpg3d8oqqlh6u1c8r2';
+const userPoolUrl = 'https://staging-auth.valhallarena.se';
+const redirectUri = 'https://staging-api.valhallarena.se/oauth-callback';
 
-export type User = {
+export type AuthUser = {
   username?: string;
   email?: string;
   uuid?: string; 
 }
 
 type AuthContextType = {
-  user: User | null;
+  authUser: AuthUser | null;
   isAuthenticated: boolean;
   authTokens: TokenResponse | null;
   error: string | null;
@@ -30,7 +29,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   WebBrowser.maybeCompleteAuthSession();
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Restore authTokens and user uuid from SecureStore on mount (device only)
@@ -123,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Platform.OS !== 'web' && authTokens?.accessToken) {
         try {
           const decoded: { sub: string } = jwtDecode(authTokens.accessToken);
-          setUser((prev) => ({ ...(prev || {}), uuid: decoded.sub }));
+          setAuthUser((prev) => ({ ...(prev || {}), uuid: decoded.sub }));
           await SecureStore.setItemAsync('userUuid', decoded.sub);
           await SecureStore.setItemAsync('accessToken', authTokens.accessToken);
           if(authTokens.idToken )
@@ -143,23 +142,10 @@ const login = useCallback(async () => {
   console.log("login");
     try {
       if (Platform.OS === 'web') {
-        setUser({
-          username: mockData.users[5].username,
-          email: mockData.users[5].email,
-          uuid: "f4a5b6c7-8d9e-0f1a-2b3c-4d5e6f7a8b9c"
-        });
-        setAuthTokens(new TokenResponse({
-          accessToken: "mock-access-token",
-          idToken: "mock-id-token",
-          refreshToken: "mock-refresh-token",
-          tokenType: "bearer",
-          expiresIn: 3600,
-          scope: "openid profile email"
-        }));
-        // window.location.href = `${userPoolUrl}/oauth2/authorize?` +
-        //   `client_id=${clientId}&` +
-        //   `response_type=code&` +
-        //   `redirect_uri=https://ymun8qwnt1.execute-api.eu-north-1.amazonaws.com/oauth2/callback`;
+        window.location.href = `${userPoolUrl}/oauth2/authorize?` +
+          `client_id=${clientId}&` +
+          `response_type=code&` +
+          `redirect_uri=${redirectUri}`;
       } else {
         console.log("prompt");
         await promptAsync();
@@ -185,7 +171,7 @@ const login = useCallback(async () => {
         });
       }
       setAuthTokens(null);
-      setUser(null);
+      setAuthUser(null);
       setError(null);
     } catch (error) {
       setError('Failed to logout');
@@ -194,13 +180,13 @@ const login = useCallback(async () => {
   }, [authTokens, discoveryDocument.revocationEndpoint]);
 
   const value = useMemo(() => ({
-    user,
-    isAuthenticated: !!user,
+    authUser,
+    isAuthenticated: !!authUser,
     authTokens,
     error,
     login,
     logout,
-  }), [user, authTokens, error, login, logout]);
+  }), [authUser, authTokens, error, login, logout]);
 
   return (
     <AuthContext.Provider value={value}>

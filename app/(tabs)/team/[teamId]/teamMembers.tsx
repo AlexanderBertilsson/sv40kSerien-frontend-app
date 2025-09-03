@@ -4,16 +4,18 @@ import { useColorScheme } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { useUsers } from '@/hooks/useUsers';
+import { useTeam } from '@/hooks/useTeam';
 import { Link } from 'expo-router';
 import ThemedText from '@/components/ThemedText';
+import { useTeamStats } from '@/hooks/useTeamStats';
 
 export default function TeamMembersScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
   const { teamId } = useLocalSearchParams();
-  const { users } = useUsers({ teamId: teamId as string });
+  const { teamQuery } = useTeam(teamId as string);
+  const { teamStatsQuery } = useTeamStats(teamId as string);
 
   const toggleMember = (memberId: string) => {
     setExpandedMember(expandedMember === memberId ? null : memberId);
@@ -31,7 +33,7 @@ export default function TeamMembersScreen() {
         <ThemedText style={styles.title}>Team Members</ThemedText>
       </View>
       <View style={styles.membersList}>
-        {users.map((user) => (
+        {teamQuery.data?.users.map((user) => (
           <Pressable
             key={user.id}
             style={[
@@ -43,7 +45,7 @@ export default function TeamMembersScreen() {
             <View style={styles.memberHeader}>
               <Link href={`/user/${user.id}`} asChild>
                 <Image
-                  source={{ uri: user.profilePicture }}
+                  source={{ uri: user.profilePictureUrl }}
                   style={styles.profileImage}
                 />
               </Link>
@@ -51,7 +53,7 @@ export default function TeamMembersScreen() {
                 <Link href={`/user/${user.id}`} asChild>
                   <ThemedText style={linkStyle}>{user.username}</ThemedText>
                 </Link>
-                <ThemedText style={styles.memberRole}>{user.role}</ThemedText>
+                <ThemedText style={styles.memberRole}>{user.sportsmanshipLevel}</ThemedText>
               </View>
               <FontAwesome
                 name={expandedMember === user.id ? 'chevron-up' : 'chevron-down'}
@@ -69,39 +71,39 @@ export default function TeamMembersScreen() {
                       {user.sportsmanshipLevel.toFixed(1)}
                     </ThemedText>
                     <ThemedText style={styles.detailValue}>
-                      {user.sportsmanship.toFixed(1)}
+                      {user.sportsmanshipScore}
                     </ThemedText>
                   </View>
                   <View style={styles.detailItem}>
                     <FontAwesome name="trophy" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Win Rate</ThemedText>
-                    <ThemedText style={styles.detailValue}>{user.winRate}%</ThemedText>
+                    <ThemedText style={styles.detailValue}>{teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.winRatio}%</ThemedText>
                   </View>
                 </View>
                 <View style={[styles.detailRow, styles.matchRoleRow]}>
                   <View style={styles.detailItem}>
                     <FontAwesome 
-                      name={user.gameRole === 'Defender' ? 'shield' :
-                           user.gameRole === 'Attacker' ? 'bomb' :
-                           user.gameRole === 'Blunter' ? 'hand-rock-o' :
+                      name={teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.mostPlayedRole === 'Defender' ? 'shield' :
+                           teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.mostPlayedRole === 'Attacker' ? 'bomb' :
+                           teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.mostPlayedRole === 'Blunter' ? 'hand-rock-o' :
                            'ban'} 
                       size={16} 
                       color={theme.text} 
                     />
                     <ThemedText style={styles.detailLabel}>Match Role</ThemedText>
-                    <ThemedText style={styles.detailValue}>{user.gameRole}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.mostPlayedRole}</ThemedText>
                   </View>
                 </View>
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
                     <FontAwesome name="gamepad" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Games Played</ThemedText>
-                    <ThemedText style={styles.detailValue}>{user.mostPlayedArmies.map((army) => army.gamesPlayed).reduce((a, b) => a + b)}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.gamesPlayed}</ThemedText>
                   </View>
                   <View style={styles.detailItem}>
                     <FontAwesome name="cube" size={16} color={theme.text} />
                     <ThemedText style={styles.detailLabel}>Favorite Army</ThemedText>
-                    <ThemedText style={styles.detailValue}>{user.mostPlayedArmies.sort((a, b) => b.gamesPlayed - a.gamesPlayed)[0].army}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{teamStatsQuery.data?.find((stat) => stat.userId === user.id)?.mostPlayedArmies[0].name}</ThemedText>
                   </View>
                 </View>
         

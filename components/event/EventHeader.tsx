@@ -4,7 +4,7 @@ import ThemedText from '@/components/ThemedText';
 
 interface EventHeaderProps {
   title: string;
-  type: '8man' | '5man' | 'single';
+  type: string;
 }
 
 const EventHeader = ({ title, type }: EventHeaderProps) => {

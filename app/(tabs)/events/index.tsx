@@ -5,7 +5,7 @@ import ThemedText from '@/components/ThemedText';
 import { Colors, hexToRgba } from '@/constants/Colors';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventManagement } from '@/hooks/useEventManagement';
-import { Event } from '@/types/utils/types/Event';
+import { EventDetails } from '@/types/EventDetails';
 
 // Helper function to convert Error objects to strings
 const getErrorMessage = (error: Error | unknown): string => {
@@ -33,18 +33,33 @@ export default function EventsScreen() {
     title: '',
     description: '',
     rounds: '3',
-    date: new Date().toISOString().split('T')[0],
     location: '',
-    type: '8man' as '8man' | '5man' | 'single',
-    roster: [],
-    userRole: "organizer" as "none" | "organizer" | "judge" 
+    numberOfPlayers: '8',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    playerPack: '',
+    eventTypeId: '1'
   });
 
   const handleCreateEvent = async () => {
     const eventData = {
-      ...newEvent,
+      title: newEvent.title,
+      description: newEvent.description,
       rounds: parseInt(newEvent.rounds),
-      userRole: "organizer" as "none" | "organizer" | "judge" 
+      location: newEvent.location,
+      eventType: {
+        id: parseInt(newEvent.eventTypeId),
+        name: 'Tournament',
+        description: 'Tournament event',
+        playersPerTeam: parseInt(newEvent.numberOfPlayers)
+      },
+      createdByUserId: 'current-user-id', // This should come from auth context
+      numberOfPlayers: parseInt(newEvent.numberOfPlayers),
+      startDate: newEvent.startDate,
+      endDate: newEvent.endDate,
+      playerPack: newEvent.playerPack || undefined,
+      numberOfRegisteredPlayers: 0,
+      numberOfRegisteredTeams: 0
     };
     
     try {
@@ -55,18 +70,19 @@ export default function EventsScreen() {
         title: '',
         description: '',
         rounds: '3',
-        date: new Date().toISOString().split('T')[0],
         location: '',
-        type: '8man' as '8man' | '5man' | 'single',
-        roster: [],
-        userRole: "organizer" as "none" | "organizer" | "judge" 
+        numberOfPlayers: '8',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
+        playerPack: '',
+        eventTypeId: '1'
       });
     } catch (error) {
       console.error('Error creating event:', error);
     }
   };
 
-  const renderEventItem = ({ item }: { item: Event }) => (
+  const renderEventItem = ({ item }: { item: EventDetails }) => (
     <TouchableOpacity 
       style={[styles.eventCard, { backgroundColor: theme.secondary }]}
       onPress={() => {
@@ -77,12 +93,37 @@ export default function EventsScreen() {
         });
       }}
     >
-      <ThemedText type="subtitle">{item.title}</ThemedText>
-      <ThemedText>{new Date(item.date).toLocaleDateString()}</ThemedText>
-      <ThemedText>{item.location}</ThemedText>
-      <View style={styles.eventTypeTag}>
-        <ThemedText style={styles.eventTypeText}>{item.type}</ThemedText>
+      <View style={styles.eventHeader}>
+        <ThemedText type="subtitle">{item.title}</ThemedText>
+        <View style={styles.eventTypeTag}>
+          <ThemedText style={styles.eventTypeText}>{item.eventType.name}</ThemedText>
+        </View>
       </View>
+      
+      {item.description && (
+        <ThemedText style={styles.eventDescription}>{item.description}</ThemedText>
+      )}
+      
+      <View style={styles.eventDetails}>
+        <ThemedText style={styles.eventDetailText}>📍 {item.location}</ThemedText>
+        <ThemedText style={styles.eventDetailText}>
+          📅 {new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}
+        </ThemedText>
+        <ThemedText style={styles.eventDetailText}>🎯 {item.rounds} rounds</ThemedText>
+        <ThemedText style={styles.eventDetailText}>👥 {item.numberOfRegisteredPlayers} / {item.numberOfPlayers}</ThemedText>
+        <ThemedText style={styles.eventDetailText}>🚩 {item.numberOfRegisteredTeams} / {item.numberOfPlayers/item.eventType.playersPerTeam}</ThemedText>
+      </View>
+      
+      {item.winningTeamId && (<View style={styles.eventStats}>
+          <View style={styles.statItem}>
+            <ThemedText style={styles.statNumber}>{item.winningTeamName}</ThemedText>
+            <ThemedText style={styles.statLabel}>🏆 Winner</ThemedText>
+          </View>
+      </View> )}
+      
+      {item.playerPack && (
+        <ThemedText style={styles.playerPack}>📦 Player Pack: {item.playerPack}</ThemedText>
+      )}
     </TouchableOpacity>
   );
 
@@ -158,11 +199,20 @@ export default function EventsScreen() {
                 keyboardType="numeric"
               />
               
-              <ThemedText>Date</ThemedText>
+              <ThemedText>Start Date</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-                value={newEvent.date}
-                onChangeText={(text) => setNewEvent({...newEvent, date: text})}
+                value={newEvent.startDate}
+                onChangeText={(text) => setNewEvent({...newEvent, startDate: text})}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={hexToRgba(theme.text, 0.5)}
+              />
+              
+              <ThemedText>End Date</ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+                value={newEvent.endDate}
+                onChangeText={(text) => setNewEvent({...newEvent, endDate: text})}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
               />
@@ -176,27 +226,24 @@ export default function EventsScreen() {
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
               />
               
-              <ThemedText>Event Type</ThemedText>
-              <View style={styles.typeSelector}>
-                {['8man', '5man', 'single'].map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={[
-                      styles.typeOption,
-                      { 
-                        backgroundColor: newEvent.type === type ? theme.tint : theme.background,
-                      }
-                    ]}
-                    onPress={() => setNewEvent({...newEvent, type: type as '8man' | '5man' | 'single'})}
-                  >
-                    <ThemedText style={{ 
-                      color: newEvent.type === type ? '#fff' : theme.text 
-                    }}>
-                      {type}
-                    </ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <ThemedText>Number of Players</ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+                value={newEvent.numberOfPlayers}
+                onChangeText={(text) => setNewEvent({...newEvent, numberOfPlayers: text})}
+                placeholder="Maximum number of players"
+                placeholderTextColor={hexToRgba(theme.text, 0.5)}
+                keyboardType="numeric"
+              />
+              
+              <ThemedText>Player Pack (Optional)</ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+                value={newEvent.playerPack}
+                onChangeText={(text) => setNewEvent({...newEvent, playerPack: text})}
+                placeholder="Player pack details"
+                placeholderTextColor={hexToRgba(theme.text, 0.5)}
+              />
               
               {createError && (
                 <ThemedText style={styles.errorText}>{getErrorMessage(createError)}</ThemedText>
@@ -346,5 +393,53 @@ const styles = StyleSheet.create({
   },
   buttonCreate: {
     elevation: 2,
+  },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  eventDescription: {
+    fontSize: 14,
+    opacity: 0.8,
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  eventDetails: {
+    marginBottom: 12,
+  },
+  eventDetailText: {
+    fontSize: 14,
+    marginBottom: 4,
+    opacity: 0.9,
+  },
+  eventStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+  playerPack: {
+    fontSize: 12,
+    opacity: 0.8,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });

@@ -1,7 +1,7 @@
 // hooks/useUsers.ts
-import { Platform } from 'react-native';
-import { User } from '@/types/utils/User';
+import { User } from '@/types/User';
 import { useQuery } from '@tanstack/react-query';
+import apiClient from '@/components/httpClient/httpClient';
   
 export type usersProps = {
     teamId?: string,
@@ -20,11 +20,10 @@ export function useUsers({ teamId, userIds }: usersProps = {}) {
     queryKey: ['users', teamId, userIds ? userIds.join(',') : undefined],
     queryFn: async () => {
       const urlParams = buildUsersUrlParams({ teamId, userIds });
-      const url = (Platform.OS === 'android' ? process.env.EXPO_PUBLIC_API_URL_ANDROID : process.env.EXPO_PUBLIC_API_URL);
-      const res = await fetch(`${url}/users${urlParams}`);
-      const data = await res.json();
-      return data;
+      const res = await apiClient.get<User[]>(`/users${urlParams}`);
+      return res.data;
     },
+    enabled: !!teamId || !!userIds
   });
 
   return { 

@@ -2,18 +2,17 @@ import { useState, useEffect } from 'react';
 import { View, StyleSheet, useColorScheme, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import ThemedText from '@/components/ThemedText';
-import { Colors } from '@/constants/Colors';
+import { Colors, hexToRgba } from '@/constants/Colors';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventManagement } from '@/hooks/useEventManagement';
-import { Event } from '@/types/utils/types/Event';
+import { Event } from '@/types/Event';
+import { JoinEventModal } from '@/components/modals/joinEventModal';
 import {
   EventHeader,
-  EventDetails,
+  EventData,
   EventParticipants,
   EditEventModal,
-  JoinTeamEventModal,
   DeleteConfirmationModal,
-  JoinEventModal
 } from '@/components/event';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useUserContext } from '@/contexts/ProfileContext';
@@ -33,20 +32,29 @@ export default function EventScreen() {
   const theme = Colors[colorScheme];
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { eventQuery } = useEvent(eventId);
-  const { updateEventMutation, deleteEventMutation, joinEventMutation } = useEventManagement();
+  const { updateEventMutation, deleteEventMutation } = useEventManagement();
   
   // Extract data from queries
   const event = eventQuery.data;
   const loading = eventQuery.isLoading;
   const error = eventQuery.error;
-  const actionLoading = updateEventMutation.isPending || deleteEventMutation.isPending || joinEventMutation.isPending;
-  const actionError = updateEventMutation.error || deleteEventMutation.error || joinEventMutation.error;
+  const actionLoading = updateEventMutation.isPending || deleteEventMutation.isPending;
+  const actionError = updateEventMutation.error || deleteEventMutation.error;
   
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-  const [joinModalVisible, setJoinModalVisible] = useState(false);
-  const [joinTeamModalVisible, setJoinTeamModalVisible] = useState(false);
-  const [participantId, setParticipantId] = useState('');
+  const [disableJoinButton, setDisableJoinButton] = useState(true);
+  const [joinEventModalVisible, setJoinEventModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (event) {
+      setDisableJoinButton( event.numberOfRegisteredTeams >= event.numberOfPlayers / 5 
+        || event.registeredTeams.some(team => team.users.some(user => user.id === profile?.id))
+        || profile?.team?.id === event.registeredTeams.find(team => team.users.some(user => user.id === profile?.id))?.id
+        || event.startDate < new Date().toISOString());
+    }
+  }, [event, profile]);
+
   const [isOrganizer, setIsOrganizer] = useState(false);
 
   const [editedEvent, setEditedEvent] = useState<Partial<Event>>({});
@@ -54,17 +62,25 @@ export default function EventScreen() {
   // Initialize the form when event data is loaded
   useEffect(() => {
     if (event) {
-      setIsOrganizer(event.userRole === 'organizer');
+      setIsOrganizer(event.createdByUserId === profile?.id);
       setEditedEvent({
         title: event.title,
         description: event.description,
         rounds: event.rounds,
-        date: event.date,
+        startDate: event.startDate,
+        endDate: event.endDate,
         location: event.location,
-        type: event.type
+        playerPack: event.playerPack,
+        numberOfPlayers: event.numberOfPlayers,
+        numberOfRegisteredPlayers: event.numberOfRegisteredPlayers,
+        numberOfRegisteredTeams: event.numberOfRegisteredTeams,
+        registeredTeams: event.registeredTeams,
+        eventType: event.eventType,
+        createdByUserId: event.createdByUserId,
+        id: event.id
       });
     }
-  }, [event]);
+  }, [event, profile]);
 
   const handleUpdateEvent = async () => {
     if (!eventId) return;
@@ -85,13 +101,8 @@ export default function EventScreen() {
     }
   };
 
-  const handleJoinEvent = async () => {
-    if (!eventId || !participantId) return;
-    const result = await joinEventMutation.mutateAsync({ eventId, participantId });
-    if (result) {
-      setJoinModalVisible(false);
-      setParticipantId('');
-    }
+  const openJoinEventModal = (): void => {
+    setJoinEventModalVisible(true);
   };
 
   if (loading) {
@@ -118,38 +129,40 @@ export default function EventScreen() {
     );
   }
 
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Event Header */}
         <EventHeader 
           title={event.title} 
-          type={event.type} 
+          type={event.eventType.name} 
         />
         
         <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
         
         {/* Event Details */}
-        <EventDetails 
-          date={event.date}
+        <EventData 
+          date={event.startDate}
           location={event.location}
           rounds={event.rounds}
           description={event.description}
         />
-        
-        {/* Roster Section */}
-        <EventParticipants 
-          roster={event.roster} 
-          theme={theme} 
-        />
-
-        {isAuthenticated && profile?.team ? (<View style={styles.actionButtons}>
+          {isAuthenticated && profile?.team ? (<View style={styles.actionButtons}>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.tint }]}
-            onPress={event.type === 'single' ? () => setJoinModalVisible(true) : () => setJoinTeamModalVisible(true)}
+            style={[styles.button, { backgroundColor: disableJoinButton ? hexToRgba(theme.tint, 0.1) : theme.tint }]}
+            onPress={() => openJoinEventModal()}
+            disabled={disableJoinButton}
           >
             <ThemedText style={{ color: '#fff' }}>Join Event</ThemedText>
           </TouchableOpacity>
+        {/* Roster Section */}
+        <EventParticipants 
+          roster={event.registeredTeams} 
+          theme={theme} 
+        />
+
+      
 
           {isOrganizer ? (
             <>
@@ -184,28 +197,6 @@ export default function EventScreen() {
         error={getErrorMessage(actionError)}
       />
       
-      {/* Join Event Modal */}
-      {profile?.team && <JoinTeamEventModal 
-        visible={joinTeamModalVisible}
-        onClose={() => setJoinTeamModalVisible(false)}
-        onJoin={handleJoinEvent}
-        eventType={event.type as '8man' | '5man'}
-        theme={theme}
-        loading={actionLoading}
-        error={getErrorMessage(actionError)}
-        teamId={profile!.team.id}
-      />}
-
-      {/* Join Event Modal */}
-      {profile?.team && <JoinEventModal 
-        visible={joinModalVisible}
-        onClose={() => setJoinModalVisible(false)}
-        onJoin={handleJoinEvent}
-        theme={theme}
-        loading={actionLoading}
-        error={getErrorMessage(actionError)}
-      />}
-      
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal 
         visible={confirmDeleteVisible}
@@ -214,6 +205,21 @@ export default function EventScreen() {
         theme={theme}
         loading={actionLoading}
       />
+
+      {/* Join Event Modal */}
+      {event && profile?.team && (
+        <JoinEventModal 
+          visible={joinEventModalVisible}
+          onClose={() => setJoinEventModalVisible(false)}
+          eventData={{
+            eventId: event.id,
+            title: event.title,
+            type: event.eventType.name,
+            playersPerTeam: event.eventType.playersPerTeam,
+          }}
+        teamId={profile?.team?.id}
+      />
+      )}
     </View>
   );
 }

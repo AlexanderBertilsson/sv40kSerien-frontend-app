@@ -12,7 +12,7 @@ import { mockMatches } from '../../../../assets/constants/mockMatchData';
 export default function MatchHistoryScreen() {
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
   const [selectedArmyList, setSelectedArmyList] = useState<string | null>(null);
-  const [armyListContent, setArmyListContent] = useState<string>('');
+  // const [armyListContent, setArmyListContent] = useState<string>('');
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { width } = useWindowDimensions();
@@ -21,14 +21,14 @@ export default function MatchHistoryScreen() {
   const showArmyList = (listName: string) => {
     try {
       if (ARMY_LISTS[listName]) {
-        setArmyListContent(ARMY_LISTS[listName]);
+        // setArmyListContent(ARMY_LISTS[listName]);
         setSelectedArmyList(listName);
       } else {
         throw new Error('Army list not found');
       }
     } catch (error) {
       console.error('Error loading army list:', error);
-      setArmyListContent('Error loading army list. Please try again.');
+      // setArmyListContent('Error loading army list. Please try again.');
       setSelectedArmyList(listName);
     }
   };
@@ -152,7 +152,7 @@ export default function MatchHistoryScreen() {
       <ArmyListModal
         visible={!!selectedArmyList}
         onClose={() => setSelectedArmyList(null)}
-        content={armyListContent}
+        armyListId={""}
       />
     </ScrollView>
   );

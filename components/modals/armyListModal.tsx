@@ -3,21 +3,29 @@ import ThemedText from '../ThemedText';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { Colors } from '../../constants/Colors';
+import { useArmyList } from '../../hooks/useArmyList';
 
 interface ArmyListModalProps {
   visible: boolean;
   onClose: () => void;
-  content: string;
+  armyListId: string;
 }
 
-export function ArmyListModal({ visible, onClose, content }: ArmyListModalProps) {
+export function ArmyListModal({ visible, onClose, armyListId }: ArmyListModalProps) {
+  const { armyListQuery } = useArmyList(armyListId);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <ScrollView style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
-        <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+      <Pressable 
+        style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
+        onPress={onClose}
+      >
+        <Pressable 
+          style={[styles.modalContent, { backgroundColor: theme.background }]}
+          onPress={(e) => e.stopPropagation()}
+        >
           <View style={styles.modalHeader}>
             <ThemedText style={styles.modalTitle}>Army List</ThemedText>
             <Pressable 
@@ -29,11 +37,11 @@ export function ArmyListModal({ visible, onClose, content }: ArmyListModalProps)
           </View>
           <View style={styles.modalBody}>
             <ScrollView contentContainerStyle={styles.modalScrollContent}>
-              <ThemedText style={styles.modalText}>{content || 'No army list available'}</ThemedText>
+              <ThemedText style={styles.modalText}>{armyListQuery.data?.list || 'No army list available'}</ThemedText>
             </ScrollView>
           </View>
-        </View>
-      </ScrollView>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -41,9 +49,13 @@ export function ArmyListModal({ visible, onClose, content }: ArmyListModalProps)
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
-    margin: 20,
+    width: '90%',
+    maxWidth: 600,
+    maxHeight: '80%',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',

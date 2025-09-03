@@ -1,15 +1,15 @@
 import React from 'react';
 import { View, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import ThemedText from '@/components/ThemedText';
-import { Event } from '@/types/utils/types/Event';
+import { EventDetails } from '@/types/EventDetails';
 import { hexToRgba } from '@/constants/Colors';
 
 interface EditEventModalProps {
   visible: boolean;
   onClose: () => void;
   onUpdate: () => void;
-  editedEvent: Partial<Event>;
-  setEditedEvent: React.Dispatch<React.SetStateAction<Partial<Event>>>;
+  editedEvent: Partial<EventDetails>;
+  setEditedEvent: React.Dispatch<React.SetStateAction<Partial<EventDetails>>>;
   theme: any;
   loading: boolean;
   error: string | null;

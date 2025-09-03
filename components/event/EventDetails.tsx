@@ -2,14 +2,14 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ThemedText from '@/components/ThemedText';
 
-interface EventDetailsProps {
+interface EventDataProps {
   date: string;
   location: string;
   rounds: number;
   description: string;
 }
 
-const EventDetails = ({ date, location, rounds, description }: EventDetailsProps) => {
+const EventData = ({ date, location, rounds, description }: EventDataProps) => {
   return (
     <View style={styles.detailsContainer}>
       <View style={styles.detailRow}>
@@ -53,4 +53,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventDetails;
+export default EventData;

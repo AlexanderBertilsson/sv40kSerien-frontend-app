@@ -6,7 +6,6 @@ import { FontAwesome } from '@expo/vector-icons';
 import TeamMembersPreview from '@/components/team/TeamMembersPreview';
 import { useLocalSearchParams } from 'expo-router';
 import { useTeam } from '@/hooks/useTeam';
-import { useUsers } from '@/hooks/useUsers';
 
 interface StatItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -19,7 +18,6 @@ export default function TeamScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { teamId } = useLocalSearchParams();
-  const { users } = useUsers({ teamId: teamId as string });
   const { teamQuery: { data: team } } = useTeam(teamId as string);
   if(!team){
     return null;
@@ -29,12 +27,12 @@ export default function TeamScreen() {
       {/* Hero Banner */}
       <View style={styles.heroBanner}>
         <Image
-          source={{ uri: team.banner }}
+          source={{ uri: team.bannerUrl }}
           style={styles.bannerImage}
         />
         <View style={styles.logoContainer}>
           <Image
-            source={{ uri: team.logo }}
+            source={{ uri: team.logoUrl }}
             style={styles.logoImage}
           />
         </View>
@@ -46,19 +44,21 @@ export default function TeamScreen() {
         <View style={styles.statsContainer}>
           <StatItem
             icon="star"
-            value={team.sportsmanshipScore.toFixed(1)}
+            value={team.sportsmanshipLvl.toString()}
             label="Sportsmanship"
             theme={theme}
           />
           <StatItem
             icon="trophy"
-            value={`${team.gameStats.winRate}%`}
+            // value={`${team.gameStats.winRate}%`}
+            value={`100%`}
             label="Win Rate"
             theme={theme}
           />
           <StatItem
             icon="gamepad"
-            value={team.gameStats.avgVictoryPoints.toString()}
+            // value={team.gameStats.avgVictoryPoints.toString()}
+            value={"100"}
             label="Average Victory Points"
             theme={theme}
           />
@@ -66,7 +66,7 @@ export default function TeamScreen() {
       </View>
 
       {/* Team Members Preview */}
-      <TeamMembersPreview members={users} teamId={teamId as string} />
+      <TeamMembersPreview members={team.users} teamId={teamId as string} />
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
@@ -79,7 +79,7 @@ export default function TeamScreen() {
       </View>
 
       {/* Upcoming Events */}
-      <View style={styles.eventsSection}>
+      {/* <View style={styles.eventsSection}>
         <ThemedText style={styles.sectionTitle}>Upcoming Events</ThemedText>
         {team.calendar!.length > 0 ? (
           <ThemedText style={styles.eventCount}>
@@ -88,7 +88,7 @@ export default function TeamScreen() {
         ) : (
           <ThemedText style={styles.noEvents}>No upcoming events</ThemedText>
         )}
-      </View>
+      </View> */}
     </ScrollView>
   );
 }

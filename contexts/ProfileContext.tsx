@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Profile } from "../types/utils/types/Profile";
+import { Profile } from "../types/Profile";
 import { useAuthContext } from "./AuthContext";
 import { useUser } from "@/hooks/useUser";
 import { useTeam } from "@/hooks/useTeam";
@@ -11,11 +11,10 @@ type UserContextType = {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
-  const { user: authUser, isAuthenticated } = useAuthContext();
+  const { authUser, isAuthenticated } = useAuthContext();
   const { userQuery } = useUser(authUser?.uuid);
   const { teamQuery } = useTeam(userQuery.data?.teamId || '');
   // Error state is handled internally; expose via context if needed.
@@ -29,15 +28,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       // Only set profile if both user and team data are available
-      if (teamQuery.data) {
-        setProfile({
-          ...userQuery.data, 
-          team: teamQuery.data
-        });
-      } else {
-        // Handle case where team data is not available
-        setProfile(null);
-      }
+      setProfile({
+        ...userQuery.data, 
+        team: teamQuery.data
+      });
       setLoading(false);
     };
     

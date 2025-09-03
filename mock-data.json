@@ -296,6 +296,58 @@
       "achievements": [
         204
       ]
+    },
+    {
+      "id": "b19e9a85-988a-4638-a531-406d2715f75d",
+      "username": "coach staff two",
+      "email": "coach@ultramarines.com",
+      "profilePicture": "https://randomuser.me/api/portraits/men/10.jpg",
+      "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
+      "sportsmanship": 77,
+      "sportsmanshipLevel": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
+      "role": "coach",
+      "mostPlayedArmies": [
+        {
+          "army": "Ultramarines",
+          "gamesPlayed": 7
+        }
+      ],
+      "gameRole": "Defender",
+      "matchHistory": [
+        "112"
+      ],
+      "winRate": 0.47,
+      "avgVictoryPoints": 65,
+      "achievements": [
+        204
+      ]
+    },
+    {
+      "id": "e00a5a11-6f6b-4413-865c-1fe749549790",
+      "username": "coach staff one",
+      "email": "coach@ultramarines.com",
+      "profilePicture": "https://randomuser.me/api/portraits/men/10.jpg",
+      "heroImage": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=800",
+      "sportsmanship": 77,
+      "sportsmanshipLevel": 2,
+      "teamId": "92e14263-f28f-46a1-973f-c17fd4e5355a",
+      "role": "coach",
+      "mostPlayedArmies": [
+        {
+          "army": "Ultramarines",
+          "gamesPlayed": 7
+        }
+      ],
+      "gameRole": "Defender",
+      "matchHistory": [
+        "112"
+      ],
+      "winRate": 0.47,
+      "avgVictoryPoints": 65,
+      "achievements": [
+        204
+      ]
     }
   ],
   "teams": [
@@ -342,7 +394,9 @@
         "b6c7d8e9-0f1a-2b3c-4d5e-6f7a8b9c0d1e",
         "c7d8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
         "d8e9f0a1-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
-        "406cc91c-e061-70df-239c-206fbbe2c990"
+        "406cc91c-e061-70df-239c-206fbbe2c990",
+        "e00a5a11-6f6b-4413-865c-1fe749549790",
+        "b19e9a85-988a-4638-a531-406d2715f75d"
       ],
       "gameStats": {
         "winRate": 0.63,

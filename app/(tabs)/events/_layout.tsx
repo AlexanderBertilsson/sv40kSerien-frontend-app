@@ -2,7 +2,11 @@ import { Stack } from "expo-router";
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 
-export default function TeamLayout() {
+export const unstable_settings = {
+  initialRouteName: 'index',
+}
+
+export default function EventLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 

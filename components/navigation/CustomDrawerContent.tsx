@@ -33,7 +33,7 @@ export default function CustomDrawerContent(props: any) {
         {isAuthenticated && profile ? (
           <View style={styles.profileSimpleContainer}>
             <Image
-              source={profile.profilePicture ? { uri: profile.profilePicture } : require('@/assets/images/emoji2.png')}
+              source={profile.profilePictureUrl ? { uri: profile.profilePictureUrl } : require('@/assets/images/emoji2.png')}
               style={[styles.avatar, { borderColor: theme.tint }]}
               resizeMode="cover"
             />

@@ -3,7 +3,7 @@ import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
-import { User } from '@/types/utils/User';
+import { User } from '@/types/User';
 import { hexToRgba } from '@/constants/Colors';
 
 interface TeamMembersPreviewProps {
@@ -39,7 +39,7 @@ export default function TeamMembersPreview({ members, teamId }: TeamMembersPrevi
             <View key={member.id} style={styles.memberCard}>
               <Link href={`/user/${member.id}`} asChild>
                 <Image
-                  source={{ uri: member.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
+                  source={{ uri: member.profilePictureUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400" }}
                   style={styles.profileImage}
                 />
               </Link>
@@ -47,7 +47,7 @@ export default function TeamMembersPreview({ members, teamId }: TeamMembersPrevi
                 <Link href={`/user/${member.id}`} asChild>
                   <Text style={linkStyle}>{member.username}</Text>
                 </Link>
-                <ThemedText style={styles.memberRole}>{member.role}</ThemedText>
+                <ThemedText style={styles.memberRole}>{member.sportsmanshipLevel}</ThemedText>
               </View>
             </View>
           ))}

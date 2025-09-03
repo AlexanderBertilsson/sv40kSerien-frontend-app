@@ -6,20 +6,18 @@ import { useState } from 'react';
 import { Link } from 'expo-router';
 
 interface TeamInfoProps {
-  teamName: string;
-  teamLogo: string;
-  role: string;
-  sportsmanshipRating: number;
-  teamId: string;
+teamName: string;
+teamLogo?: string;
+sportsmanshipLvl: number;
+teamId: string;
 }
 
 const fallbackLogo = 'https://images.unsplash.com/photo-1599753894977-bc6c46289a76?q=80&w=400';
 
-export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating, teamId }: TeamInfoProps) {
+export function TeamInfo({ teamName, teamLogo, sportsmanshipLvl, teamId }: TeamInfoProps) {
   const [imageError, setImageError] = useState(false);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-
   const cardStyle = {
     ...styles.card,
     backgroundColor: theme.secondary,
@@ -71,15 +69,10 @@ export function TeamInfo({ teamName, teamLogo, role, sportsmanshipRating, teamId
                 <ThemedText style={[valueStyle, linkStyle]}>{teamName}</ThemedText>
               </Pressable>
             </Link>
-            
-            <View style={styles.infoRow}>
-              <ThemedText style={labelStyle}>Role:</ThemedText>
-              <ThemedText style={valueStyle}>{role}</ThemedText>
-            </View>
 
             <View style={styles.infoRow}>
               <ThemedText style={labelStyle}>Sportsmanship:</ThemedText>
-              <ThemedText style={valueStyle}>{sportsmanshipRating.toFixed(1)} / 5.0</ThemedText>
+              <ThemedText style={valueStyle}>{sportsmanshipLvl}</ThemedText>
             </View>
           </View>
         </View>

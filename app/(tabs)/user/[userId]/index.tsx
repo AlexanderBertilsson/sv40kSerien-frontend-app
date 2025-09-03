@@ -11,7 +11,8 @@ import { Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/hooks/useUser';
 import { useTeam } from '@/hooks/useTeam';
-import { Profile } from '@/types/utils/types/Profile';
+import { Profile } from '@/types/Profile';
+import { useUserStats } from '@/hooks/useUserStats';
 
 export default function UserScreen() {
   const scrollViewRef = useRef(null);
@@ -20,9 +21,10 @@ export default function UserScreen() {
   const { userId } = useLocalSearchParams();
   const { userQuery } = useUser(userId as string);
   const { teamQuery } = useTeam(userQuery.data?.teamId || '');
+  const { userStatsQuery } = useUserStats(userId as string);
 
-  const loading = userQuery.isLoading || teamQuery.isLoading;
-  const error = userQuery.error || teamQuery.error;
+  const loading = userQuery.isLoading || teamQuery.isLoading || userStatsQuery.isLoading;
+  const error = userQuery.error || teamQuery.error || userStatsQuery.error;
 
   let profile: Profile | null = null;
   if (userQuery.data && teamQuery.data) {
@@ -74,30 +76,29 @@ export default function UserScreen() {
         <ProfileHeader
           username={profile.username}
           title={""}
-          team={profile.team.name}
-          sportsmanship={profile.sportsmanship}
+          team={profile.team?.name}
+          sportsmanship={profile.sportsmanshipScore}
           sportsmanshipLevel={profile.sportsmanshipLevel}
-          profilePicture={profile.profilePicture}
-          heroImage={profile.heroImage}
+          profilePicture={profile.profilePictureUrl}
+          heroImage={profile.heroImageUrl}
         />
-
+  
         <View style={contentContainerStyle}>
-          <View style={styles.section}>
+         {profile.team && <View style={styles.section}>
               <TeamInfo
                 teamName={profile.team.name}
-                teamLogo={profile.team.logo ?? ""}
-                role={profile.role}
-                sportsmanshipRating={profile.sportsmanship}
+                teamLogo={profile.team.logoUrl ?? ""}
                 teamId={profile.team.id}
+                sportsmanshipLvl={profile.team.sportsmanshipLvl}
               />
-          </View>
+          </View>}
           <View style={styles.section}>
             <Link href={`/user/${userId}/stats`} asChild>
               <View style={statsLinkStyle}>
                 <StatsOverview
-                  battles={profile?.matchHistory?.length ?? 0}
-                  winRate={profile?.winRate ?? 0}
-                  points={profile?.avgVictoryPoints ?? 0}
+                  battles={userStatsQuery.data?.gamesPlayed || 0}
+                  winRate={userStatsQuery.data?.winRatio || 0}
+                  points={userStatsQuery.data?.averageScore || 0}
                 />
                 <Ionicons 
                   name="chevron-forward" 
@@ -111,8 +112,8 @@ export default function UserScreen() {
 
           <View style={styles.section}>
             <GameInfo
-              role={profile.gameRole}
-              armies={profile?.mostPlayedArmies ?? []}
+              role={userStatsQuery.data?.mostPlayedRole || ""}
+              armies={userStatsQuery.data?.mostPlayedArmies || []}
             />
           </View>
 {/* 

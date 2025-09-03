@@ -4,7 +4,7 @@ import { Colors } from '@/constants/Colors';
 
 interface GameInfoProps {
   role?: string;
-  armies: { army: string, gamesPlayed: number }[];
+  armies: { name: string, gamesPlayed: number }[];
 }
 
 export function GameInfo({ role, armies }: GameInfoProps) {
@@ -50,7 +50,7 @@ export function GameInfo({ role, armies }: GameInfoProps) {
           <ThemedText style={labelStyle}>Armies:</ThemedText>
           {armies.map((army, index) => (
             <View key={index} style={styles.armyItem}>
-              <ThemedText style={armyNameStyle}>{army.army}</ThemedText>
+              <ThemedText style={armyNameStyle}>{army.name}</ThemedText>
               <ThemedText style={gamesPlayedStyle}>
                 {army.gamesPlayed} {army.gamesPlayed === 1 ? 'game' : 'games'}
               </ThemedText>

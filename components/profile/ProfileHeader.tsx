@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 interface ProfileHeaderProps {
   username: string;
   title: string;
-  team: string;
+  team?: string;
   sportsmanship: number;
   sportsmanshipLevel: number;
   profilePicture: string;

@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export function LoginView() {
-  const { user, error, isAuthenticated, login, logout } = useAuthContext();
+  const { authUser: user, error, isAuthenticated, login, logout } = useAuthContext();
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 

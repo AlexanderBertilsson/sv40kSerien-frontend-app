@@ -1,10 +1,10 @@
 // hooks/useEventManagement.ts
 import { Platform } from 'react-native';
-import { Event } from '@/types/utils/types/Event';
+import { EventDetails } from '@/types/EventDetails';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-type EventInput = Omit<Event, 'id'>;
-type EventUpdateInput = Partial<Omit<Event, 'id'>>;
+type EventInput = Omit<EventDetails, 'id'>;
+type EventUpdateInput = Partial<Omit<EventDetails, 'id'>>;
 
 export function useEventManagement() {
   const queryClient = useQueryClient();
@@ -13,7 +13,7 @@ export function useEventManagement() {
     : process.env.EXPO_PUBLIC_API_URL;
 
   // Create event mutation
-  const createEventMutation = useMutation<Event, Error, EventInput>({
+  const createEventMutation = useMutation<EventDetails, Error, EventInput>({
     mutationFn: async (eventData: EventInput) => {
       const response = await fetch(`${apiUrl}/events`, {
         method: 'POST',
@@ -37,7 +37,7 @@ export function useEventManagement() {
   });
 
   // Update event mutation
-  const updateEventMutation = useMutation<Event, Error, { id: string; data: EventUpdateInput }>({
+  const updateEventMutation = useMutation<EventDetails, Error, { id: string; data: EventUpdateInput }>({
     mutationFn: async ({ id, data }) => {
       const response = await fetch(`${apiUrl}/events/${id}`, {
         method: 'PUT',
@@ -82,38 +82,10 @@ export function useEventManagement() {
     },
   });
 
-  // Join event mutation
-  const joinEventMutation = useMutation<boolean, Error, { eventId: string; participantId: string }>({
-    mutationFn: async ({ eventId, participantId }) => {
-      const response = await fetch(`${apiUrl}/events/${eventId}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          participantId,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to join event`);
-      }
-      
-      return true;
-    },
-    onSuccess: (_, variables) => {
-      // Invalidate specific event
-      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId] });
-    },
-  });
-
-  // No wrapper functions needed anymore
 
   return {
     createEventMutation,
     updateEventMutation,
     deleteEventMutation,
-    joinEventMutation
   };
 }

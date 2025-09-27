@@ -1,58 +1,68 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useUserContext } from '@/contexts/ProfileContext';
 
 export default function TabLayout() {
-    return (
-        <Tabs 
-            screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: '#ffd33d',
-                headerStyle: {
-                    backgroundColor: '#25292e',
-                },
-                headerShadowVisible: false,
-                headerTintColor: '#fff',
-                tabBarStyle: {
-                    backgroundColor: '#25292e',
-                },
-            }}
-        >
-            <Tabs.Screen 
-                name='index' 
-                options={{ 
-                    title: 'Home',
-                    tabBarIcon: ({ color, focused}) => (
-                        <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen 
-                name='profile' 
-                options={{ 
-                    title: 'Profile',
-                    tabBarIcon: ({ color, focused}) => (
-                        <Ionicons name={focused ? 'person' : 'person-outline'} color={color} size={24}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen 
-                name='about' 
-                options={{ 
-                    title: 'About',
-                    tabBarIcon: ({ color, focused}) => (
-                        <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen 
-                name='login' 
-                options={{ 
-                    title: 'Login',
-                    tabBarIcon: ({ color, focused}) => (
-                        <Ionicons name={focused ? 'log-in' : 'log-in-outline'} color={color} size={24}/>
-                    ),
-                }}
-            />
-        </Tabs>
-    )
+  const colorScheme = useColorScheme() ?? 'dark';
+  const { isAuthenticated } = useAuthContext();
+  const { profile } = useUserContext();
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="user/[userId]"
+        options={{
+          href: isAuthenticated && profile?.id ? `/user/${profile?.id}` : null,
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="team/[teamId]"
+        options={{
+          href: isAuthenticated && profile?.team?.id ? `/team/${profile?.team?.id}` : null,
+          title: 'Team',
+          tabBarIcon: ({ color }: { color: string }) => (
+            <Ionicons name="flag-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ladder"
+        options={{
+          title: 'Ladder',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="trophy-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="events"
+        options={{
+          title: 'Events',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="calendar-outline" size={24} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
+  );
 }

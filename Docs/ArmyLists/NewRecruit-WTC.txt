@@ -1,0 +1,87 @@
++++++++++++++++++++++++++++++++++++++++++++++++
++ FACTION KEYWORD: Chaos - Chaos Daemons
++ DETACHMENT: Shadow Legion
++ TOTAL ARMY POINTS: 1995pts
++
++ WARLORD: Char1: Be'lakor
++ ENHANCEMENT: 
++ NUMBER OF UNITS: 15
++ SECONDARY: - Bring It Down: (1x4) + (2x6) - Assassination: 3 Characters
++++++++++++++++++++++++++++++++++++++++++++++++
+
+CHARACTER
+
+Char1: 1x Be'lakor (375 pts)
+1 with Betraying Shades, The Blade of Shadows
+  • Warlord
+
+Char2: 1x Bloodthirster (305 pts)
+1 with Hellfire breath, Great axe of Khorne
+
+Char3: 1x Great Unclean One (250 pts)
+1 with Putrid vomit, Bilesword, Plague flail
+
+BATTLELINE
+
+10x Bloodletters (110 pts)
+• 9x Bloodletter
+    9 with Hellblade
+• 1x Bloodreaper
+    1 with Hellblade
+
+10x Blue Horrors (125 pts)
+• 10x Blue Horror
+    10 with Blue claws, Coruscating Blue flames
+
+10x Daemonettes (100 pts)
+• 1x Alluress
+    1 with Slashing claws
+• 9x Daemonette
+    9 with Slashing claws
+
+3x Nurglings (35 pts)
+• 3x Nurgling Swarm
+    3 with Diseased claws and teeth
+
+3x Nurglings (35 pts)
+• 3x Nurgling Swarm
+    3 with Diseased claws and teeth
+
+OTHER DATASHEETS
+
+3x Flamers (65 pts)
+• 2x Flamer
+    2 with Flamer mouths, Flickering Flames
+• 1x Pyrocaster
+    1 with Flamer mouths, Flickering Flames
+
+3x Flamers (65 pts)
+• 2x Flamer
+    2 with Flamer mouths, Flickering Flames
+• 1x Pyrocaster
+    1 with Flamer mouths, Flickering Flames
+
+3x Flamers (65 pts)
+• 2x Flamer
+    2 with Flamer mouths, Flickering Flames
+• 1x Pyrocaster
+    1 with Flamer mouths, Flickering Flames
+
+3x Bloodcrushers (110 pts)
+• 2x Bloodcrusher
+    2 with Hellblade, Juggernaut's bladed horn
+• 1x Bloodhunter
+    1 with Hellblade, Juggernaut's bladed horn
+
+1x Burning Chariot (115 pts)
+1 with Fires of Tzeentch, Flamer mouths, Screamer bites
+
+3x Pox Riders [Legends] (160 pts)
+• 3x Pox Rider
+    3 with Grasping tongue, Pox rider plaguesword, Yawning maw
+
+5x Seekers (80 pts)
+• 1x Heartseeker
+    1 with Lashing tongues, Slashing claws
+• 4x Seeker
+    4 with Lashing tongues, Slashing claws

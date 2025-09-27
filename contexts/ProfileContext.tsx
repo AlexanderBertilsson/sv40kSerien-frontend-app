@@ -27,7 +27,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
-      // Only set profile if both user and team data are available
       setProfile({
         ...userQuery.data, 
         team: teamQuery.data
@@ -36,7 +35,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
     
     loadUserProfile();
-  }, [isAuthenticated, userQuery.data, teamQuery.data]);
+  }, [isAuthenticated, userQuery.data, teamQuery.data, authUser]);
   // Loads profile and team data for a given user (by uuid)
 
 

@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useLadder } from '@/hooks/useLadder';
 import { useSeasons } from '@/hooks/useSeasons';
 import { Season } from '@/types/Season';
-import { useMe } from '@/hooks/useMe';
+
 
 export default function LadderScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
@@ -25,8 +25,6 @@ export default function LadderScreen() {
   }, [seasons, selectedSeason]);
 
   const { ladderQuery: { data: ladder, isLoading: loading, error } } = useLadder(selectedSeason?.name);
-  const { meQuery } = useMe();
-  console.log(meQuery.data);
   const handleSeasonSelect = (season: Season) => {
     setSelectedSeason(season);
     setDropdownVisible(false);

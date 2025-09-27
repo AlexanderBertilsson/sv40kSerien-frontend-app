@@ -27,7 +27,7 @@ export default function UserScreen() {
   const error = userQuery.error || teamQuery.error || userStatsQuery.error;
 
   let profile: Profile | null = null;
-  if (userQuery.data && teamQuery.data) {
+  if (userQuery.data || teamQuery.data) {
     profile = { ...userQuery.data, team: teamQuery.data } as Profile;
   }
   const containerStyle = {

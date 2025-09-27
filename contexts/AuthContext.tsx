@@ -5,11 +5,13 @@ import * as WebBrowser from 'expo-web-browser';
 import axios from "axios";
 import { jwtDecode } from 'jwt-decode';
 import * as SecureStore from 'expo-secure-store';
+import { useMe } from '@/hooks/useMe';
+import { User } from '@/types/User';
 
 const clientId = '2os37kanrpg3d8oqqlh6u1c8r2';
 const userPoolUrl = 'https://staging-auth.valhallarena.se';
 const redirectUri = 'https://staging-api.valhallarena.se/oauth-callback';
-
+WebBrowser.maybeCompleteAuthSession();
 export type AuthUser = {
   username?: string;
   email?: string;
@@ -21,46 +23,74 @@ type AuthContextType = {
   isAuthenticated: boolean;
   authTokens: TokenResponse | null;
   error: string | null;
-  login: () => Promise<void>;
+  login: () => {};
   logout: () => Promise<void>;
 };
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  WebBrowser.maybeCompleteAuthSession();
+
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+
+  // Use the useMe hook for automatic authentication check
+  const { meQuery } = useMe();
 
   // Restore authTokens and user uuid from SecureStore on mount (device only)
-  // useEffect(() => {
-  //   const restoreFromStorage = async () => {
-  //     if (Platform.OS !== 'web') {
-  //       try {
-  //         const accessToken = await SecureStore.getItemAsync('accessToken');
-  //         const idToken = await SecureStore.getItemAsync('idToken');
-  //         const refreshToken = await SecureStore.getItemAsync('refreshToken');
-  //         const uuid = await SecureStore.getItemAsync('userUuid');
-  //         if (accessToken && idToken && refreshToken) {
-  //           setAuthTokens({
-  //             accessToken,
-  //             idToken,
-  //             refreshToken,
-  //             tokenType: 'bearer',
-  //             expiresIn: 3600,
-  //             scope: 'openid profile email'
-  //           } as TokenResponse);
-  //         }
-  //         if (uuid) {
-  //           setUser((prev) => ({ ...(prev || {}), uuid }));
-  //         }
-  //       } catch (err) {
-  //         console.error('Failed to restore tokens from SecureStore', err);
-  //       }
-  //     }
-  //   };
-  //   restoreFromStorage();
-  // }, []);
+  useEffect(() => {
+    const restoreFromStorage = async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          const accessToken = await SecureStore.getItemAsync('accessToken');
+          const idToken = await SecureStore.getItemAsync('idToken');
+          const refreshToken = await SecureStore.getItemAsync('refreshToken');
+          const uuid = await SecureStore.getItemAsync('userUuid');
+          if (accessToken && idToken && refreshToken) {
+            setAuthTokens({
+              accessToken,
+              idToken,
+              refreshToken,
+              tokenType: 'bearer',
+              expiresIn: 3600,
+              scope: 'openid profile email'
+            } as TokenResponse);
+          }
+          if (uuid) {
+            setAuthUser((prev) => ({ ...(prev || {}), uuid }));
+          }
+        } catch (err) {
+          console.error('Failed to restore tokens from SecureStore', err);
+        }
+      }
+    };
+    restoreFromStorage();
+  }, []);
+
+  // Handle automatic authentication check using useMe hook
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      if (meQuery.data && !hasCheckedAuth) {
+        setHasCheckedAuth(true);
+        // Map User response to AuthUser type
+        const userData: User = meQuery.data.data;
+        const mappedAuthUser: AuthUser = {
+          username: userData.username,
+          email: userData.email,
+          uuid: userData.id
+        };
+        setAuthUser(mappedAuthUser);
+        setError(null);
+      } else if (meQuery.error && !hasCheckedAuth) {
+        setHasCheckedAuth(true);
+        // If useMe fails and token refresh also fails, clear auth state
+        setAuthUser(null);
+        setAuthTokens(null);
+        setError('Authentication failed');
+      }
+    }
+  }, [meQuery.data, meQuery.error, hasCheckedAuth, meQuery]);
 
   const discoveryDocument = useMemo(() => ({
     authorizationEndpoint: userPoolUrl + '/oauth2/authorize',
@@ -142,10 +172,12 @@ const login = useCallback(async () => {
   console.log("login");
     try {
       if (Platform.OS === 'web') {
-        window.location.href = `${userPoolUrl}/oauth2/authorize?` +
+        await WebBrowser.openAuthSessionAsync(
+          `${userPoolUrl}/oauth2/authorize?` +
           `client_id=${clientId}&` +
           `response_type=code&` +
-          `redirect_uri=${redirectUri}`;
+          `redirect_uri=${redirectUri}`
+        );
       } else {
         console.log("prompt");
         await promptAsync();

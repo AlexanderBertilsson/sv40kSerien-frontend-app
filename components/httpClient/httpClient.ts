@@ -2,9 +2,10 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
+import { ENV } from "../../config/environment";
 
-// API base URL
-const BASE_URL = (Platform.OS === 'android' ? process.env.EXPO_PUBLIC_API_URL_ANDROID : process.env.EXPO_PUBLIC_API_URL);
+// API base URL from environment configuration
+const BASE_URL = ENV.apiUrl;
 
 // Keys for secure storage
 const ACCESS_TOKEN_KEY = "access_token";
@@ -25,7 +26,7 @@ async function saveTokens(access: string, refresh: string) {
 // Axios instance
 const apiClient: AxiosInstance = axios.create({
     baseURL: BASE_URL,
-    withCredentials: Platform.OS === "web", // only for web
+    withCredentials: Platform.OS === "web" &&  ENV.environment !== "development", // only for web
 });
 
 // Flag to avoid multiple refresh calls at once

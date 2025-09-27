@@ -7,7 +7,7 @@ export function useMe() {
     queryKey: ['me'],
     queryFn: async () => {
       const res = await apiClient.get<User>(`/users/me`);
-      return res.data;
+      return res;
     },
     enabled: true,
   });

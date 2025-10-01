@@ -26,7 +26,7 @@ async function saveTokens(access: string, refresh: string) {
 // Axios instance
 const apiClient: AxiosInstance = axios.create({
     baseURL: BASE_URL,
-    withCredentials: Platform.OS === "web" &&  ENV.environment !== "development", // only for web
+    withCredentials: Platform.OS === "web", // only for web
 });
 
 // Flag to avoid multiple refresh calls at once

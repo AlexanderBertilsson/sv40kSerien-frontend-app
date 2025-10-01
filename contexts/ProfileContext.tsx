@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Profile } from "../types/Profile";
 import { useAuthContext } from "./AuthContext";
-import { useUser } from "@/hooks/useUser";
 import { useTeam } from "@/hooks/useTeam";
 
 type UserContextType = {
@@ -15,27 +14,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const { authUser, isAuthenticated } = useAuthContext();
-  const { userQuery } = useUser(authUser?.uuid);
-  const { teamQuery } = useTeam(userQuery.data?.teamId || '');
+  // const { userQuery } = useUser(authUser?.uuid);
+  const { teamQuery } = useTeam(authUser?.teamId || '');
   // Error state is handled internally; expose via context if needed.
 
   useEffect(() => {
     const loadUserProfile = async () => {
       setLoading(true);
-      if(!isAuthenticated || !userQuery.data) {
+      if(!isAuthenticated || !authUser) {
         setProfile(null);
         setLoading(false);
         return;
       }
       setProfile({
-        ...userQuery.data, 
-        team: teamQuery.data
+        ...authUser,
+        team: teamQuery.data || undefined 
       });
       setLoading(false);
     };
     
     loadUserProfile();
-  }, [isAuthenticated, userQuery.data, teamQuery.data, authUser]);
+  }, [isAuthenticated, teamQuery.data, authUser]);
   // Loads profile and team data for a given user (by uuid)
 
 

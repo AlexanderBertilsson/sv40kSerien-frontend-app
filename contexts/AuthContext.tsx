@@ -1,21 +1,25 @@
 import { createContext, useContext, useState, useMemo, useCallback, ReactNode, useEffect } from 'react';
 import { Platform } from 'react-native';
-import { useAuthRequest, ResponseType, TokenResponse, AccessTokenRequestConfig, exchangeCodeAsync } from 'expo-auth-session';
+import { useAuthRequest, ResponseType, TokenResponse, AccessTokenRequestConfig, exchangeCodeAsync, makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import axios from "axios";
 import { jwtDecode } from 'jwt-decode';
 import * as SecureStore from 'expo-secure-store';
-import { useMe } from '@/hooks/useMe';
-import { User } from '@/types/User';
+import { ENV } from "../config/environment";
+import apiClient from '@/components/httpClient/httpClient';
 
-const clientId = '2os37kanrpg3d8oqqlh6u1c8r2';
-const userPoolUrl = 'https://staging-auth.valhallarena.se';
-const redirectUri = 'https://staging-api.valhallarena.se/oauth-callback';
+const clientId = ENV.clientId;
+const userPoolUrl = ENV.userPoolUrl;
+const redirectUri = makeRedirectUri();
 WebBrowser.maybeCompleteAuthSession();
 export type AuthUser = {
+  id: string;
   username?: string;
   email?: string;
-  uuid?: string; 
+  profilePictureUrl?: string;
+  heroImageUrl?: string;
+  sportsmanshipScore?: number;
+  sportsmanshipLevel?: number;
+  teamId?: string;
 }
 
 type AuthContextType = {
@@ -23,7 +27,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   authTokens: TokenResponse | null;
   error: string | null;
-  login: () => {};
+  login: () => void;
   logout: () => Promise<void>;
 };
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -33,10 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
-  // Use the useMe hook for automatic authentication check
-  const { meQuery } = useMe();
 
   // Restore authTokens and user uuid from SecureStore on mount (device only)
   useEffect(() => {
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const accessToken = await SecureStore.getItemAsync('accessToken');
           const idToken = await SecureStore.getItemAsync('idToken');
           const refreshToken = await SecureStore.getItemAsync('refreshToken');
-          const uuid = await SecureStore.getItemAsync('userUuid');
+
           if (accessToken && idToken && refreshToken) {
             setAuthTokens({
               accessToken,
@@ -56,10 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               expiresIn: 3600,
               scope: 'openid profile email'
             } as TokenResponse);
+
+            const response = await apiClient.get('/users/me');
+            if(response.status === 200) {
+              const data = response.data;
+              console.log("data", data);
+              setAuthUser(data);
+            }
+        
           }
-          if (uuid) {
-            setAuthUser((prev) => ({ ...(prev || {}), uuid }));
-          }
+         
         } catch (err) {
           console.error('Failed to restore tokens from SecureStore', err);
         }
@@ -68,29 +75,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreFromStorage();
   }, []);
 
-  // Handle automatic authentication check using useMe hook
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      if (meQuery.data && !hasCheckedAuth) {
-        setHasCheckedAuth(true);
-        // Map User response to AuthUser type
-        const userData: User = meQuery.data.data;
-        const mappedAuthUser: AuthUser = {
-          username: userData.username,
-          email: userData.email,
-          uuid: userData.id
-        };
-        setAuthUser(mappedAuthUser);
-        setError(null);
-      } else if (meQuery.error && !hasCheckedAuth) {
-        setHasCheckedAuth(true);
-        // If useMe fails and token refresh also fails, clear auth state
-        setAuthUser(null);
-        setAuthTokens(null);
-        setError('Authentication failed');
+    const GetSession = async () => {
+      if(Platform.OS !== 'web') {
+        return;
+      }
+      try {
+        const response = await apiClient.get('/users/me')
+        if(response.status === 200) {
+          const data = response.data;
+          console.log("data", data);
+          setAuthUser(data);
+        }
+      } catch (error) {
+        console.error('Failed to get session', error);
       }
     }
-  }, [meQuery.data, meQuery.error, hasCheckedAuth, meQuery]);
+    GetSession();
+  }, []);
+
 
   const discoveryDocument = useMemo(() => ({
     authorizationEndpoint: userPoolUrl + '/oauth2/authorize',
@@ -110,19 +113,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const exchangeFn = async (exchangeTokenReq: AccessTokenRequestConfig) => {
-      try {
-        const exchangeTokenResponse = await exchangeCodeAsync(
-          exchangeTokenReq,
-          discoveryDocument
-        );
-        setAuthTokens(exchangeTokenResponse);
-        setError(null);
-      } catch (error) {
-        setError('Failed to exchange code for tokens');
-        console.error(error);
-      }
-    };
-
+      if(Platform.OS === 'web') {
+        const res = await apiClient.get('/auth/code?Code=' + exchangeTokenReq.code + "&RedirectUri=" + exchangeTokenReq.redirectUri + "&ClientId=" + exchangeTokenReq.clientId + "&CodeVerifier=" + exchangeTokenReq?.extraParams?.code_verifier);
+        
+        const data = res.data;
+        setAuthUser(data.user);
+      } else {
+        try {
+          const exchangeTokenResponse = await exchangeCodeAsync(
+            exchangeTokenReq,
+            discoveryDocument
+          );
+          setAuthTokens(exchangeTokenResponse);
+          setError(null);
+        } catch (error) {
+          setError('Failed to exchange code for tokens');
+          console.error(error);
+        }
+      };
+    }
+      
     if (response?.type === 'error') {
       setError(response.params.error_description || 'Authentication failed');
       return;
@@ -133,7 +143,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError('Code verifier is missing');
         return;
       }
-
       exchangeFn({
         clientId,
         code: response.params.code,
@@ -152,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Platform.OS !== 'web' && authTokens?.accessToken) {
         try {
           const decoded: { sub: string } = jwtDecode(authTokens.accessToken);
-          setAuthUser((prev) => ({ ...(prev || {}), uuid: decoded.sub }));
+          setAuthUser((prev) => ({ ...(prev || {}), id: decoded.sub }));
           await SecureStore.setItemAsync('userUuid', decoded.sub);
           await SecureStore.setItemAsync('accessToken', authTokens.accessToken);
           if(authTokens.idToken )
@@ -168,20 +177,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storeTokensAndUuid();
   }, [authTokens]);
   
-const login = useCallback(async () => {
-  console.log("login");
+const login = useCallback(() => {
     try {
-      if (Platform.OS === 'web') {
-        await WebBrowser.openAuthSessionAsync(
-          `${userPoolUrl}/oauth2/authorize?` +
-          `client_id=${clientId}&` +
-          `response_type=code&` +
-          `redirect_uri=${redirectUri}`
-        );
-      } else {
-        console.log("prompt");
-        await promptAsync();
-      }
+      promptAsync().catch(error => {
+        setError('Failed to start login flow');
+        console.error('Login error:', error);
+      });
     } catch (error) {
       setError('Failed to start login flow');
       console.error('Login error:', error);
@@ -190,26 +191,23 @@ const login = useCallback(async () => {
 
   const logout = useCallback(async () => {
     try {
-      if (authTokens?.refreshToken) {
-        await axios.post(discoveryDocument.revocationEndpoint + `?client_id=${clientId}&logout_uri=${redirectUri}`, {
-          body: {
-            client_id: clientId,
-            logout_uri: redirectUri,
-            token: authTokens.refreshToken,
-          }
-        }).catch(error => {
-          setError('Failed to logout');
-          console.error('Logout error:', error);
-        });
-      }
+      const response = await apiClient.post('/auth/logout', {
+        ClientId: clientId,
+        IsWeb: Platform.OS === 'web',
+        Token: authTokens?.refreshToken,
+        LogoutUri: redirectUri,
+    });
+    if(response.status === 200) {
       setAuthTokens(null);
       setAuthUser(null);
       setError(null);
+      window.location.href = userPoolUrl + '/logout?client_id=' + clientId + '&logout_uri=' + redirectUri;
+    }
     } catch (error) {
       setError('Failed to logout');
       console.error('Logout error:', error);
     }
-  }, [authTokens, discoveryDocument.revocationEndpoint]);
+  }, [authTokens]);
 
   const value = useMemo(() => ({
     authUser,

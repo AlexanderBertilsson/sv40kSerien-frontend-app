@@ -13,7 +13,7 @@ export default function CustomDrawerContent(props: any) {
   const router = useRouter();
   const navigation = useNavigation();
   const { profile } = useUserContext();
-  const { isAuthenticated, login } = useAuthContext();
+  const { isAuthenticated, login, logout } = useAuthContext();
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const [homeHovered, setHomeHovered] = useState(false);
@@ -47,7 +47,27 @@ export default function CustomDrawerContent(props: any) {
         )}
         <DrawerItemList {...props} />
 
-        <Pressable
+        {isAuthenticated 
+        ? <Pressable
+          onPress={() => {
+            navigation.dispatch(DrawerActions.closeDrawer());
+            logout();
+          }}
+          onHoverIn={() => setLoginHovered(true)}
+          onHoverOut={() => setLoginHovered(false)}
+          style={pressableLoginStyle}
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={24}
+            color={loginHovered ? theme.tint : theme.text}
+            style={{ marginRight: 18}}
+          />
+          <Text style={{ color:theme.text, fontWeight: 'bold', fontSize: 16 }}>
+            Logout
+          </Text>
+        </Pressable> 
+        : <Pressable
           onPress={() => {
             navigation.dispatch(DrawerActions.closeDrawer());
             login();
@@ -65,7 +85,7 @@ export default function CustomDrawerContent(props: any) {
           <Text style={{ color:theme.text, fontWeight: 'bold', fontSize: 16 }}>
             Login
           </Text>
-        </Pressable>
+        </Pressable>}
         
         <Pressable
           onPress={() => {

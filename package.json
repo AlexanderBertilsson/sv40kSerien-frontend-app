@@ -11,7 +11,11 @@
     "test": "jest --watchAll",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "mock-api": "json-server --watch mock-data.json --port 3001"
+    "mock-api": "json-server --watch mock-data.json --port 3001",
+    "build:dev": "copy .env.development .env && npx expo export --platform web --output-dir dist --clear",
+    "build:staging": "copy .env.staging .env && npx expo export --platform web --output-dir dist --clear",
+    "build:prod": "copy .env.production .env && npx expo export --platform web --output-dir dist --clear",
+    "deploy:staging": "npm run build:staging && aws s3 sync dist/ s3://wha-client-staging-web-app --delete && aws cloudfront create-invalidation --distribution-id E3BF09I57S5OM3 --paths \"/*\""
   },
   "jest": {
     "preset": "jest-expo"

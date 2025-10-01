@@ -44,3 +44,11 @@ export const isProduction = () => ENV.environment === 'production';
 if (isDevelopment()) {
   console.log('Environment Config:', ENV);
 }
+
+// Temporary debug logging for staging
+if (isStaging()) {
+  console.log('Staging Environment Config:', ENV);
+}
+if (isProduction()) {
+  console.log('Production Environment Config:', ENV);
+}

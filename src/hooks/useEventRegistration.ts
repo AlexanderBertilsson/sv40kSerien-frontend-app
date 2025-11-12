@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import apiClient from '@/src/components/httpClient/httpClient';
 
 export type EventRegistrationBody = {
   teamId: string;
@@ -12,22 +12,15 @@ export function useEventRegistration(eventId: string) {
   const queryClient = useQueryClient();
   const eventRegistrationMutation = useMutation({
     mutationFn: async (body: EventRegistrationBody) => {
-      const url = (Platform.OS === 'android' ? process.env.EXPO_PUBLIC_API_URL_ANDROID : process.env.EXPO_PUBLIC_API_URL);
-      const res = await fetch(`${url}/eventRegistrations/${eventId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+      const res = await apiClient.post(`/eventRegistrations/${eventId}`, body);
       
       // Check if response is ok
-      if (!res.ok) {
+      if (!res.status) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       
       // Check if response has content before parsing JSON
-      const text = await res.text();
+      const text = await res.data;
       if (!text || text.trim() === '') {
         // Return a success indicator for empty responses
         return { success: true };

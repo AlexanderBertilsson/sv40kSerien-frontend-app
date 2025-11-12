@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
 import { useAuthContext } from '@/src/contexts/AuthContext';
+import { useColorScheme } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-export default function TabLayout() {
+export default function DeviceTabs() {
     const colorScheme = useColorScheme() ?? 'dark';
     const { isAuthenticated, authUser } = useAuthContext();
-  return (
+    return (
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -17,7 +17,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: '',
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={24} color={color} />
           ),
@@ -27,9 +27,19 @@ export default function TabLayout() {
         name="user/[userId]"
         options={{
           href: isAuthenticated && authUser?.id ? `/user/${authUser?.id}` : null,
-          title: 'Profile',
+          title: '',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="team/create"
+        options={{
+          href: isAuthenticated && !authUser?.teamId ? `/team/create` : null,
+          title: '',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="flag-outline" size={24} color={color} />
           ),
         }}
       />
@@ -37,7 +47,7 @@ export default function TabLayout() {
         name="team/[teamId]"
         options={{
           href: isAuthenticated && authUser?.teamId ? `/team/${authUser?.teamId}` : null,
-          title: 'Team',
+          title: '',
           tabBarIcon: ({ color }: { color: string }) => (
             <Ionicons name="flag-outline" size={24} color={color} />
           ),
@@ -46,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ladder"
         options={{
-          title: 'Ladder',
+          title: '',
           tabBarIcon: ({ color }) => (
             <Ionicons name="trophy-outline" size={24} color={color} />
           ),
@@ -55,12 +65,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: 'Events',
+          title: '',
           tabBarIcon: ({ color }) => (
             <Ionicons name="calendar-outline" size={24} color={color} />
           ),
         }}
       />
+    
     </Tabs>
   );
 }

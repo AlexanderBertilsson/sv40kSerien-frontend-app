@@ -6,37 +6,31 @@ import { jwtDecode } from 'jwt-decode';
 import * as SecureStore from 'expo-secure-store';
 import { ENV } from "../config/environment";
 import apiClient from '@/src/components/httpClient/httpClient';
+import { useMe } from '@/src/hooks/useMe';
+import { Profile } from '@/types/User';
 
 const clientId = ENV.clientId;
 const userPoolUrl = ENV.userPoolUrl;
 const redirectUri = makeRedirectUri();
 WebBrowser.maybeCompleteAuthSession();
-export type AuthUser = {
-  id: string;
-  username?: string;
-  email?: string;
-  profilePictureUrl?: string;
-  heroImageUrl?: string;
-  sportsmanshipScore?: number;
-  sportsmanshipLevel?: number;
-  teamId?: string;
-}
 
 type AuthContextType = {
-  authUser: AuthUser | null;
+  authUser: Profile | null;
   isAuthenticated: boolean;
   authTokens: TokenResponse | null;
   error: string | null;
   login: () => void;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [authTokens, setAuthTokens] = useState<TokenResponse | null>(null);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authUser, setAuthUser] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
 
   // Restore authTokens and user uuid from SecureStore on mount (device only)
@@ -61,16 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const response = await apiClient.get('/users/me');
             if(response.status === 200) {
               const data = response.data;
-              console.log("data", data);
               setAuthUser(data);
             }
-        
           }
-         
         } catch (err) {
           console.error('Failed to restore tokens from SecureStore', err);
         }
       }
+      setIsInitialized(true);
     };
     restoreFromStorage();
   }, []);
@@ -84,15 +76,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await apiClient.get('/users/me')
         if(response.status === 200) {
           const data = response.data;
-          console.log("data", data);
           setAuthUser(data);
         }
       } catch (error) {
         console.error('Failed to get session', error);
       }
+      setIsInitialized(true);
     }
     GetSession();
   }, []);
+
+  // Use the useMe hook for automatic polling and synchronization
+  const { user: meUser, refetch: refetchMe } = useMe({
+    enabled: isInitialized && !!authUser, // Only poll when user is authenticated
+    refetchInterval: 5 * 60 * 1000, // Poll every 5 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns to app
+    refetchOnReconnect: true, // Refetch when network reconnects
+    retry: false, // Don't retry on failure (user might be logged out)
+  });
+
+  // Sync authUser state with useMe hook data
+  useEffect(() => {
+    if (meUser && isInitialized) {
+      setAuthUser(meUser);
+    }
+  }, [meUser, isInitialized]);
 
 
   const discoveryDocument = useMemo(() => ({
@@ -161,7 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Platform.OS !== 'web' && authTokens?.accessToken) {
         try {
           const decoded: { sub: string } = jwtDecode(authTokens.accessToken);
-          setAuthUser((prev) => ({ ...(prev || {}), id: decoded.sub }));
+          // Fetch full user profile after token decode
+          const response = await apiClient.get('/users/me');
+          if(response.status === 200) {
+            setAuthUser(response.data);
+          }
           await SecureStore.setItemAsync('userUuid', decoded.sub);
           await SecureStore.setItemAsync('accessToken', authTokens.accessToken);
           if(authTokens.idToken )
@@ -209,6 +221,15 @@ const login = useCallback(() => {
     }
   }, [authTokens]);
 
+  // Manual refresh function for immediate updates after mutations
+  const refreshProfile = useCallback(async () => {
+    try {
+      await refetchMe();
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+    }
+  }, [refetchMe]);
+
   const value = useMemo(() => ({
     authUser,
     isAuthenticated: !!authUser,
@@ -216,7 +237,8 @@ const login = useCallback(() => {
     error,
     login,
     logout,
-  }), [authUser, authTokens, error, login, logout]);
+    refreshProfile,
+  }), [authUser, authTokens, error, login, logout, refreshProfile]);
 
   return (
     <AuthContext.Provider value={value}>

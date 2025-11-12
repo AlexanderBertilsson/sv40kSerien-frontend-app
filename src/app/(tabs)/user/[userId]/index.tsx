@@ -11,7 +11,6 @@ import { Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/src/hooks/useUser';
 import { useTeam } from '@/src/hooks/useTeam';
-import { Profile } from '@/types/Profile';
 import { useUserStats } from '@/src/hooks/useUserStats';
 
 export default function UserScreen() {
@@ -26,10 +25,7 @@ export default function UserScreen() {
   const loading = userQuery.isLoading || teamQuery.isLoading || userStatsQuery.isLoading;
   const error = userQuery.error || teamQuery.error || userStatsQuery.error;
 
-  let profile: Profile | null = null;
-  if (userQuery.data || teamQuery.data) {
-    profile = { ...userQuery.data, team: teamQuery.data } as Profile;
-  }
+
   const containerStyle = {
     ...styles.container,
     backgroundColor: theme.background,
@@ -59,7 +55,7 @@ export default function UserScreen() {
       </View>
     );
   }
-  if (!profile) {
+  if (!userQuery.data) {
     return (
       <View style={[containerStyle, { justifyContent: 'center', alignItems: 'center', flex: 1 }]}> 
         <Text style={{ color: theme.text }}>Profile not found.</Text>
@@ -74,22 +70,22 @@ export default function UserScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <ProfileHeader
-          username={profile.username}
+          username={userQuery.data.username}
           title={""}
-          team={profile.team?.name}
-          sportsmanship={profile.sportsmanshipScore}
-          sportsmanshipLevel={profile.sportsmanshipLevel}
-          profilePicture={profile.profilePictureUrl}
-          heroImage={profile.heroImageUrl}
+          team={teamQuery.data?.name}
+          sportsmanship={userQuery.data.sportsmanshipScore}
+          sportsmanshipLevel={userQuery.data.sportsmanshipLevel}
+          profilePicture={userQuery.data.profilePictureUrl}
+          heroImage={userQuery.data.heroImageUrl}
         />
   
         <View style={contentContainerStyle}>
-         {profile.team && <View style={styles.section}>
+         {teamQuery.data && <View style={styles.section}>
               <TeamInfo
-                teamName={profile.team.name}
-                teamLogo={profile.team.logoUrl ?? ""}
-                teamId={profile.team.id}
-                sportsmanshipLvl={profile.team.sportsmanshipLvl}
+                teamName={teamQuery.data?.name}
+                teamLogo={teamQuery.data?.logoUrl ?? ""}
+                teamId={teamQuery.data?.id}
+                sportsmanshipLvl={teamQuery.data?.sportsmanshipLvl}
               />
           </View>}
           <View style={styles.section}>

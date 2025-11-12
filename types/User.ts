@@ -13,3 +13,10 @@ export interface User {
   sportsmanshipLevel: number;
   teamId: string;
 }
+
+export interface Profile extends User {
+    teamRoles?: {
+        role: string;
+        teamId: string;
+    }[];
+}

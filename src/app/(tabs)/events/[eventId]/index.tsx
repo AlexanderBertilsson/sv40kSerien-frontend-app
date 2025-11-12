@@ -15,7 +15,6 @@ import {
   DeleteConfirmationModal,
 } from '@/src/components/event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
-import { useUserContext } from '@/src/contexts/ProfileContext';
 
 // Helper function to convert Error objects to strings
 const getErrorMessage = (error: Error | null): string | null => {
@@ -26,8 +25,7 @@ const getErrorMessage = (error: Error | null): string | null => {
 };
 
 export default function EventScreen() {
-  const { isAuthenticated } = useAuthContext();
-  const { profile } = useUserContext();
+  const { isAuthenticated, authUser } = useAuthContext();
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -49,11 +47,11 @@ export default function EventScreen() {
   useEffect(() => {
     if (event) {
       setDisableJoinButton( event.numberOfRegisteredTeams >= event.numberOfPlayers / 5 
-        || event.registeredTeams.some(team => team.users.some(user => user.id === profile?.id))
-        || profile?.team?.id === event.registeredTeams.find(team => team.users.some(user => user.id === profile?.id))?.id
+        || event.registeredTeams.some(team => team.users.some(user => user.id === authUser?.id))
+        || authUser?.teamId === event.registeredTeams.find(team => team.users.some(user => user.id === authUser?.id))?.id
         || event.startDate < new Date().toISOString());
     }
-  }, [event, profile]);
+  }, [event, authUser]);
 
   const [isOrganizer, setIsOrganizer] = useState(false);
 
@@ -62,7 +60,7 @@ export default function EventScreen() {
   // Initialize the form when event data is loaded
   useEffect(() => {
     if (event) {
-      setIsOrganizer(event.createdByUserId === profile?.id);
+      setIsOrganizer(event.createdByUserId === authUser?.id);
       setEditedEvent({
         title: event.title,
         description: event.description,
@@ -80,7 +78,7 @@ export default function EventScreen() {
         id: event.id
       });
     }
-  }, [event, profile]);
+  }, [event, authUser]);
 
   const handleUpdateEvent = async () => {
     if (!eventId) return;
@@ -148,7 +146,7 @@ export default function EventScreen() {
           rounds={event.rounds}
           description={event.description}
         />
-          {isAuthenticated && profile?.team ? (<View style={styles.actionButtons}>
+          {isAuthenticated && authUser?.teamId ? (<View style={styles.actionButtons}>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: disableJoinButton ? hexToRgba(theme.tint, 0.1) : theme.tint }]}
             onPress={() => openJoinEventModal()}
@@ -207,7 +205,7 @@ export default function EventScreen() {
       />
 
       {/* Join Event Modal */}
-      {event && profile?.team && (
+      {event && authUser?.teamId && (
         <JoinEventModal 
           visible={joinEventModalVisible}
           onClose={() => setJoinEventModalVisible(false)}
@@ -217,7 +215,7 @@ export default function EventScreen() {
             type: event.eventType.name,
             playersPerTeam: event.eventType.playersPerTeam,
           }}
-        teamId={profile?.team?.id}
+        teamId={authUser?.teamId}
       />
       )}
     </View>

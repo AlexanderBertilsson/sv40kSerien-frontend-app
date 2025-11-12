@@ -6,6 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import TeamMembersPreview from '@/src/components/team/TeamMembersPreview';
 import { useLocalSearchParams } from 'expo-router';
 import { useTeam } from '@/src/hooks/useTeam';
+import { useAuthContext } from '@/src/contexts/AuthContext';
 
 interface StatItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -19,6 +20,8 @@ export default function TeamScreen() {
   const theme = Colors[colorScheme];
   const { teamId } = useLocalSearchParams();
   const { teamQuery: { data: team } } = useTeam(teamId as string);
+  const { authUser } = useAuthContext();
+
   if(!team){
     return null;
   }
@@ -66,7 +69,7 @@ export default function TeamScreen() {
       </View>
 
       {/* Team Members Preview */}
-      <TeamMembersPreview members={team.users} teamId={teamId as string} />
+      <TeamMembersPreview members={team.users} teamId={teamId as string} authUser={authUser} />
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>

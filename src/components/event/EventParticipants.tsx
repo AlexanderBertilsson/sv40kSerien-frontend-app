@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import ThemedText from '../ThemedText';
 import { EventTeam } from '../../../types/Event';
 
@@ -45,11 +45,14 @@ const EventParticipants = ({ roster, theme }: EventParticipantsProps) => {
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
       
       {roster && roster.length > 0 ? (
-        <View style={styles.mobileContainer}>
-          {roster.map((team, index) => {
+        <FlatList
+          data={roster}
+          keyExtractor={(item, index) => item.id || index.toString()}
+          contentContainerStyle={styles.mobileContainer}
+          renderItem={({ item: team, index }) => {
             const isExpanded = expandedTeams.has(index);
             return (
-              <View key={index} style={[styles.teamCard, { backgroundColor: theme.secondary }]}>
+              <View style={[styles.teamCard, { backgroundColor: theme.secondary }]}>
                 {/* Team Header */}
                 <TouchableOpacity 
                   style={styles.teamHeader}
@@ -110,8 +113,8 @@ const EventParticipants = ({ roster, theme }: EventParticipantsProps) => {
                 )}
               </View>
             );
-          })}
-        </View>
+          }}
+        />
       ) : (
         <View style={styles.emptyState}>
           <ThemedText style={styles.emptyStateText}>No teams registered yet</ThemedText>

@@ -243,7 +243,6 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
           keyExtractor={(item) => item.id}
           renderItem={renderMatchItem}
           contentContainerStyle={styles.matchesList}
-          scrollEnabled={false}
         />
       )}
 

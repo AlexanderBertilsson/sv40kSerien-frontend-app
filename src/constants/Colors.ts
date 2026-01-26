@@ -19,8 +19,10 @@ export const Colors = {
     tabIconDefault: colors.slate,
     tabIconSelected: colors.orange,
     ctaText: colors.silver,  // Bright text for CTAs
-    success: '#4CAF50',
-    error: '#F44336',
+    success: '#10B981',
+    error: '#EF4444',
+    warning: '#F59E0B',
+    info: '#3B82F6',
   },
   dark: {
     text: colors.silver,
@@ -31,7 +33,9 @@ export const Colors = {
     tabIconDefault: colors.steel,
     tabIconSelected: colors.orange,
     ctaText: colors.silver,  // Bright text for CTAs
-    success: '#4CAF50',
-    error: '#F44336',
+    success: '#10B981',
+    error: '#EF4444',
+    warning: '#F59E0B',
+    info: '#3B82F6',
   },
 };

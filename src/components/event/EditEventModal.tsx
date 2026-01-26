@@ -1,15 +1,18 @@
-import React from 'react';
-import { View, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, FlatList } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
-import { EventDetails } from '@/types/EventDetails';
 import { hexToRgba } from '@/src/constants/Colors';
+import { UpdateEventRequest, PairingStrategy, EventType } from '@/types/EventAdmin';
+import { Season } from '@/types/Season';
+import { useEventTypes } from '@/src/hooks/useEventTypes';
+import { useSeasons } from '@/src/hooks/useSeasons';
 
 interface EditEventModalProps {
   visible: boolean;
   onClose: () => void;
   onUpdate: () => void;
-  editedEvent: Partial<EventDetails>;
-  setEditedEvent: React.Dispatch<React.SetStateAction<Partial<EventDetails>>>;
+  editedEvent: UpdateEventRequest;
+  setEditedEvent: React.Dispatch<React.SetStateAction<UpdateEventRequest>>;
   theme: any;
   loading: boolean;
   error: string | null;
@@ -25,6 +28,17 @@ const EditEventModal = ({
   loading, 
   error 
 }: EditEventModalProps) => {
+  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes();
+  const { seasonsQuery } = useSeasons();
+  const seasons = seasonsQuery.data || [];
+  const [seasonDropdownVisible, setSeasonDropdownVisible] = useState(false);
+
+  const getSelectedSeasonName = () => {
+    if (editedEvent.seasonId === null || editedEvent.seasonId === undefined) return 'None';
+    const season = seasons.find((s: Season) => s.id === editedEvent.seasonId);
+    return season?.name || 'None';
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -40,7 +54,7 @@ const EditEventModal = ({
             <ThemedText>Title</ThemedText>
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-              value={editedEvent.title}
+              value={editedEvent.title || ''}
               onChangeText={(text) => setEditedEvent({...editedEvent, title: text})}
               placeholder="Event Title"
               placeholderTextColor={hexToRgba(theme.text, 0.5)}
@@ -49,29 +63,63 @@ const EditEventModal = ({
             <ThemedText>Description</ThemedText>
             <TextInput
               style={[styles.input, styles.textArea, { backgroundColor: theme.background, color: theme.text }]}
-              value={editedEvent.description}
+              value={editedEvent.description || ''}
               onChangeText={(text) => setEditedEvent({...editedEvent, description: text})}
               placeholder="Event Description"
               placeholderTextColor={hexToRgba(theme.text, 0.5)}
               multiline
               numberOfLines={4}
             />
+
+            <ThemedText>Event Type</ThemedText>
+            {eventTypesLoading ? (
+              <ActivityIndicator size="small" color={theme.tint} />
+            ) : (
+              <View style={styles.typeSelector}>
+                {eventTypes.map((type: EventType) => (
+                  <TouchableOpacity
+                    key={type.id}
+                    style={[
+                      styles.typeOption,
+                      { backgroundColor: editedEvent.eventTypeId === type.id ? theme.tint : theme.background }
+                    ]}
+                    onPress={() => setEditedEvent({...editedEvent, eventTypeId: type.id})}
+                  >
+                    <ThemedText style={{ 
+                      color: editedEvent.eventTypeId === type.id ? '#fff' : theme.text,
+                      fontSize: 12,
+                    }}>
+                      {type.name}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             
-            <ThemedText>Rounds</ThemedText>
+            <ThemedText>Number of Rounds</ThemedText>
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-              value={editedEvent.rounds?.toString()}
-              onChangeText={(text) => setEditedEvent({...editedEvent, rounds: parseInt(text) || 0})}
+              value={editedEvent.numberOfRounds?.toString() || ''}
+              onChangeText={(text) => setEditedEvent({...editedEvent, numberOfRounds: parseInt(text) || null})}
               placeholder="Number of Rounds"
               placeholderTextColor={hexToRgba(theme.text, 0.5)}
               keyboardType="numeric"
             />
             
-            <ThemedText>Date</ThemedText>
+            <ThemedText>Start Date</ThemedText>
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-              value={editedEvent.date}
-              onChangeText={(text) => setEditedEvent({...editedEvent, date: text})}
+              value={editedEvent.startDate ? editedEvent.startDate.split('T')[0] : ''}
+              onChangeText={(text) => setEditedEvent({...editedEvent, startDate: text ? new Date(text).toISOString() : null})}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={hexToRgba(theme.text, 0.5)}
+            />
+
+            <ThemedText>End Date</ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+              value={editedEvent.endDate ? editedEvent.endDate.split('T')[0] : ''}
+              onChangeText={(text) => setEditedEvent({...editedEvent, endDate: text ? new Date(text).toISOString() : null})}
               placeholder="YYYY-MM-DD"
               placeholderTextColor={hexToRgba(theme.text, 0.5)}
             />
@@ -79,33 +127,114 @@ const EditEventModal = ({
             <ThemedText>Location</ThemedText>
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-              value={editedEvent.location}
+              value={editedEvent.location || ''}
               onChangeText={(text) => setEditedEvent({...editedEvent, location: text})}
               placeholder="Event Location"
               placeholderTextColor={hexToRgba(theme.text, 0.5)}
             />
-            
-            <ThemedText>Event Type</ThemedText>
+
+            <ThemedText>Max Participants</ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+              value={editedEvent.maxParticipants?.toString() || ''}
+              onChangeText={(text) => setEditedEvent({...editedEvent, maxParticipants: parseInt(text) || null})}
+              placeholder="Maximum number of participants"
+              placeholderTextColor={hexToRgba(theme.text, 0.5)}
+              keyboardType="numeric"
+            />
+
+            <ThemedText>Season</ThemedText>
+            <TouchableOpacity
+              style={[styles.dropdownButton, { backgroundColor: theme.background }]}
+              onPress={() => setSeasonDropdownVisible(true)}
+            >
+              <ThemedText>{getSelectedSeasonName()}</ThemedText>
+              <ThemedText style={{ opacity: 0.5 }}>▼</ThemedText>
+            </TouchableOpacity>
+
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={seasonDropdownVisible}
+              onRequestClose={() => setSeasonDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.dropdownOverlay}
+                activeOpacity={1}
+                onPress={() => setSeasonDropdownVisible(false)}
+              >
+                <View style={[styles.dropdownModal, { backgroundColor: theme.secondary }]}>
+                  <ThemedText type="subtitle" style={styles.dropdownTitle}>Select Season</ThemedText>
+                  <FlatList
+                    data={[{ id: null, name: 'None' }, ...seasons]}
+                    keyExtractor={(item) => item.id?.toString() || 'none'}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          styles.dropdownItem,
+                          { backgroundColor: editedEvent.seasonId === item.id ? hexToRgba(theme.tint, 0.2) : 'transparent' }
+                        ]}
+                        onPress={() => {
+                          setEditedEvent({...editedEvent, seasonId: item.id});
+                          setSeasonDropdownVisible(false);
+                        }}
+                      >
+                        <ThemedText style={{ color: editedEvent.seasonId === item.id ? theme.tint : theme.text }}>
+                          {item.name}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Modal>
+
+            <ThemedText>Pairing Strategy</ThemedText>
             <View style={styles.typeSelector}>
-              {['8man', '5man', 'single'].map((type) => (
+              {[
+                { value: PairingStrategy.DutchSwiss, label: 'Dutch Swiss' },
+                { value: PairingStrategy.RoundRobin, label: 'Round Robin' },
+                { value: PairingStrategy.Manual, label: 'Manual' },
+              ].map((strategy) => (
                 <TouchableOpacity
-                  key={type}
+                  key={strategy.value}
                   style={[
                     styles.typeOption,
-                    { 
-                      backgroundColor: editedEvent.type === type ? theme.tint : theme.background,
-                    }
+                    { backgroundColor: editedEvent.pairingStrategy === strategy.value ? theme.tint : theme.background }
                   ]}
-                  onPress={() => setEditedEvent({...editedEvent, type: type as '8man' | '5man' | 'single'})}
+                  onPress={() => setEditedEvent({...editedEvent, pairingStrategy: strategy.value})}
                 >
                   <ThemedText style={{ 
-                    color: editedEvent.type === type ? '#fff' : theme.text 
+                    color: editedEvent.pairingStrategy === strategy.value ? '#fff' : theme.text,
+                    fontSize: 12,
                   }}>
-                    {type}
+                    {strategy.label}
                   </ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
+
+            <ThemedText>Hide Army Lists</ThemedText>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                { backgroundColor: editedEvent.hideLists ? theme.tint : theme.background }
+              ]}
+              onPress={() => setEditedEvent({...editedEvent, hideLists: !editedEvent.hideLists})}
+            >
+              <ThemedText style={{ color: editedEvent.hideLists ? '#fff' : theme.text }}>
+                {editedEvent.hideLists ? 'Yes - Lists Hidden' : 'No - Lists Visible'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <ThemedText>Player Pack</ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+              value={editedEvent.playerPack || ''}
+              onChangeText={(text) => setEditedEvent({...editedEvent, playerPack: text})}
+              placeholder="Player pack URL or details"
+              placeholderTextColor={hexToRgba(theme.text, 0.5)}
+            />
             
             {error && (
               <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -206,6 +335,41 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#ff6b6b',
     marginVertical: 10,
+  },
+  toggleButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  dropdownOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownModal: {
+    width: '80%',
+    maxHeight: '60%',
+    borderRadius: 12,
+    padding: 16,
+  },
+  dropdownTitle: {
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  dropdownItem: {
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 4,
   },
 });
 

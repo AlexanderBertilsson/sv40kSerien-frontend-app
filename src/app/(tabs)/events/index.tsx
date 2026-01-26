@@ -5,7 +5,10 @@ import ThemedText from '@/src/components/ThemedText';
 import { Colors, hexToRgba } from '@/src/constants/Colors';
 import { useEvents } from '@/src/hooks/useEvents';
 import { useEventManagement } from '@/src/hooks/useEventManagement';
+import { useEventTypes } from '@/src/hooks/useEventTypes';
+import { useSeasons } from '@/src/hooks/useSeasons';
 import { EventDetails } from '@/types/EventDetails';
+import { CreateEventRequest, PairingStrategy } from '@/types/EventAdmin';
 
 // Helper function to convert Error objects to strings
 const getErrorMessage = (error: Error | unknown): string => {
@@ -20,6 +23,9 @@ export default function EventsScreen() {
   const theme = Colors[colorScheme];
   const { eventsQuery } = useEvents({ upcomingOnly: true });
   const { createEventMutation } = useEventManagement();
+  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes();
+  const { seasonsQuery } = useSeasons();
+  const seasons = seasonsQuery.data || [];
   
   // Extract data from queries
   const events = eventsQuery.data || [];
@@ -29,37 +35,36 @@ export default function EventsScreen() {
   const createError = createEventMutation.error;
   
   const [modalVisible, setModalVisible] = useState(false);
+  const [seasonDropdownVisible, setSeasonDropdownVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
-    rounds: '3',
+    numberOfRounds: '3',
     location: '',
-    numberOfPlayers: '8',
+    maxParticipants: '40',
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
     playerPack: '',
-    eventTypeId: '1'
+    eventTypeId: 0,
+    seasonId: null as number | null,
+    hideLists: false,
+    pairingStrategy: PairingStrategy.DutchSwiss,
   });
 
   const handleCreateEvent = async () => {
-    const eventData = {
+    const eventData: CreateEventRequest = {
       title: newEvent.title,
-      description: newEvent.description,
-      rounds: parseInt(newEvent.rounds),
-      location: newEvent.location,
-      eventType: {
-        id: parseInt(newEvent.eventTypeId),
-        name: 'Tournament',
-        description: 'Tournament event',
-        playersPerTeam: parseInt(newEvent.numberOfPlayers)
-      },
-      createdByUserId: 'current-user-id', // This should come from auth context
-      numberOfPlayers: parseInt(newEvent.numberOfPlayers),
-      startDate: newEvent.startDate,
-      endDate: newEvent.endDate,
-      playerPack: newEvent.playerPack || undefined,
-      numberOfRegisteredPlayers: 0,
-      numberOfRegisteredTeams: 0
+      description: newEvent.description || null,
+      numberOfRounds: parseInt(newEvent.numberOfRounds),
+      location: newEvent.location || null,
+      eventTypeId: newEvent.eventTypeId,
+      maxParticipants: parseInt(newEvent.maxParticipants) || null,
+      hideLists: newEvent.hideLists,
+      startDate: new Date(newEvent.startDate).toISOString(),
+      endDate: new Date(newEvent.endDate).toISOString(),
+      playerPack: newEvent.playerPack || null,
+      seasonId: newEvent.seasonId,
+      pairingStrategy: newEvent.pairingStrategy,
     };
     
     try {
@@ -69,13 +74,16 @@ export default function EventsScreen() {
       setNewEvent({
         title: '',
         description: '',
-        rounds: '3',
+        numberOfRounds: '3',
         location: '',
-        numberOfPlayers: '8',
+        maxParticipants: '40',
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date().toISOString().split('T')[0],
         playerPack: '',
-        eventTypeId: '1'
+        eventTypeId: 0,
+        seasonId: null,
+        hideLists: false,
+        pairingStrategy: PairingStrategy.DutchSwiss,
       });
     } catch (error) {
       console.error('Error creating event:', error);
@@ -169,7 +177,7 @@ export default function EventsScreen() {
             <ThemedText type="title">Create New Event</ThemedText>
             
             <ScrollView style={styles.formContainer}>
-              <ThemedText>Title</ThemedText>
+              <ThemedText>Title *</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
                 value={newEvent.title}
@@ -188,18 +196,45 @@ export default function EventsScreen() {
                 multiline
                 numberOfLines={4}
               />
+
+              <ThemedText>Event Type *</ThemedText>
+              {eventTypesLoading ? (
+                <ActivityIndicator size="small" color={theme.tint} />
+              ) : (
+                <View style={styles.typeSelector}>
+                  {eventTypes.map((type) => (
+                    <TouchableOpacity
+                      key={type.id}
+                      style={[
+                        styles.typeOption,
+                        { 
+                          backgroundColor: newEvent.eventTypeId === type.id ? theme.tint : theme.background,
+                        }
+                      ]}
+                      onPress={() => setNewEvent({...newEvent, eventTypeId: type.id})}
+                    >
+                      <ThemedText style={{ 
+                        color: newEvent.eventTypeId === type.id ? '#fff' : theme.text,
+                        fontSize: 12,
+                      }}>
+                        {type.name}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
               
-              <ThemedText>Rounds</ThemedText>
+              <ThemedText>Number of Rounds *</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-                value={newEvent.rounds}
-                onChangeText={(text) => setNewEvent({...newEvent, rounds: text})}
+                value={newEvent.numberOfRounds}
+                onChangeText={(text) => setNewEvent({...newEvent, numberOfRounds: text})}
                 placeholder="Number of Rounds"
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
                 keyboardType="numeric"
               />
               
-              <ThemedText>Start Date</ThemedText>
+              <ThemedText>Start Date *</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
                 value={newEvent.startDate}
@@ -208,7 +243,7 @@ export default function EventsScreen() {
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
               />
               
-              <ThemedText>End Date</ThemedText>
+              <ThemedText>End Date *</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
                 value={newEvent.endDate}
@@ -226,22 +261,110 @@ export default function EventsScreen() {
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
               />
               
-              <ThemedText>Number of Players</ThemedText>
+              <ThemedText>Max Participants</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-                value={newEvent.numberOfPlayers}
-                onChangeText={(text) => setNewEvent({...newEvent, numberOfPlayers: text})}
-                placeholder="Maximum number of players"
+                value={newEvent.maxParticipants}
+                onChangeText={(text) => setNewEvent({...newEvent, maxParticipants: text})}
+                placeholder="Maximum number of participants"
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
                 keyboardType="numeric"
               />
+
+              <ThemedText>Season (Optional)</ThemedText>
+              <TouchableOpacity
+                style={[styles.dropdownButton, { backgroundColor: theme.background }]}
+                onPress={() => setSeasonDropdownVisible(true)}
+              >
+                <ThemedText>
+                  {newEvent.seasonId === null 
+                    ? 'None' 
+                    : seasons.find(s => s.id === newEvent.seasonId)?.name || 'None'}
+                </ThemedText>
+                <ThemedText style={{ opacity: 0.5 }}>▼</ThemedText>
+              </TouchableOpacity>
+
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={seasonDropdownVisible}
+                onRequestClose={() => setSeasonDropdownVisible(false)}
+              >
+                <TouchableOpacity
+                  style={styles.dropdownOverlay}
+                  activeOpacity={1}
+                  onPress={() => setSeasonDropdownVisible(false)}
+                >
+                  <View style={[styles.dropdownModal, { backgroundColor: theme.secondary }]}>
+                    <ThemedText type="subtitle" style={styles.dropdownTitle}>Select Season</ThemedText>
+                    <FlatList
+                      data={[{ id: null, name: 'None' }, ...seasons]}
+                      keyExtractor={(item) => item.id?.toString() || 'none'}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={[
+                            styles.dropdownItem,
+                            { backgroundColor: newEvent.seasonId === item.id ? hexToRgba(theme.tint, 0.2) : 'transparent' }
+                          ]}
+                          onPress={() => {
+                            setNewEvent({...newEvent, seasonId: item.id});
+                            setSeasonDropdownVisible(false);
+                          }}
+                        >
+                          <ThemedText style={{ color: newEvent.seasonId === item.id ? theme.tint : theme.text }}>
+                            {item.name}
+                          </ThemedText>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </Modal>
+
+              <ThemedText>Pairing Strategy *</ThemedText>
+              <View style={styles.typeSelector}>
+                {[
+                  { value: PairingStrategy.DutchSwiss, label: 'Dutch Swiss' },
+                  { value: PairingStrategy.RoundRobin, label: 'Round Robin' },
+                  { value: PairingStrategy.Manual, label: 'Manual' },
+                ].map((strategy) => (
+                  <TouchableOpacity
+                    key={strategy.value}
+                    style={[
+                      styles.typeOption,
+                      { backgroundColor: newEvent.pairingStrategy === strategy.value ? theme.tint : theme.background }
+                    ]}
+                    onPress={() => setNewEvent({...newEvent, pairingStrategy: strategy.value})}
+                  >
+                    <ThemedText style={{ 
+                      color: newEvent.pairingStrategy === strategy.value ? '#fff' : theme.text,
+                      fontSize: 12,
+                    }}>
+                      {strategy.label}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <ThemedText>Hide Army Lists</ThemedText>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  { backgroundColor: newEvent.hideLists ? theme.tint : theme.background }
+                ]}
+                onPress={() => setNewEvent({...newEvent, hideLists: !newEvent.hideLists})}
+              >
+                <ThemedText style={{ color: newEvent.hideLists ? '#fff' : theme.text }}>
+                  {newEvent.hideLists ? 'Yes - Lists Hidden' : 'No - Lists Visible'}
+                </ThemedText>
+              </TouchableOpacity>
               
               <ThemedText>Player Pack (Optional)</ThemedText>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
                 value={newEvent.playerPack}
                 onChangeText={(text) => setNewEvent({...newEvent, playerPack: text})}
-                placeholder="Player pack details"
+                placeholder="Player pack URL or details"
                 placeholderTextColor={hexToRgba(theme.text, 0.5)}
               />
               
@@ -441,5 +564,40 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginTop: 8,
     fontStyle: 'italic',
+  },
+  toggleButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  dropdownOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownModal: {
+    width: '80%',
+    maxHeight: '60%',
+    borderRadius: 12,
+    padding: 16,
+  },
+  dropdownTitle: {
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  dropdownItem: {
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 4,
   },
 });

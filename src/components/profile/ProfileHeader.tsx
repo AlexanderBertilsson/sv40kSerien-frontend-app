@@ -1,8 +1,11 @@
-import { View, StyleSheet, useColorScheme } from 'react-native';
+import { View, StyleSheet, useColorScheme, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import ThemedText from '../ThemedText';
 import { Colors } from '@/src/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import UpdateProfileModal from '../modals/UpdateProfileModal';
 
 interface ProfileHeaderProps {
   username: string;
@@ -12,6 +15,9 @@ interface ProfileHeaderProps {
   sportsmanshipLevel: number;
   profilePicture: string;
   heroImage: string;
+  userId?: string;
+  isOwnProfile?: boolean;
+  onProfileUpdate?: (profilePicture?: string, heroImage?: string, imageMetadata?: any) => Promise<void>;
 }
 
 function getSportsmanshipLevel(progress: number, level: number): { level: number; progress: number } {
@@ -23,10 +29,17 @@ function getSportsmanshipLevel(progress: number, level: number): { level: number
   return { level, progress };
 }
 
-export function ProfileHeader({ username, title, team, sportsmanship, sportsmanshipLevel, profilePicture, heroImage }: ProfileHeaderProps) {
+export function ProfileHeader({ username, title, team, sportsmanship, sportsmanshipLevel, profilePicture, heroImage, isOwnProfile, onProfileUpdate }: ProfileHeaderProps) {
   const { level, progress } = getSportsmanshipLevel(sportsmanship, sportsmanshipLevel);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleUpdate = async (newProfilePicture?: string, newHeroImage?: string, imageMetadata?: any) => {
+    if (onProfileUpdate) {
+      await onProfileUpdate(newProfilePicture, newHeroImage, imageMetadata);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -40,6 +53,14 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
           colors={['transparent', theme.background]}
           style={styles.bannerGradient}
         />
+        {isOwnProfile && (
+          <Pressable
+            style={[styles.editButton, { backgroundColor: theme.secondary }]}
+            onPress={() => setIsModalVisible(true)}
+          >
+            <Ionicons name="settings-outline" size={24} color={theme.text} />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.contentContainer}>
@@ -79,6 +100,14 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
           </View>
         </View>
       </View>
+
+      <UpdateProfileModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        currentProfilePicture={profilePicture}
+        currentHeroImage={heroImage}
+        onUpdate={handleUpdate}
+      />
     </View>
   );
 }
@@ -101,6 +130,21 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 150,
+  },
+  editButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   contentContainer: {
     paddingHorizontal: 16,

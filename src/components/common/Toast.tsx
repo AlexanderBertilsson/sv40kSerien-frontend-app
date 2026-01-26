@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Animated, Pressable } from 'react-native';
+import { StyleSheet, Animated, Pressable, useColorScheme } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@/src/constants/Colors';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 export type ToastPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
@@ -15,27 +16,11 @@ interface ToastProps {
   onHide?: () => void;
 }
 
-const TOAST_COLORS = {
-  success: {
-    background: '#10B981',
-    text: '#FFFFFF',
-    icon: 'checkmark-circle' as const,
-  },
-  error: {
-    background: '#EF4444',
-    text: '#FFFFFF',
-    icon: 'close-circle' as const,
-  },
-  warning: {
-    background: '#F59E0B',
-    text: '#FFFFFF',
-    icon: 'warning' as const,
-  },
-  info: {
-    background: '#3B82F6',
-    text: '#FFFFFF',
-    icon: 'information-circle' as const,
-  },
+const TOAST_ICONS = {
+  success: 'checkmark-circle' as const,
+  error: 'close-circle' as const,
+  warning: 'warning' as const,
+  info: 'information-circle' as const,
 };
 
 export default function Toast({ 
@@ -49,6 +34,8 @@ export default function Toast({
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(-100));
   const [isVisible, setIsVisible] = useState(false);
+  const colorScheme = useColorScheme() ?? 'dark';
+  const theme = Colors[colorScheme];
 
   const handleHide = useCallback(() => {
     Animated.parallel([
@@ -103,7 +90,8 @@ export default function Toast({
     return null;
   }
 
-  const colors = TOAST_COLORS[type];
+  const icon = TOAST_ICONS[type];
+  const iconColor = theme[type];
   const positionStyle = getPositionStyle(position);
 
   return (
@@ -112,7 +100,8 @@ export default function Toast({
         styles.container,
         positionStyle,
         {
-          backgroundColor: colors.background,
+          backgroundColor: theme.background,
+          borderColor: theme.tabIconDefault,
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
         },
@@ -122,12 +111,12 @@ export default function Toast({
         style={styles.content}
         onPress={handleHide}
       >
-        <Ionicons name={colors.icon} size={24} color={colors.text} />
-        <ThemedText style={[styles.message, { color: colors.text }]}>
+        <Ionicons name={icon} size={24} color={iconColor} />
+        <ThemedText style={[styles.message, { color: theme.text }]}>
           {message}
         </ThemedText>
         <Pressable onPress={handleHide} style={styles.closeButton}>
-          <Ionicons name="close" size={20} color={colors.text} />
+          <Ionicons name="close" size={20} color={theme.icon} />
         </Pressable>
       </Pressable>
     </Animated.View>
@@ -163,11 +152,12 @@ const styles = StyleSheet.create({
     minWidth: 300,
     maxWidth: 400,
     borderRadius: 8,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   content: {
     flexDirection: 'row',

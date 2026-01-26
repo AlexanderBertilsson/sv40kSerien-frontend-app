@@ -12,6 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/src/hooks/useUser';
 import { useTeam } from '@/src/hooks/useTeam';
 import { useUserStats } from '@/src/hooks/useUserStats';
+import { useMe } from '@/src/hooks/useMe';
+import Toast, { ToastType } from '@/src/components/common/Toast';
+import { useState } from 'react';
 
 export default function UserScreen() {
   const scrollViewRef = useRef(null);
@@ -21,10 +24,46 @@ export default function UserScreen() {
   const { userQuery } = useUser(userId as string);
   const { teamQuery } = useTeam(userQuery.data?.teamId || '');
   const { userStatsQuery } = useUserStats(userId as string);
+  const { user: currentUser } = useMe({ enabled: true });
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
+
+  const isOwnProfile = currentUser?.id === userId;
+
+  const handleProfileUpdate = async (profilePictureUri?: string, heroImageUri?: string, imageMetadata?: any) => {
+    try {
+      // TODO: Implement API call to update profile images with imageMetadata
+      console.log('Updating profile:', { profilePictureUri, heroImageUri, imageMetadata });
+      
+      // Example of what the API call would look like:
+      // const response = await apiClient.put('/users/me/images', {
+      //   images: imageMetadata,
+      // });
+      // Then upload to S3 using signed URLs similar to team creation
+      
+      // For now, just show success and refetch
+      await userQuery.refetch();
+      
+      setToastConfig({
+        visible: true,
+        message: 'Profile updated successfully',
+        type: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      setToastConfig({
+        visible: true,
+        message: 'Failed to update profile. Please try again.',
+        type: 'error',
+      });
+    }
+  };
 
   const loading = userQuery.isLoading || teamQuery.isLoading || userStatsQuery.isLoading;
   const error = userQuery.error || teamQuery.error || userStatsQuery.error;
-
 
   const containerStyle = {
     ...styles.container,
@@ -77,6 +116,9 @@ export default function UserScreen() {
           sportsmanshipLevel={userQuery.data.sportsmanshipLevel}
           profilePicture={userQuery.data.profilePictureUrl}
           heroImage={userQuery.data.heroImageUrl}
+          userId={userId as string}
+          isOwnProfile={isOwnProfile}
+          onProfileUpdate={handleProfileUpdate}
         />
   
         <View style={contentContainerStyle}>
@@ -136,6 +178,14 @@ export default function UserScreen() {
           </View> */}
         </View>
       </ScrollView>
+
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        position="bottom-left"
+        onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
+      />
     </View>
   );
 }

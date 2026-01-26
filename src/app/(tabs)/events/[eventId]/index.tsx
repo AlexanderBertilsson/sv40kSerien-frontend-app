@@ -2,19 +2,28 @@ import { useState, useEffect } from 'react';
 import { View, StyleSheet, useColorScheme, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import ThemedText from '@/src/components/ThemedText';
-import { Colors, hexToRgba } from '@/src/constants/Colors';
+import { Colors } from '@/src/constants/Colors';
 import { useEvent } from '@/src/hooks/useEvent';
 import { useEventManagement } from '@/src/hooks/useEventManagement';
-import { Event } from '@/types/Event';
+import { UpdateEventRequest, PairingStrategy } from '@/types/EventAdmin';
 import { JoinEventModal } from '@/src/components/modals/joinEventModal';
 import {
   EventHeader,
-  EventData,
-  EventParticipants,
   EditEventModal,
   DeleteConfirmationModal,
 } from '@/src/components/event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
+import { TabSwitcher } from '@/src/components/common/TabSwitcher';
+import {
+  EventDetailsView,
+  PlayerDetailsView,
+  TeamDetailsView,
+  PairingsView,
+  PlacingsView,
+  AdminView,
+} from './views';
+
+type EventTab = 'details' | 'playerDetails' | 'teams' | 'pairings' | 'placings' | 'admin';
 
 // Helper function to convert Error objects to strings
 const getErrorMessage = (error: Error | null): string | null => {
@@ -41,41 +50,91 @@ export default function EventScreen() {
   
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-  const [disableJoinButton, setDisableJoinButton] = useState(true);
   const [joinEventModalVisible, setJoinEventModalVisible] = useState(false);
-
-  useEffect(() => {
-    if (event) {
-      setDisableJoinButton( event.numberOfRegisteredTeams >= event.numberOfPlayers / 5 
-        || event.registeredTeams.some(team => team.users.some(user => user.id === authUser?.id))
-        || authUser?.teamId === event.registeredTeams.find(team => team.users.some(user => user.id === authUser?.id))?.id
-        || event.startDate < new Date().toISOString());
-    }
-  }, [event, authUser]);
-
+  const [activeTab, setActiveTab] = useState<EventTab>('details');
+  
+  // Event condition states
+  const [isEventFull, setIsEventFull] = useState(false);
+  const [isUserRegistered, setIsUserRegistered] = useState(false);
+  const [isTeamRegistered, setIsTeamRegistered] = useState(false);
+  const [isEventPast, setIsEventPast] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
 
-  const [editedEvent, setEditedEvent] = useState<Partial<Event>>({});
+  const disableJoinButton = isEventFull || isUserRegistered || isTeamRegistered || isEventPast;
 
-  // Initialize the form when event data is loaded
+  const baseTabs = [
+    { key: 'details' as const, label: 'Overview' },
+    { key: 'playerDetails' as const, label: 'Player Details' },
+    { key: 'teams' as const, label: 'Roster' },
+    { key: 'pairings' as const, label: 'Pairings' },
+    { key: 'placings' as const, label: 'Placings' },
+  ];
+
+  const tabs = isOrganizer 
+    ? [...baseTabs, { key: 'admin' as const, label: 'Admin' }]
+    : baseTabs;
+
+  const renderTabContent = () => {
+    if (!event) return null;
+    switch (activeTab) {
+      case 'details':
+        return <EventDetailsView event={event} />;
+      case 'playerDetails':
+        return <PlayerDetailsView eventId={event.id} />;
+      case 'teams':
+        return <TeamDetailsView event={event} />;
+      case 'pairings':
+        return (
+          <PairingsView 
+            eventId={event.id} 
+            userTeamId={authUser?.teamId}
+            registeredTeams={event.registeredTeams}
+          />
+        );
+      case 'placings':
+        return <PlacingsView />;
+      case 'admin':
+        return isOrganizer ? (
+          <AdminView
+            event={event}
+            editedEvent={editedEvent}
+            setEditedEvent={setEditedEvent}
+            onUpdateEvent={handleUpdateEvent}
+            onDeleteEvent={handleDeleteEvent}
+            actionLoading={actionLoading}
+            actionError={actionError}
+          />
+        ) : null;
+      default:
+        return <EventDetailsView event={event} />;
+    }
+  };
+
+  const [editedEvent, setEditedEvent] = useState<UpdateEventRequest>({});
+
+  // Initialize state when event data is loaded
   useEffect(() => {
     if (event) {
+      // Event conditions
+      setIsEventFull(event.numberOfRegisteredTeams >= event.numberOfPlayers / 5);
+      setIsUserRegistered(event.registeredTeams.some(team => team.users.some(user => user.id === authUser?.id)));
+      setIsTeamRegistered(event.registeredTeams.some(team => team.id === authUser?.teamId));
+      setIsEventPast(event.startDate < new Date().toISOString());
       setIsOrganizer(event.createdByUserId === authUser?.id);
+      
       setEditedEvent({
         title: event.title,
         description: event.description,
-        rounds: event.rounds,
+        numberOfRounds: event.rounds,
         startDate: event.startDate,
         endDate: event.endDate,
         location: event.location,
         playerPack: event.playerPack,
-        numberOfPlayers: event.numberOfPlayers,
-        numberOfRegisteredPlayers: event.numberOfRegisteredPlayers,
-        numberOfRegisteredTeams: event.numberOfRegisteredTeams,
-        registeredTeams: event.registeredTeams,
-        eventType: event.eventType,
-        createdByUserId: event.createdByUserId,
-        id: event.id
+        maxParticipants: event.numberOfPlayers,
+        eventTypeId: event.eventType?.id,
+        hideLists: event.hideLists ?? false,
+        seasonId: event.seasonId ?? null,
+        pairingStrategy: (event.pairingStrategy as PairingStrategy) ?? null,
       });
     }
   }, [event, authUser]);
@@ -92,11 +151,9 @@ export default function EventScreen() {
   const handleDeleteEvent = async () => {
     if (!eventId) return;
     
-    const result = await deleteEventMutation.mutateAsync(eventId);
-    if (result) {
-      setConfirmDeleteVisible(false);
-      router.back();
-    }
+    await deleteEventMutation.mutateAsync(eventId);
+    setConfirmDeleteVisible(false);
+    router.back();
   };
 
   const openJoinEventModal = (): void => {
@@ -139,47 +196,30 @@ export default function EventScreen() {
         
         <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
         
-        {/* Event Details */}
-        <EventData 
-          date={event.startDate}
-          location={event.location}
-          rounds={event.rounds}
-          description={event.description}
-        />
-          {isAuthenticated && authUser?.teamId ? (<View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: disableJoinButton ? hexToRgba(theme.tint, 0.1) : theme.tint }]}
-            onPress={() => openJoinEventModal()}
-            disabled={disableJoinButton}
-          >
-            <ThemedText style={{ color: '#fff' }}>Join Event</ThemedText>
-          </TouchableOpacity>
-        {/* Roster Section */}
-        <EventParticipants 
-          roster={event.registeredTeams} 
-          theme={theme} 
+        {/* Tab Switcher */}
+        <TabSwitcher
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          style={styles.tabSwitcher}
         />
 
-      
+        {/* Tab Content */}
+        <View style={styles.tabContent}>
+          {renderTabContent()}
+        </View>
 
-          {isOrganizer ? (
-            <>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: theme.tint }]}
-                onPress={() => setEditModalVisible(true)}
-              >
-                <ThemedText style={{ color: '#fff' }}>Edit Event</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: theme.error }]}
-                onPress={() => setConfirmDeleteVisible(true)}
-              >
-                <ThemedText style={{ color: '#fff' }}>Delete Event</ThemedText>
-              </TouchableOpacity>
-            </>
-          ) : null}
-
-        </View>) : null}
+        {/* Action Buttons */}
+        {isAuthenticated && authUser?.teamId && !disableJoinButton ? (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: theme.tint }]}
+              onPress={() => openJoinEventModal()}
+            >
+              <ThemedText style={{ color: '#fff' }}>Join Event</ThemedText>
+            </TouchableOpacity>
+          </View>
+        ) : null}
         
       </ScrollView>
       
@@ -251,5 +291,12 @@ const styles = StyleSheet.create({
   actionButtons: {
     marginTop: 16,
     gap: 12,
+  },
+  tabSwitcher: {
+    marginBottom: 16,
+  },
+  tabContent: {
+    flex: 1,
+    minHeight: 200,
   },
 });

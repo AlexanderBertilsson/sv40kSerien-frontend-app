@@ -19,7 +19,12 @@ export interface Event {
   playerPack: string,
   numberOfRegisteredPlayers: number,
   numberOfRegisteredTeams: number,
-  registeredTeams: EventTeam[]
+  registeredTeams: EventTeam[],
+  hideLists?: boolean,
+  seasonId?: number | null,
+  pairingStrategy?: string | null,
+  status?: string,
+  currentRoundNumber?: number,
 }
 
 export interface EventTeam {

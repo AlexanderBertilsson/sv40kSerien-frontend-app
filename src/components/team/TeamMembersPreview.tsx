@@ -124,7 +124,7 @@ export default function TeamMembersPreview({ members, teamId, authUser }: TeamMe
             <View key={member.id} style={styles.memberCard}>
               <Link href={`/user/${member.id}`} asChild>
                 <Image
-                  source={{ uri: member.profilePictureUrl || require('@/assets/images/emoji2.png') }}
+                  source={member.profilePictureUrl ? { uri: member.profilePictureUrl } : require('@/assets/images/emoji2.png')}
                   style={styles.profileImage}
                 />
               </Link>

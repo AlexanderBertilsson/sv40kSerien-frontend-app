@@ -1,20 +1,27 @@
 import { Drawer } from 'expo-router/drawer';
 import DeviceDrawerContent from './drawerContent/DeviceDrawerContent';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, useWindowDimensions } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
 
 export default function DeviceDrawer() {
     const colorScheme = useColorScheme() ?? 'dark';
     const theme = Colors[colorScheme];
+
     return (
         <Drawer
             drawerContent={DeviceDrawerContent}
             screenOptions={() => ({
                 drawerPosition: 'left',
                 title: '',
-                headerStyle: { backgroundColor: theme.background },
+                headerStyle: {
+                    backgroundColor: 'transparent',
+                    ...({ position: 'absolute', elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }),
+                },
                 headerTintColor: theme.text,
-                drawerStyle: { backgroundColor: theme.secondary },
+                headerTransparent: true,
+                drawerStyle: {
+                    backgroundColor: theme.secondary,
+                },
                 drawerActiveTintColor: theme.tint,
                 drawerInactiveTintColor: theme.text,
                 drawerLabelStyle: { color: theme.text, fontWeight: 'bold' },

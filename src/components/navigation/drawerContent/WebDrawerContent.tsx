@@ -102,6 +102,12 @@ export default function WebDrawerContent(props: any) {
           onPress={() => handleNavigation(`/ladder`)}
           theme={theme}
         />
+        <DrawerItem
+          label="Pairings"
+          iconName="trophy-outline"
+          onPress={() => handleNavigation(`/pairings`)}
+          theme={theme}
+        />
         
         {isAuthenticated
           ? <DrawerItem

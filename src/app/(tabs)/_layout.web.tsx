@@ -3,7 +3,7 @@ import { useWindowDimensions } from 'react-native';
 import { useEffect, useState } from 'react';
 import DeviceTabs from '@/src/components/navigation/DeviceTabs';
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 900;
 
 export default function TabLayout() {
   const { width } = useWindowDimensions();

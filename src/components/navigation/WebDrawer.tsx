@@ -13,7 +13,9 @@ export default function WebDrawer() {
             screenOptions={() => ({
             drawerPosition: 'left',
             title: '',
-            headerStyle: { backgroundColor: theme.background  },
+            headerStyle: { backgroundColor: 'transparent',
+                    ...({ position: 'absolute', elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }), },
+            headerTransparent: true,
             headerTintColor: theme.text,
             drawerStyle: { backgroundColor: theme.secondary },
             drawerActiveTintColor: theme.tint,
@@ -54,6 +56,12 @@ export default function WebDrawer() {
           />
           <Drawer.Screen
             name="events"
+            options={{
+              drawerItemStyle: { display: 'none' },
+            }}
+          />
+           <Drawer.Screen
+            name="pairings"
             options={{
               drawerItemStyle: { display: 'none' },
             }}

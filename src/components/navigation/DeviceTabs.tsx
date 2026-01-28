@@ -71,7 +71,16 @@ export default function DeviceTabs() {
           ),
         }}
       />
-    
+      <Tabs.Screen
+        name="pairings"
+        options={{
+          title: '',
+          tabBarStyle: { display: 'none' },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people-outline" size={24} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

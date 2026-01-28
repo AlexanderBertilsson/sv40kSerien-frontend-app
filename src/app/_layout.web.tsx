@@ -12,7 +12,7 @@ import { useWindowDimensions } from 'react-native';
 import { useEffect, useState } from 'react';
 import DeviceDrawer from '../components/navigation/DeviceDrawer';
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 900;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? 'dark';

@@ -11,12 +11,12 @@ export function hexToRgba(hex: string, alpha: number) {
 
 export const Colors = {
   light: {
-    text: colors.darkNavy,
-    background: colors.slate,
-    secondary: colors.silver,
+     text: colors.silver,
+    background: colors.darkNavy,
+    secondary: colors.navy,
     tint: colors.orange,
-    icon: colors.steel,
-    tabIconDefault: colors.slate,
+    icon: colors.slate,
+    tabIconDefault: colors.steel,
     tabIconSelected: colors.orange,
     ctaText: colors.silver,  // Bright text for CTAs
     success: '#10B981',

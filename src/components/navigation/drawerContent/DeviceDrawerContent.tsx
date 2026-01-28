@@ -55,7 +55,7 @@ export default function DeviceDrawerContent(props: any) {
           }}
           theme={theme}
         />
-        {isAuthenticated 
+        {isAuthenticated
         ? <DrawerItem
             label="Logout"
             iconName="log-out-outline"
@@ -64,7 +64,7 @@ export default function DeviceDrawerContent(props: any) {
               logout();
             }}
             theme={theme}
-          />
+            />
         : <DrawerItem
             label="Login"
             iconName="log-in-outline"
@@ -73,7 +73,7 @@ export default function DeviceDrawerContent(props: any) {
               login();
             }}
             theme={theme}
-          />}
+            />}
      
       </DrawerContentScrollView>
       

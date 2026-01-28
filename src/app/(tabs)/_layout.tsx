@@ -61,6 +61,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="pairings"
+        options={{
+          title: 'Pairings',
+          tabBarStyle: { display: 'none' },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people-outline" size={24} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

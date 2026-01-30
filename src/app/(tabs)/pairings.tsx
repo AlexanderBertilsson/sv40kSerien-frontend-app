@@ -32,11 +32,6 @@ export default function PairingsScreen() {
   // Check if mobile for sidebar layout (900px for landscape mobile/tablet)
   const isMobile = windowWidth < 900;
 
-  // Calculate responsive margin based on screen height
-  // < 730px: 6% margin, >= 730px: 10% margin
-  const marginPercentage = windowHeight < 730 ? 0.06 : 0.1;
-  const tenPercentMargin = windowHeight * marginPercentage;
-
   const {
     state,
     getAvailablePlayers,
@@ -138,9 +133,9 @@ export default function PairingsScreen() {
       }
 
       // FLIP - First: Measure collapsed hand position
-      handRef.current.measureInWindow((handX: number, handY: number, handWidth: number, handHeight: number) => {
+      handRef.current.measureInWindow((handX: number, handY: number, _handWidth: number, _handHeight: number) => {
         // FLIP - Last: Measure destination slot position
-        slotRef.measureInWindow((slotX: number, slotY: number, slotWidth: number, slotHeight: number) => {
+        slotRef.measureInWindow((slotX: number, slotY: number, _slotWidth: number, _slotHeight: number) => {
           // FLIP - Use exact measured positions
           // Start from the collapsed hand (where cards visually appear)
           const startPos = {
@@ -414,7 +409,8 @@ export default function PairingsScreen() {
     if (state.currentPhase.includes('layout-select') && !state.currentLayoutPicker) {
       const isRound1 = state.currentPhase === 'round1-layout-select';
       const roundState = isRound1 ? state.round1 : state.round2;
-      const firstPicker = roundState.coinFlipWinner;
+      const firstPicker = state.coinflipWinner;
+      console.log('firstPicker', firstPicker);
       if (firstPicker) {
         const teamName = firstPicker === 'A' ? 'Team Alpha' : 'Team Bravo';
         if (isRound1) {
@@ -424,10 +420,10 @@ export default function PairingsScreen() {
         }
       }
       if (roundState.teamBRefused) {
-        addLogMessage(`Bravo refused ${roundState.teamBRefused.name}`);
+        addLogMessage(`Bravo refused ${roundState.teamBRefused.initials}`);
       }
     }
-  }, [state.currentPhase, state.round1.coinFlipWinner, state.round2.coinFlipWinner]);
+  }, [state.currentPhase, state.coinflipWinner]);
 
   // Log when Team B picks a layout
   useEffect(() => {
@@ -479,17 +475,17 @@ export default function PairingsScreen() {
         }
       };
 
-      getStartPosition((startPos) => {
-        slotRef.measureInWindow((slotX: number, slotY: number, slotWidth: number, slotHeight: number) => {
+      getStartPosition((measuredStartPos) => {
+        slotRef.measureInWindow((slotX: number, slotY: number, _slotWidth: number, _slotHeight: number) => {
           const endPos = {
             x: slotX,
             y: slotY,
           };
 
           console.log('FLIP Animation: slot=' + slotType +
-            ', start=(' + startPos.x.toFixed(0) + ',' + startPos.y.toFixed(0) + ')' +
+            ', start=(' + measuredStartPos.x.toFixed(0) + ',' + measuredStartPos.y.toFixed(0) + ')' +
             ', end=(' + endPos.x.toFixed(0) + ',' + endPos.y.toFixed(0) + ')' +
-            ', delta=(' + (endPos.x - startPos.x).toFixed(0) + ',' + (endPos.y - startPos.y).toFixed(0) + ')');
+            ', delta=(' + (endPos.x - measuredStartPos.x).toFixed(0) + ',' + (endPos.y - measuredStartPos.y).toFixed(0) + ')');
 
           // Store pending placement
           setPendingSlotPlacement({
@@ -501,7 +497,7 @@ export default function PairingsScreen() {
           // FLIP - Play: Start animation from First to Last
           setAnimatingCard({
             player: selectedHandCard,
-            startPos,
+            startPos: measuredStartPos,
             endPos,
             faceDown: false,
           });
@@ -542,7 +538,7 @@ export default function PairingsScreen() {
   };
 
   // Refusal phase slot interaction
-  const handleRefusalSlotClick = (slotType: SlotType, clickX: number, clickY: number) => {
+  const handleRefusalSlotClick = (slotType: SlotType, _clickX: number, _clickY: number) => {
     if (slotType === 'redAttacker1' || slotType === 'redAttacker2') {
       setRefusalSlotSelection(slotType);
     }

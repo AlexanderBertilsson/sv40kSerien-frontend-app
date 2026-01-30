@@ -1,6 +1,6 @@
 import { Drawer } from 'expo-router/drawer';
 import DeviceDrawerContent from './drawerContent/DeviceDrawerContent';
-import { useColorScheme, useWindowDimensions } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
 
 export default function DeviceDrawer() {

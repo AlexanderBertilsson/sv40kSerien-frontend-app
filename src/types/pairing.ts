@@ -94,7 +94,7 @@ export interface PairingState {
 }
 
 // Initial state helpers
-export const createInitialRoundState = (): RoundState => ({
+const createInitialRoundState = (): RoundState => ({
   round: 1,
   teamADefender: null,
   teamBDefender: null,

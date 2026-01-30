@@ -1,10 +1,19 @@
-import { View, StyleSheet, useColorScheme, Pressable, Text } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, useColorScheme, Pressable, Text, TextInput, Button } from 'react-native';
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors } from '@/src/constants/Colors';
 import { ConfettiAnimation } from '@/src/components/animations/ConfettiAnimation';
 import { hexToRgba } from '@/src/constants/Colors';
+import { supabase } from '@/src/components/supabase/supabase';
+import { StyledText } from '@/src/components/pairings/styled';
+
+type Message = {
+  text: string;
+  user: string;
+  timestamp: string;
+}
+
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
@@ -12,6 +21,98 @@ export default function HomeScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef<View>(null);
+   const [message, setMessage] = useState('');
+  const [user, setUser] = useState("john_doe");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const reanimatedTestRef = useRef<{ toggle: () => void } | null>(null);
+
+  useEffect(() => {
+    console.log('useEffect running - initializing channel');
+    // Initialize the lobby channel
+    const channel = supabase.channel('lobby', {
+      config: { broadcast: { self: true } },
+    });
+
+    channel
+      .on('broadcast', { event: 'message_sent' }, (payload) => {
+        setMessages((prevMessages) => [...prevMessages, payload.payload]);
+        reanimatedTestRef.current?.toggle();
+      })
+      .subscribe((status, err) => {
+        console.log('Lobby channel status:', status, err ? `Error: ${err.message}` : '');
+        setIsSubscribed(status === 'SUBSCRIBED');
+      });
+
+      if(!channel) {
+        console.error('Channel initialization failed');
+        return;
+      }
+   channelRef.current = channel;
+
+    // Subscribe to global events channel (triggers from events table changes)
+    const globalChannel = supabase.channel('events', { config: { private: true } })
+      .on('broadcast', { event: 'INSERT' }, payload => console.log('global INSERT', payload))
+      .on('broadcast', { event: 'UPDATE' }, payload => console.log('global UPDATE', payload))
+      .on('broadcast', { event: 'DELETE' }, payload => console.log('global DELETE', payload))
+      .subscribe((status, err) => {
+        console.log('Global events channel status:', status, err ? `Error: ${err.message}` : '');
+      });
+
+    // Subscribe to a specific event id (replace with a real uuid from wha_data.events)
+    const testEventId = 'e2841474-9aba-4e88-a5bc-f82462b73eb2';
+    const perEventChannel = supabase.channel(`event:${testEventId}`, { config: { private: true } })
+      .on('broadcast', { event: 'INSERT' }, payload => console.log('event INSERT', payload))
+      .on('broadcast', { event: 'UPDATE' }, payload => console.log('event UPDATE', payload))
+      .on('broadcast', { event: 'DELETE' }, payload => console.log('event DELETE', payload))
+      .subscribe((status, err) => {
+        console.log(`Per-event channel (${testEventId}) status:`, status, err ? `Error: ${err.message}` : '');
+      });
+
+    console.log('Subscribed to events. Waiting for broadcasts...');
+
+    return () => {
+      console.log('useEffect cleanup - removing channels');
+      if (channel) supabase.removeChannel(channel);
+      if (globalChannel) supabase.removeChannel(globalChannel);
+      if (perEventChannel) supabase.removeChannel(perEventChannel);
+    };
+  }, []);
+
+  const handleSend = async () => {
+    if (!channelRef.current) {
+      console.error("Channel not initialized");
+      return;
+    }
+
+    if (!isSubscribed) {
+      console.error("Channel not subscribed yet");
+      return;
+    }
+    
+    try {
+      // Use channelRef.current here
+      const result = await channelRef.current.send({
+        type: 'broadcast',
+        event: 'message_sent',
+        payload: {
+          text: message,
+          user: user,
+          timestamp: new Date().toISOString(),
+        },
+      });
+      
+      if (result === 'ok') {
+        console.log('Message sent successfully');
+        setMessage('');
+      } else {
+        console.error('Message send failed with status:', result);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
 
   const handleButtonPress = () => {
     // Measure button position for confetti origin
@@ -42,20 +143,61 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>🎉 Test Confetti Animation</Text>
       </Pressable>
 
-      <ConfettiAnimation
-        trigger={showConfetti}
-        originX={buttonPosition.x}
-        originY={buttonPosition.y}
-        onComplete={handleConfettiComplete}
-      />
+            {/* Reanimated 4 test */}
+      <ReanimatedTest ref={reanimatedTestRef} />
+      <View style={{ margin: 16 }}>
+        <StyledText variant="h1">Home</StyledText>
+        
+        {/* Cross-platform friendly TextInput */}
+        <TextInput 
+          placeholder="Username" 
+          value={user}
+          onChangeText={setUser} // React Native uses onChangeText
+          style={{
+            width: '100%',
+            padding: 8,
+            marginTop: 16,
+            borderRadius: 4,
+            borderColor: theme.secondary,
+            borderWidth: 1,
+            color: theme.text // Ensure text is visible
+          }} 
+        />
+        <TextInput 
+          placeholder="Type something..." 
+          value={message}
+          onChangeText={setMessage} // React Native uses onChangeText
+          style={{
+            width: '100%',
+            padding: 8,
+            marginTop: 16,
+            borderRadius: 4,
+            borderColor: theme.secondary,
+            borderWidth: 1,
+            color: theme.text // Ensure text is visible
+          }} 
+        />
 
-      {/* Reanimated 4 test */}
-      <ReanimatedTest />
+        <View style={{ marginTop: 16 }}>
+          <Button 
+            title="Send Message"
+            onPress={handleSend}
+          />
+        </View>
+      </View>
+       <View style={{ margin: 16 }}>
+        <StyledText variant="h1">Messages</StyledText>
+        {messages.map((msg, index) => (
+          <StyledText key={index} style={{backgroundColor: msg.user === user ? theme.tint : theme.background, color: msg.user === user ? theme.text : theme.tint}}>{msg.user}: {msg.text}</StyledText>
+        ))}
+
+      </View>
+
     </View>
   );
 }
 
-function ReanimatedTest() {
+const ReanimatedTest = forwardRef<{ toggle: () => void }, object>((_, ref) => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const [inSlotB, setInSlotB] = useState(false);
@@ -86,6 +228,7 @@ function ReanimatedTest() {
       });
     }, 100);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggle = () => {
@@ -98,6 +241,10 @@ function ReanimatedTest() {
       setInSlotB(!inSlotB);
     });
   };
+
+  useImperativeHandle(ref, () => ({
+    toggle,
+  }));
 
   return (
     <View style={{ marginTop: 24, alignItems: 'center', gap: 12 }}>
@@ -141,9 +288,10 @@ function ReanimatedTest() {
           ]}
         />
       )}
+      
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -250,7 +250,7 @@ function AnimatedCard({
         {faceDown ? (
           <FaceDownCard team={team} width={cardWidth} height={cardHeight} />
         ) : (
-          <PlayerCard player={player} state="available" draggable={false} />
+          <PlayerCard player={player} state="available" />
         )}
       </Pressable>
     </Animated.View>

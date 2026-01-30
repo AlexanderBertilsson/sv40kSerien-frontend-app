@@ -537,8 +537,7 @@ function CardInHand({
               <PlayerCard
                 player={player}
                 state="available"
-                draggable={false}
-              />
+                             />
             )}
           </View>
         </Pressable>
@@ -559,8 +558,7 @@ function CardInHand({
             <PlayerCard
               player={player}
               state="available"
-              draggable={false}
-            />
+                         />
           )}
         </View>
       )}

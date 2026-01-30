@@ -190,8 +190,7 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
                 <PlayerCard
                   player={player}
                   state="available"
-                  draggable={false}
-                />
+                                 />
               )}
             </View>
           )}

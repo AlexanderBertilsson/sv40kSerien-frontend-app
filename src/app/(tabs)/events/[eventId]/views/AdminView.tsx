@@ -336,7 +336,7 @@ export default function AdminView({
       </View>
 
       {/* Edit Event Modal */}
-      <EditEventModal 
+      <EditEventModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
         onUpdate={async () => {
@@ -348,6 +348,9 @@ export default function AdminView({
         theme={theme}
         loading={actionLoading}
         error={getErrorMessage(actionError)}
+        eventId={event.id}
+        numberOfRounds={event.rounds}
+        playersPerTeam={event.eventType?.playersPerTeam}
       />
 
       {/* Delete Confirmation */}

@@ -1,5 +1,5 @@
 export interface Notification {
-    notificationType: "team_invite" | "tournament_invite";
+    notificationType: "team_invite" | "event_invite";
     payload: TeamInvite | TournamentInvite;
 }
 
@@ -18,5 +18,21 @@ export interface TeamInvite {
 }
 
 export interface TournamentInvite{
-
+    id: string;
+    senderName: string;
+    senderId: string;
+    recieverId: string;
+    eventRole: 'player' | 'coach';
+    team: {
+        id: string;
+        name: string;
+        logoUrl?: string;
+        bannerUrl?: string;
+        sportsmanshipLvl: number;
+    };
+    event: {
+        id: string;
+        title: string;
+        eventType: string | null;
+    };
 }

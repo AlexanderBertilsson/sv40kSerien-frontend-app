@@ -78,7 +78,7 @@ export default function AnimatedCardTransition({
           height={cardHeight}
         />
       ) : (
-        <PlayerCard player={player} state="available" draggable={false} />
+        <PlayerCard player={player} state="available" />
       )}
     </Animated.View>
   );

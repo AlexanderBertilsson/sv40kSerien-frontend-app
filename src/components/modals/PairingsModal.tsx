@@ -7,6 +7,7 @@ import { Colors, hexToRgba } from '../../constants/Colors';
 import { useSubmitPairings } from '../../hooks/useEventState';
 import { EventTeam } from '../../../types/Event';
 import { PlayerRole, PairingRequest, SubmitPairingsRequest } from '../../../types/EventAdmin';
+import { FactionIcon } from '../FactionIcon';
 
 interface PairingsModalProps {
   visible: boolean;
@@ -15,6 +16,7 @@ interface PairingsModalProps {
   teamMatchId: string;
   team1: EventTeam | null;
   team2: EventTeam | null;
+  onStartPairings?: () => void;
 }
 
 interface GamePairing {
@@ -33,6 +35,7 @@ export function PairingsModal({
   teamMatchId,
   team1,
   team2,
+  onStartPairings,
 }: PairingsModalProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
@@ -143,13 +146,16 @@ export function PairingsModal({
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.optionButton, { backgroundColor: hexToRgba(theme.icon, 0.5) }]}
-        disabled
+        style={[styles.optionButton, { backgroundColor: theme.tint }]}
+        onPress={() => {
+          handleClose();
+          onStartPairings?.();
+        }}
       >
-        <MaterialCommunityIcons name="shuffle-variant" size={32} color={theme.text} style={{ opacity: 0.5 }} />
-        <ThemedText style={[styles.optionButtonText, { opacity: 0.5 }]}>Start Pairings</ThemedText>
-        <ThemedText style={[styles.optionButtonSubtext, { opacity: 0.5 }]}>
-          Coming soon
+        <MaterialCommunityIcons name="shuffle-variant" size={32} color="#fff" />
+        <ThemedText style={styles.optionButtonText}>Start Pairings</ThemedText>
+        <ThemedText style={styles.optionButtonSubtext}>
+          WTC-style pairing process
         </ThemedText>
       </TouchableOpacity>
     </View>
@@ -187,9 +193,12 @@ export function PairingsModal({
                   {player.username}
                 </ThemedText>
                 {player.faction && (
-                  <ThemedText style={styles.playerFaction} numberOfLines={1}>
-                    {player.faction}
-                  </ThemedText>
+                  <View style={styles.factionRow}>
+                    <FactionIcon faction={player.faction} size={12} color={theme.text} style={{ opacity: 0.7 }} />
+                    <ThemedText style={styles.playerFaction} numberOfLines={1}>
+                      {player.faction}
+                    </ThemedText>
+                  </View>
                 )}
               </TouchableOpacity>
             );
@@ -469,6 +478,11 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  factionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   playerFaction: {
     fontSize: 12,

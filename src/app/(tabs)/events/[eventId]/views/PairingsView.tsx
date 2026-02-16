@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, useColorScheme, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { router } from 'expo-router';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors } from '@/src/constants/Colors';
 import { useEventState, useRoundMatches, useConfirmTeamMatch } from '@/src/hooks/useEventState';
@@ -11,17 +12,18 @@ import { GameDetailsModal } from '@/src/components/modals/GameDetailsModal';
 import { ConfirmModal } from '@/src/components/modals/ConfirmModal';
 import { EventTeam } from '@/types/Event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
+import { useEventContext } from '@/src/contexts/EventContext';
 
 interface PairingsViewProps {
   eventId: string;
-  userTeamId?: string | null;
   registeredTeams?: EventTeam[];
 }
 
-export default function PairingsView({ eventId, userTeamId, registeredTeams = [] }: PairingsViewProps) {
+export default function PairingsView({ eventId, registeredTeams = [] }: PairingsViewProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { authUser } = useAuthContext();
+  const { eventTeamId, isCaptain, isEventAdmin } = useEventContext();
   
   const { eventStateQuery } = useEventState(eventId);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
@@ -57,20 +59,20 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
     if (!roundMatchesQuery.data) return [];
     const matches = [...roundMatchesQuery.data];
     
-    if (userTeamId) {
+    if (eventTeamId) {
       matches.sort((a, b) => {
-        const aIsUserTeam = a.team1Id === userTeamId || a.team2Id === userTeamId;
-        const bIsUserTeam = b.team1Id === userTeamId || b.team2Id === userTeamId;
+        const aIsUserTeam = a.team1Id === eventTeamId || a.team2Id === eventTeamId;
+        const bIsUserTeam = b.team1Id === eventTeamId || b.team2Id === eventTeamId;
         if (aIsUserTeam && !bIsUserTeam) return -1;
         if (!aIsUserTeam && bIsUserTeam) return 1;
         return 0;
       });
     }
     return matches;
-  }, [roundMatchesQuery.data, userTeamId]);
+  }, [roundMatchesQuery.data, eventTeamId]);
 
   const isUserMatch = (match: TeamMatchDto) => {
-    return userTeamId && (match.team1Id === userTeamId || match.team2Id === userTeamId);
+    return eventTeamId && (match.team1Id === eventTeamId || match.team2Id === eventTeamId);
   };
 
   // Transform TeamMatchDto to MatchData
@@ -104,8 +106,14 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
       player2Faction: g.player2Faction,
       player2Score: g.player2Score,
       player2DifferentialScore: g.player2DifferentialScore,
-      missionName: g.missionName,
-      deployment: g.deployment,
+      missionName: g.mission?.name || null,
+      deployment: g.layout?.deployment || null,
+      layout: g.layout ? {
+        id: g.layout.id,
+        name: g.layout.name,
+        imageUrl: g.layout.imageUrl,
+        deployment: g.layout.deployment,
+      } : null,
       winnerId: g.winnerId,
     })),
   });
@@ -122,9 +130,9 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
 
   // Find user's match for confirm functionality
   const userMatch = useMemo(() => {
-    if (!userTeamId) return undefined;
-    return sortedMatches.find(m => m.team1Id === userTeamId || m.team2Id === userTeamId);
-  }, [sortedMatches, userTeamId]);
+    if (!eventTeamId) return undefined;
+    return sortedMatches.find(m => m.team1Id === eventTeamId || m.team2Id === eventTeamId);
+  }, [sortedMatches, eventTeamId]);
 
   const { confirmMatchMutation } = useConfirmTeamMatch(eventId, userMatch?.id || '');
 
@@ -146,9 +154,17 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
   };
 
   const handleMatchPress = (item: TeamMatchDto) => {
-    // Only open pairings modal if no games exist and not a bye
+    // Only allow pairings if no games exist and not a bye
     if (!hasGames(item) && !item.isBye) {
       setSelectedMatch(item);
+    }
+  };
+
+  const handleStartPairings = () => {
+    if (selectedMatch) {
+      const matchId = selectedMatch.id;
+      setSelectedMatch(null);
+      router.push(`/events/${eventId}/pairings/${matchId}`);
     }
   };
 
@@ -159,23 +175,38 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
   const renderMatchItem = ({ item }: { item: TeamMatchDto }) => {
     const isMyMatch = isUserMatch(item);
     const matchData = transformToMatchData(item);
-    // Only allow setting pairings for user's own match
-    const canSetPairings = isMyMatch && !hasGames(item) && !item.isBye;
+    const isAdmin = isCaptain || isEventAdmin;
+    // Only allow starting pairings for admins on their own match
+    const canSetPairings = isMyMatch && isAdmin && !hasGames(item) && !item.isBye;
     // Show confirm button if it's user's match, has games, all games completed, and match not yet completed
     const showConfirm = !!isMyMatch && hasGames(item) && allGamesCompleted(item) && item.status !== 'completed';
-    
+    // Spectate: non-user matches, or own match for non-admins, with in_progress pairing state
+    const canSpectate = (!isMyMatch || (isMyMatch && !isAdmin)) && item.pairingState?.status === 'in_progress' && !item.isBye;
+
     return (
-      <MatchCard
-        match={matchData}
-        isHighlighted={!!isMyMatch}
-        expandable={hasGames(item)}
-        onArmyListPress={handleArmyListPress}
-        onPress={canSetPairings ? () => handleMatchPress(item) : undefined}
-        onGamePress={handleGamePress}
-        showConfirmButton={showConfirm}
-        onConfirmResult={handleConfirmResult}
-        isConfirming={confirmMatchMutation.isPending}
-      />
+      <View>
+        <MatchCard
+          match={matchData}
+          isHighlighted={!!isMyMatch}
+          expandable={hasGames(item)}
+          onArmyListPress={handleArmyListPress}
+          onPress={canSetPairings ? () => handleMatchPress(item) : undefined}
+          onGamePress={handleGamePress}
+          showConfirmButton={showConfirm}
+          onConfirmResult={handleConfirmResult}
+          isConfirming={confirmMatchMutation.isPending}
+        />
+        {canSpectate && (
+          <TouchableOpacity
+            style={[styles.spectateButton, { borderColor: theme.tint }]}
+            onPress={() => router.push(`/events/${eventId}/pairings/${item.id}`)}
+          >
+            <ThemedText style={[styles.spectateButtonText, { color: theme.tint }]}>
+              Spectate Pairings
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+      </View>
     );
   };
 
@@ -259,6 +290,7 @@ export default function PairingsView({ eventId, userTeamId, registeredTeams = []
         teamMatchId={selectedMatch?.id || ''}
         team1={selectedMatch ? getTeamData(selectedMatch.team1Id) : null}
         team2={selectedMatch?.team2Id ? getTeamData(selectedMatch.team2Id) : null}
+        onStartPairings={handleStartPairings}
       />
 
       <GameDetailsModal
@@ -319,5 +351,17 @@ const styles = StyleSheet.create({
   },
   matchesList: {
     gap: 12,
+  },
+  spectateButton: {
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center' as const,
+  },
+  spectateButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
   },
 });

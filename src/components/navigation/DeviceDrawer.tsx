@@ -1,6 +1,6 @@
 import { Drawer } from 'expo-router/drawer';
 import DeviceDrawerContent from './drawerContent/DeviceDrawerContent';
-import { useColorScheme, useWindowDimensions } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
 
 export default function DeviceDrawer() {
@@ -15,7 +15,7 @@ export default function DeviceDrawer() {
                 title: '',
                 headerStyle: {
                     backgroundColor: 'transparent',
-                    ...({ position: 'absolute', elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }),
+                    ...({  elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }),
                 },
                 headerTintColor: theme.text,
                 headerTransparent: true,

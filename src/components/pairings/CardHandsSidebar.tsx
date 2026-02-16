@@ -15,6 +15,11 @@ interface CardHandsSidebarProps {
   redAvailablePlayers: Player[];
   redHandRef?: any;
   onOpenRedHand: () => void;
+
+  // Layout picker / coinflip indicator
+  currentLayoutPicker?: 'A' | 'B' | null;
+  coinflipWinner?: 'A' | 'B' | null;
+  showCoinflipWinner?: boolean; // Show during refuse phase
 }
 
 export default function CardHandsSidebar({
@@ -26,10 +31,49 @@ export default function CardHandsSidebar({
   redAvailablePlayers,
   redHandRef,
   onOpenRedHand,
+  currentLayoutPicker,
+  coinflipWinner,
+  showCoinflipWinner,
 }: CardHandsSidebarProps) {
   const theme = usePairingTheme();
 
   const filteredBluePlayers = blueAvailablePlayers.filter(p => !placedBlueCards.has(p.id));
+
+  // Coinflip Winner Marker (shown during refuse phase)
+  const CoinflipWinnerMarker = ({ team }: { team: 'A' | 'B' }) => {
+    if (!showCoinflipWinner || coinflipWinner !== team) return null;
+    return (
+      <View style={{
+        backgroundColor: '#10b981',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: theme.borderRadius.sm,
+        marginBottom: 4,
+      }}>
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 7, textAlign: 'center' }}>
+          🏆 Picks First
+        </Text>
+      </View>
+    );
+  };
+
+  // Layout Picker Marker (shown during layout-select phase)
+  const LayoutPickerMarker = ({ team }: { team: 'A' | 'B' }) => {
+    if (currentLayoutPicker !== team) return null;
+    return (
+      <View style={{
+        backgroundColor: '#f59e0b',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: theme.borderRadius.sm,
+        marginBottom: 4,
+      }}>
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 8, textAlign: 'center' }}>
+          🎯 Picking
+        </Text>
+      </View>
+    );
+  };
 
   return (
     <View
@@ -42,6 +86,8 @@ export default function CardHandsSidebar({
     >
       {/* Blue Team Hand - tap to open modal */}
       <Pressable id="blue-hand" onPress={onOpenBlueHand} style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+        <CoinflipWinnerMarker team="A" />
+        <LayoutPickerMarker team="A" />
         <Text
           style={{
             fontSize: theme.typography.sizes.xs,
@@ -66,6 +112,8 @@ export default function CardHandsSidebar({
 
       {/* Red Team Hand - tap to open modal */}
       <Pressable id='red-hand' onPress={onOpenRedHand} style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+        <CoinflipWinnerMarker team="B" />
+        <LayoutPickerMarker team="B" />
         <Text
           style={{
             fontSize: theme.typography.sizes.xs,

@@ -1,16 +1,13 @@
-import { View, Text, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, useWindowDimensions } from 'react-native';
 import { Player, PlayerState } from '@/src/types/pairing';
 import { usePairingTheme } from '@/src/theme/pairingTheme';
+import { FactionIcon, hasFactionIcon } from '@/src/components/FactionIcon';
 
 interface PlayerCardProps {
   player: Player;
   state?: PlayerState;
   isDragging?: boolean;
   isSelected?: boolean;
-  draggable?: boolean;
-  onDragStart?: (player: Player) => void;
-  onDragEnd?: () => void;
-  sourceZone?: string;
 }
 
 export default function PlayerCard({
@@ -18,10 +15,6 @@ export default function PlayerCard({
   state = 'available',
   isDragging,
   isSelected,
-  draggable = false,
-  onDragStart,
-  onDragEnd,
-  sourceZone
 }: PlayerCardProps) {
   const theme = usePairingTheme();
   const { height: windowHeight } = useWindowDimensions();
@@ -109,117 +102,66 @@ export default function PlayerCard({
     };
   };
 
-  const getTextColor = () => {
-    if (state === 'paired') {
-      return theme.colors.gray[500];
-    }
-    return theme.colors.text;
-  };
+  // Check if we have a valid faction to display
+  const showFactionIcon = player.faction && hasFactionIcon(player.faction);
+  const displayText = player.faction || player.username || `Team ${player.team}`;
+
+  // Truncate long faction names for the badge
+  const truncatedFaction = displayText.length > 12
+    ? displayText.slice(0, 11) + '…'
+    : displayText;
+
+  // Short text for avatar fallback (first 2 chars of faction or username)
+  const avatarText = (player.faction || player.username || player.team)?.slice(0, 2).toUpperCase() || '??';
 
   const cardContent = (
     <>
-      {/* Avatar with initials */}
+      {/* Avatar with faction icon or short text fallback */}
       <View style={getAvatarStyle()}>
-        <Text
-          style={{
-            color: theme.colors.white,
-            fontSize: theme.typography.sizes.md,
-            fontWeight: theme.typography.weights.bold as any,
-          }}
-        >
-          {player.initials}
-        </Text>
+        {showFactionIcon ? (
+          <FactionIcon
+            faction={player.faction!}
+            size={avatarSize * 0.65}
+            color={theme.colors.white}
+          />
+        ) : (
+          <Text
+            style={{
+              color: theme.colors.white,
+              fontSize: theme.typography.sizes.sm,
+              fontWeight: theme.typography.weights.bold as any,
+            }}
+          >
+            {avatarText}
+          </Text>
+        )}
       </View>
 
-      {/* Player name */}
-      <Text
-        style={{
-          color: getTextColor(),
-          fontSize: theme.typography.sizes.xs,
-          fontWeight: theme.typography.weights.medium as any,
-          textAlign: 'center',
-        }}
-        numberOfLines={2}
-      >
-        {player.name}
-      </Text>
-
-      {/* Team badge */}
+      {/* Faction/Team badge */}
       <View
         style={{
           paddingHorizontal: theme.spacing.xs,
           paddingVertical: 2,
           borderRadius: theme.borderRadius.sm,
           backgroundColor: player.color,
+          maxWidth: cardWidth - theme.spacing.sm * 2,
         }}
       >
         <Text
           style={{
             color: theme.colors.white,
-            fontSize: theme.typography.sizes.xs,
+            fontSize: windowHeight < 730 ? 8 : theme.typography.sizes.xs,
             fontWeight: theme.typography.weights.medium as any,
+            textAlign: 'center',
           }}
+          numberOfLines={1}
         >
-          Team {player.team}
+          {truncatedFaction}
         </Text>
       </View>
-
-      {/* Optional faction badge */}
-      {player.faction && (
-        <Text
-          style={{
-            color: theme.colors.gray[500],
-            fontSize: 10,
-          }}
-        >
-          {player.faction}
-        </Text>
-      )}
     </>
   );
 
-  // For web with drag enabled, use a div wrapper to support HTML5 drag-and-drop
-  if (Platform.OS === 'web' && draggable && onDragStart && onDragEnd) {
-    const cardStyle = getCardStyle();
-    return (
-      <div
-        draggable={true}
-        onDragStart={(e: any) => {
-          if (e.dataTransfer) {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('application/json', JSON.stringify(player));
-          }
-          e.preventDefault = () => {}; // Prevent default text selection
-          onDragStart(player);
-        }}
-        onDragEnd={(e: any) => {
-          onDragEnd();
-        }}
-        style={{
-          width: cardStyle.width,
-          height: cardStyle.height,
-          borderRadius: cardStyle.borderRadius,
-          padding: cardStyle.padding,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: cardStyle.alignItems,
-          justifyContent: cardStyle.justifyContent,
-          gap: cardStyle.gap,
-          borderWidth: cardStyle.borderWidth,
-          borderColor: cardStyle.borderColor,
-          borderStyle: 'solid',
-          backgroundColor: cardStyle.backgroundColor,
-          opacity: 'opacity' in cardStyle ? cardStyle.opacity : 1,
-          boxShadow: isDragging ? 'none' : '0 4px 6px rgba(0,0,0,0.1)',
-          cursor: 'grab',
-        }}
-      >
-        {cardContent}
-      </div>
-    );
-  }
-
-  // Default: regular View for non-draggable or native platforms
   return (
     <View style={getCardStyle()}>
       {cardContent}

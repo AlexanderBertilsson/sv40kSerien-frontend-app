@@ -14,7 +14,7 @@ export default function WebDrawer() {
             drawerPosition: 'left',
             title: '',
             headerStyle: { backgroundColor: 'transparent',
-                    ...({ position: 'absolute', elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }), },
+                    ...({  elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }), },
             headerTransparent: true,
             headerTintColor: theme.text,
             drawerStyle: { backgroundColor: theme.secondary },

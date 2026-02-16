@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
@@ -7,11 +7,17 @@ import { useAuthContext } from '@/src/contexts/AuthContext';
 export default function TabLayout() {
     const colorScheme = useColorScheme() ?? 'dark';
     const { isAuthenticated, authUser } = useAuthContext();
+    const segments = useSegments();
+
+    // Hide tab bar when on pairings game screens
+    const isPairingsGame = segments.includes('pairings');
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarStyle: isPairingsGame ? { display: 'none' } : undefined,
       }}
     >
       <Tabs.Screen

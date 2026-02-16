@@ -36,7 +36,7 @@ export default function UserScreen() {
   const handleProfileUpdate = async (profilePictureUri?: string, heroImageUri?: string, imageMetadata?: any) => {
     try {
       // TODO: Implement API call to update profile images with imageMetadata
-      console.log('Updating profile:', { profilePictureUri, heroImageUri, imageMetadata });
+      console.log('TODO: Updating profile:', { profilePictureUri, heroImageUri, imageMetadata });
       
       // Example of what the API call would look like:
       // const response = await apiClient.put('/users/me/images', {

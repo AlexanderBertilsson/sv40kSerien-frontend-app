@@ -7,11 +7,13 @@ import { Colors } from '@/src/constants/Colors';
 import { useLadder } from '@/src/hooks/useLadder';
 import { useSeasons } from '@/src/hooks/useSeasons';
 import { Season } from '@/types/Season';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export default function LadderScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   const { seasonsQuery: { data: seasons, isLoading: seasonsLoading } } = useSeasons();
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
@@ -31,7 +33,7 @@ export default function LadderScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>    
+    <ScrollView style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top + 56 }]}>
       {/* Season Card */}
       {seasonsLoading ? (
         <ActivityIndicator size="large" color={theme.tint} />
@@ -138,7 +140,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 10,
-    paddingTop: 20,
   },
   title: {
     fontSize: 28,

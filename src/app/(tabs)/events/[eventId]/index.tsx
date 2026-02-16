@@ -13,6 +13,7 @@ import {
   DeleteConfirmationModal,
 } from '@/src/components/event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
+import { EventProvider } from '@/src/contexts/EventContext';
 import { TabSwitcher } from '@/src/components/common/TabSwitcher';
 import {
   EventDetailsView,
@@ -21,9 +22,10 @@ import {
   PairingsView,
   PlacingsView,
   AdminView,
+  MyTeamView,
 } from './views';
 
-type EventTab = 'details' | 'playerDetails' | 'teams' | 'pairings' | 'placings' | 'admin';
+type EventTab = 'details' | 'playerDetails' | 'teams' | 'myTeam' | 'pairings' | 'placings' | 'admin';
 
 // Helper function to convert Error objects to strings
 const getErrorMessage = (error: Error | null): string | null => {
@@ -66,11 +68,12 @@ export default function EventScreen() {
     { key: 'details' as const, label: 'Overview' },
     { key: 'playerDetails' as const, label: 'Player Details' },
     { key: 'teams' as const, label: 'Roster' },
+    ...(isUserRegistered ? [{ key: 'myTeam' as const, label: 'My Team' }] : []),
     { key: 'pairings' as const, label: 'Pairings' },
     { key: 'placings' as const, label: 'Placings' },
   ];
 
-  const tabs = isOrganizer 
+  const tabs = isOrganizer
     ? [...baseTabs, { key: 'admin' as const, label: 'Admin' }]
     : baseTabs;
 
@@ -83,11 +86,12 @@ export default function EventScreen() {
         return <PlayerDetailsView eventId={event.id} />;
       case 'teams':
         return <TeamDetailsView event={event} />;
+      case 'myTeam':
+        return <MyTeamView eventId={event.id} maxPlayers={event.eventType?.playersPerTeam} />;
       case 'pairings':
         return (
-          <PairingsView 
-            eventId={event.id} 
-            userTeamId={authUser?.teamId}
+          <PairingsView
+            eventId={event.id}
             registeredTeams={event.registeredTeams}
           />
         );
@@ -205,9 +209,11 @@ export default function EventScreen() {
         />
 
         {/* Tab Content */}
-        <View style={styles.tabContent}>
-          {renderTabContent()}
-        </View>
+        <EventProvider eventId={eventId}>
+          <View style={styles.tabContent}>
+            {renderTabContent()}
+          </View>
+        </EventProvider>
 
         {/* Action Buttons */}
         {isAuthenticated && authUser?.teamId && !disableJoinButton ? (
@@ -224,7 +230,7 @@ export default function EventScreen() {
       </ScrollView>
       
       {/* Edit Event Modal */}
-      <EditEventModal 
+      <EditEventModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
         onUpdate={handleUpdateEvent}
@@ -233,6 +239,9 @@ export default function EventScreen() {
         theme={theme}
         loading={actionLoading}
         error={getErrorMessage(actionError)}
+        eventId={event?.id}
+        numberOfRounds={event?.rounds}
+        playersPerTeam={event?.eventType?.playersPerTeam}
       />
       
       {/* Delete Confirmation Modal */}

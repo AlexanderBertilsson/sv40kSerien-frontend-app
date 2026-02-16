@@ -1,14 +1,9 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.4",
   "info": {
-    "title": "wha-backend | v1",
-    "version": "1.0.0"
+    "title": "wha-backend",
+    "version": "1.0"
   },
-  "servers": [
-    {
-      "url": "http://localhost:5109"
-    }
-  ],
   "paths": {
     "/ArmyLists": {
       "get": {
@@ -88,6 +83,213 @@
         }
       }
     },
+    "/ArmyLists/factions": {
+      "get": {
+        "tags": [
+          "ArmyLists"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ArmyLists/events/{eventId}": {
+      "post": {
+        "tags": [
+          "ArmyLists"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateArmyListRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateArmyListRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateArmyListRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ArmyLists"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateArmyListRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateArmyListRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateArmyListRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmyListDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Auth/token": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/Auth/code": {
       "get": {
         "tags": [
@@ -97,6 +299,7 @@
           {
             "name": "Code",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -104,6 +307,7 @@
           {
             "name": "RedirectUri",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -111,6 +315,7 @@
           {
             "name": "ClientId",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -118,6 +323,7 @@
           {
             "name": "CodeVerifier",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -156,21 +362,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -188,21 +405,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateEventRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateEventRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateEventRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -248,21 +476,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateEventRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateEventRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateEventRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateEventRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -636,21 +875,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddEventAdminRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddEventAdminRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddEventAdminRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddEventAdminRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/AddEventAdminRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddEventAdminRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -691,6 +941,89 @@
         }
       }
     },
+    "/admin/event/configuration/options": {
+      "get": {
+        "tags": [
+          "EventAdmin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationOptionsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationOptionsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationOptionsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/event/{id}/rounds/configuration": {
+      "put": {
+        "tags": [
+          "EventAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddRoundConfigRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddRoundConfigRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddRoundConfigRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/EventRegistrations/{id}": {
       "post": {
         "tags": [
@@ -711,21 +1044,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventTeamRegistrationDto"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -763,28 +1107,85 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "format": "uuid"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventInviteRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "type": "string",
-                "format": "uuid"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventInviteRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "string",
-                "format": "uuid"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventInviteRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/EventRegistrations/event/{eventId}/team/{teamId}": {
+      "get": {
+        "tags": [
+          "EventRegistrations"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventTeamRegistrationResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventTeamRegistrationResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventTeamRegistrationResponseDto"
+                }
+              }
+            }
           }
         }
       }
@@ -900,6 +1301,46 @@
                   "items": {
                     "$ref": "#/components/schemas/PendingInviteDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EventRegistrations/event/{eventId}/me": {
+      "get": {
+        "tags": [
+          "EventRegistrations"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyEventRegistrationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyEventRegistrationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyEventRegistrationDto"
                 }
               }
             }
@@ -1115,6 +1556,55 @@
         }
       }
     },
+    "/Events/{id}/rounds/{roundNumber}/configuration": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundConfigDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundConfigDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundConfigDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/EventTypes": {
       "get": {
         "tags": [
@@ -1128,7 +1618,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventType2"
+                    "$ref": "#/components/schemas/EventType"
                   }
                 }
               },
@@ -1136,7 +1626,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventType2"
+                    "$ref": "#/components/schemas/EventType"
                   }
                 }
               },
@@ -1144,7 +1634,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventType2"
+                    "$ref": "#/components/schemas/EventType"
                   }
                 }
               }
@@ -1173,21 +1663,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReportScoreRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReportScoreRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReportScoreRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1205,21 +1706,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateUserFromCognitoRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1285,6 +1797,262 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/pairings/{id}/state": {
+      "get": {
+        "tags": [
+          "Pairings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pairings/{id}/defender": {
+      "post": {
+        "tags": [
+          "Pairings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectDefenderRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectDefenderRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectDefenderRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/pairings/{id}/attackers": {
+      "post": {
+        "tags": [
+          "Pairings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectAttackersRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectAttackersRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectAttackersRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/pairings/{id}/refuse": {
+      "post": {
+        "tags": [
+          "Pairings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RefuseAttackerRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RefuseAttackerRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RefuseAttackerRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/pairings/{id}/layout": {
+      "post": {
+        "tags": [
+          "Pairings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectLayoutRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectLayoutRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SelectLayoutRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -1529,8 +2297,7 @@
                 "format": "uuid"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1568,21 +2335,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitPairingsRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitPairingsRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitPairingsRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitPairingsRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitPairingsRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitPairingsRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1712,21 +2490,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTeamDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateTeamDto"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTeamDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateTeamDto"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTeamDto"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateTeamDto"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1928,16 +2717,32 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           },
           "refereeIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "AddRoundConfigRequest": {
+        "type": "object",
+        "properties": {
+          "rounds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoundConfigRequestItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "ArmyListDto": {
         "type": "object",
@@ -1947,6 +2752,14 @@
             "format": "uuid"
           },
           "factionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "factionShortName": {
+            "type": "string",
+            "nullable": true
+          },
+          "factionNormalizedName": {
             "type": "string",
             "nullable": true
           },
@@ -1962,25 +2775,83 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "AuthenticationResponse": {
         "type": "object",
         "properties": {
           "user": {
-            "$ref": "#/components/schemas/UserDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDto"
+              }
+            ],
+            "nullable": true
           },
           "expiresIn": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationOptionsDto": {
+        "type": "object",
+        "properties": {
+          "deployments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Deployment"
+            },
+            "nullable": true
+          },
+          "primaryMissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrimaryMissionDto"
+            },
+            "nullable": true
+          },
+          "layouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateArmyListRequest": {
+        "type": "object",
+        "properties": {
+          "factionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detachmentId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "list": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "CreateEventRequest": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
@@ -2024,23 +2895,36 @@
             "nullable": true
           },
           "pairingStrategy": {
-            "$ref": "#/components/schemas/PairingStrategy"
+            "enum": [
+              "dutch_swiss",
+              "round_robin",
+              "manual"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStrategy"
+              }
+            ]
           },
           "adminIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           },
           "refereeIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateTeamDto": {
         "required": [
@@ -2049,12 +2933,19 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "images": {
-            "$ref": "#/components/schemas/TeamImagesDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamImagesDto"
+              }
+            ],
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateTeamResponseDto": {
         "required": [
@@ -2068,7 +2959,8 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "logoSignedUrl": {
             "type": "string",
@@ -2078,12 +2970,13 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateUserFromCognitoRequest": {
         "required": [
-          "userId",
-          "email"
+          "email",
+          "userId"
         ],
         "type": "object",
         "properties": {
@@ -2092,13 +2985,43 @@
             "format": "uuid"
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "username": {
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "Deployment": {
+        "enum": [
+          "search_and_destroy",
+          "tipping_point",
+          "hammer_and_anvil",
+          "dawn_of_war",
+          "crucible_of_battle",
+          "sweeping_engagement"
+        ],
+        "type": "string"
+      },
+      "DetachmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "EventDetailsDto": {
         "type": "object",
@@ -2108,7 +3031,8 @@
             "format": "uuid"
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
@@ -2132,7 +3056,12 @@
             "nullable": true
           },
           "eventType": {
-            "$ref": "#/components/schemas/EventType"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ],
+            "nullable": true
           },
           "createdByUserId": {
             "type": "string",
@@ -2162,7 +3091,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EventDto": {
         "type": "object",
@@ -2177,17 +3107,20 @@
             "nullable": true
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
             "nullable": true
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "pairingStrategy": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "currentRoundNumber": {
             "type": "integer",
@@ -2215,7 +3148,12 @@
             "format": "int32"
           },
           "eventType": {
-            "$ref": "#/components/schemas/EventType"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ],
+            "nullable": true
           },
           "createdByUserId": {
             "type": "string",
@@ -2259,9 +3197,33 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EventRegisteredTeamDto"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "EventInviteRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventRole": {
+            "enum": [
+              "player",
+              "coach"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventRole"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
       },
       "EventRegisteredTeamDto": {
         "required": [
@@ -2276,7 +3238,8 @@
             "format": "uuid"
           },
           "teamName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "logoUrl": {
             "type": "string",
@@ -2290,16 +3253,18 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EventRegisteredUserDto"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EventRegisteredUserDto": {
         "required": [
           "id",
-          "username",
+          "profilePictureUrl",
           "sportsmanshipLevel",
-          "profilePictureUrl"
+          "username"
         ],
         "type": "object",
         "properties": {
@@ -2308,7 +3273,8 @@
             "format": "uuid"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "sportsmanshipLevel": {
             "type": "integer",
@@ -2331,21 +3297,83 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "EventRegistrationMemberDto": {
+        "required": [
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "profilePictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "sportsmanshipLevel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventRole": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isCaptain": {
+            "type": "boolean"
+          },
+          "armyList": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ArmyListDto"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EventRole": {
+        "enum": [
+          "player",
+          "coach"
+        ],
+        "type": "string"
       },
       "EventStateDto": {
         "type": "object",
         "properties": {
           "event": {
-            "$ref": "#/components/schemas/EventDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDto"
+              }
+            ],
+            "nullable": true
           },
           "rounds": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoundDto"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EventTeamRegistrationDto": {
         "type": "object",
@@ -2363,35 +3391,44 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           },
           "playerIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "EventTeamRegistrationResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRegistrationMemberDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "EventType": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "playersPerTeam": {
-            "type": "integer",
-            "format": "int32"
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -2400,11 +3437,27 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "playersPerTeam": {
+            "type": "integer",
+            "format": "int32"
           }
         },
-        "nullable": true
+        "additionalProperties": false
       },
-      "EventType2": {
+      "FactionDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -2412,26 +3465,26 @@
             "format": "int32"
           },
           "name": {
-            "type": "string"
-          },
-          "description": {
             "type": "string",
             "nullable": true
           },
-          "playersPerTeam": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
+          "shortName": {
             "type": "string",
-            "format": "date-time"
+            "nullable": true
           },
-          "updatedAt": {
+          "normalizedName": {
             "type": "string",
-            "format": "date-time",
+            "nullable": true
+          },
+          "detachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetachmentDto"
+            },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "GameDto": {
         "type": "object",
@@ -2449,7 +3502,8 @@
             "format": "uuid"
           },
           "player1Name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "player1ArmyListId": {
             "type": "string",
@@ -2472,7 +3526,8 @@
             "format": "uuid"
           },
           "player2Name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "player2ArmyListId": {
             "type": "string",
@@ -2495,12 +3550,20 @@
             "format": "date-time",
             "nullable": true
           },
-          "missionName": {
-            "type": "string",
+          "mission": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PrimaryMissionDto"
+              }
+            ],
             "nullable": true
           },
-          "deployment": {
-            "type": "string",
+          "layout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LayoutDto"
+              }
+            ],
             "nullable": true
           },
           "winnerId": {
@@ -2508,22 +3571,68 @@
             "format": "uuid",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "GamePairingRoles": {
+        "enum": [
+          "Attacker",
+          "Defender",
+          "Refused"
+        ],
+        "type": "string"
       },
       "ImageMetadataDto": {
         "required": [
-          "fileName",
-          "contentType"
+          "contentType",
+          "fileName"
         ],
         "type": "object",
         "properties": {
           "fileName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "contentType": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "LayoutDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "deployment": {
+            "enum": [
+              "search_and_destroy",
+              "tipping_point",
+              "hammer_and_anvil",
+              "dawn_of_war",
+              "crucible_of_battle",
+              "sweeping_engagement"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Deployment"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
       },
       "LogoutRequest": {
         "type": "object",
@@ -2539,7 +3648,44 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "MyEventRegistrationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventRole": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isCaptain": {
+            "type": "boolean"
+          },
+          "armyList": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ArmyListDto"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "NotificationDto": {
         "required": [
@@ -2556,66 +3702,23 @@
             "format": "uuid"
           },
           "notificationType": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "payload": {
-            "$ref": "#/components/schemas/NotificationPayload"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationPayload"
+              }
+            ],
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "NotificationPayload": {
-        "required": [
-          "$type"
-        ],
         "type": "object",
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/NotificationPayloadTeamInvitePayload"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "$type",
-          "mapping": {
-            "team_invite": "#/components/schemas/NotificationPayloadTeamInvitePayload"
-          }
-        }
-      },
-      "NotificationPayloadTeamInvitePayload": {
-        "properties": {
-          "$type": {
-            "enum": [
-              "team_invite"
-            ],
-            "type": "string"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "senderName": {
-            "type": "string"
-          },
-          "senderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "team": {
-            "$ref": "#/components/schemas/TeamDetailsDto"
-          },
-          "receiverId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "NullableOfPairingStrategy": {
-        "enum": [
-          "dutch_swiss",
-          "round_robin",
-          "manual",
-          null
-        ],
-        "nullable": true
+        "additionalProperties": false
       },
       "PairingGameSideRequest": {
         "type": "object",
@@ -2629,9 +3732,11 @@
             "format": "uuid"
           },
           "role": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PairingRequest": {
         "type": "object",
@@ -2640,16 +3745,294 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PairingGameSideRequest"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "PairingResultJson": {
+        "type": "object",
+        "properties": {
+          "tableNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "team1Player": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "team1Role": {
+            "enum": [
+              "Attacker",
+              "Defender",
+              "Refused"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GamePairingRoles"
+              }
+            ]
+          },
+          "team2Player": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "team2Role": {
+            "enum": [
+              "Attacker",
+              "Defender",
+              "Refused"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GamePairingRoles"
+              }
+            ]
+          },
+          "layoutId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdInRound": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairingRoundJson": {
+        "type": "object",
+        "properties": {
+          "team1Defender": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team2Defender": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team1Attackers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "team2Attackers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "team1Refused": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team2Refused": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team1Layout": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team2Layout": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team1LayoutTable": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "team2LayoutTable": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairingStateDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStateStatus"
+              }
+            ]
+          },
+          "state": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStateJson"
+              }
+            ],
+            "nullable": true
+          },
+          "team1Id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "team2Id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "teamMatchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transactionLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PairingTransactionLogDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairingStateJson": {
+        "type": "object",
+        "properties": {
+          "currentPhase": {
+            "type": "string",
+            "nullable": true
+          },
+          "coinflipWinner": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentLayoutPicker": {
+            "type": "string",
+            "nullable": true
+          },
+          "round1": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingRoundJson"
+              }
+            ],
+            "nullable": true
+          },
+          "round2": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingRoundJson"
+              }
+            ],
+            "nullable": true
+          },
+          "pairings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PairingResultJson"
+            },
+            "nullable": true
+          },
+          "availableLayoutIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "team1AvailablePlayers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "team2AvailablePlayers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairingStateStatus": {
+        "enum": [
+          "pending",
+          "in_progress",
+          "completed"
+        ],
+        "type": "string"
       },
       "PairingStrategy": {
         "enum": [
           "dutch_swiss",
           "round_robin",
           "manual"
-        ]
+        ],
+        "type": "string"
+      },
+      "PairingTransactionLogDto": {
+        "type": "object",
+        "properties": {
+          "transactionType": {
+            "enum": [
+              "select_defender",
+              "select_attacker_1",
+              "select_attacker_2",
+              "refuse_attacker",
+              "select_layout"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingTransactionType"
+              }
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairingTransactionType": {
+        "enum": [
+          "select_defender",
+          "select_attacker_1",
+          "select_attacker_2",
+          "refuse_attacker",
+          "select_layout"
+        ],
+        "type": "string"
       },
       "PendingInviteDto": {
         "required": [
@@ -2663,21 +4046,29 @@
             "format": "uuid"
           },
           "user": {
-            "$ref": "#/components/schemas/UserDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDto"
+              }
+            ],
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PlayedArmyData": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "gamesPlayed": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PlayerScoreEntry": {
         "type": "object",
@@ -2690,7 +4081,36 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "PrimaryMissionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RefuseAttackerRequest": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attackerId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
       },
       "ReportScoreRequest": {
         "type": "object",
@@ -2699,9 +4119,94 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PlayerScoreEntry"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "RoundConfigDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roundNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deployment": {
+            "enum": [
+              "search_and_destroy",
+              "tipping_point",
+              "hammer_and_anvil",
+              "dawn_of_war",
+              "crucible_of_battle",
+              "sweeping_engagement"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Deployment"
+              }
+            ]
+          },
+          "primaryMission": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PrimaryMissionDto"
+              }
+            ],
+            "nullable": true
+          },
+          "layouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoundConfigRequestItem": {
+        "type": "object",
+        "properties": {
+          "roundNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deployment": {
+            "enum": [
+              "search_and_destroy",
+              "tipping_point",
+              "hammer_and_anvil",
+              "dawn_of_war",
+              "crucible_of_battle",
+              "sweeping_engagement"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Deployment"
+              }
+            ]
+          },
+          "primaryMissionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "layoutIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "RoundDto": {
         "type": "object",
@@ -2719,10 +4224,26 @@
             "format": "int32"
           },
           "status": {
-            "$ref": "#/components/schemas/RoundStatus"
+            "enum": [
+              "pending",
+              "pairing_in_progress",
+              "in_progress",
+              "completed"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoundStatus"
+              }
+            ]
           },
           "pairingStrategy": {
-            "$ref": "#/components/schemas/NullableOfPairingStrategy"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStrategy"
+              }
+            ],
+            "nullable": true
           },
           "startedAt": {
             "type": "string",
@@ -2741,7 +4262,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RoundStatus": {
         "enum": [
@@ -2749,7 +4271,8 @@
           "pairing_in_progress",
           "in_progress",
           "completed"
-        ]
+        ],
+        "type": "string"
       },
       "SeasonDto": {
         "type": "object",
@@ -2759,7 +4282,8 @@
             "format": "int32"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "startDate": {
             "type": "string",
@@ -2769,7 +4293,8 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeasonLadderDto": {
         "type": "object",
@@ -2783,7 +4308,12 @@
             "format": "int32"
           },
           "team": {
-            "$ref": "#/components/schemas/TeamDetailsDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamDetailsDto"
+              }
+            ],
+            "nullable": true
           },
           "score": {
             "type": "integer",
@@ -2805,7 +4335,54 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "SelectAttackersRequest": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attackerIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SelectDefenderRequest": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "defenderId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SelectLayoutRequest": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "layoutId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
       },
       "SubmitPairingsRequest": {
         "type": "object",
@@ -2814,9 +4391,11 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PairingRequest"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TeamDetailsDto": {
         "required": [
@@ -2830,7 +4409,8 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "logoUrl": {
             "type": "string",
@@ -2844,7 +4424,8 @@
             "type": "number",
             "format": "float"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TeamDto": {
         "required": [
@@ -2859,7 +4440,8 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "logoUrl": {
             "type": "string",
@@ -2877,25 +4459,37 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserDto"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TeamImagesDto": {
         "required": [
-          "logo",
-          "banner"
+          "banner",
+          "logo"
         ],
         "type": "object",
         "properties": {
           "logo": {
-            "$ref": "#/components/schemas/ImageMetadataDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
           },
           "banner": {
-            "$ref": "#/components/schemas/ImageMetadataDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
           }
         },
-        "nullable": true
+        "additionalProperties": false
       },
       "TeamMatchDto": {
         "type": "object",
@@ -2917,7 +4511,8 @@
             "format": "uuid"
           },
           "team1Name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "team1Score": {
             "type": "integer",
@@ -2956,15 +4551,36 @@
             "type": "boolean"
           },
           "status": {
-            "$ref": "#/components/schemas/TeamMatchStatus"
+            "enum": [
+              "pending",
+              "pairing",
+              "in_progress",
+              "completed"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamMatchStatus"
+              }
+            ]
           },
           "games": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GameDto"
-            }
+            },
+            "nullable": true
+          },
+          "pairingState": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStateDto"
+              }
+            ],
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TeamMatchStatus": {
         "enum": [
@@ -2972,12 +4588,13 @@
           "pairing",
           "in_progress",
           "completed"
-        ]
+        ],
+        "type": "string"
       },
       "TeamRoleDto": {
         "required": [
-          "teamId",
-          "role"
+          "role",
+          "teamId"
         ],
         "type": "object",
         "properties": {
@@ -2986,9 +4603,45 @@
             "format": "uuid"
           },
           "role": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateArmyListRequest": {
+        "type": "object",
+        "properties": {
+          "factionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detachmentId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "list": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "UpdateEventRequest": {
         "type": "object",
@@ -3044,19 +4697,25 @@
             "nullable": true
           },
           "pairingStrategy": {
-            "$ref": "#/components/schemas/NullableOfPairingStrategy"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PairingStrategy"
+              }
+            ],
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UserDto": {
         "required": [
-          "id",
-          "username",
           "email",
-          "sportsmanshipScore",
-          "sportsmanshipLevel",
+          "heroImageUrl",
+          "id",
           "profilePictureUrl",
-          "heroImageUrl"
+          "sportsmanshipLevel",
+          "sportsmanshipScore",
+          "username"
         ],
         "type": "object",
         "properties": {
@@ -3065,10 +4724,12 @@
             "format": "uuid"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "sportsmanshipScore": {
             "type": "integer",
@@ -3091,7 +4752,8 @@
             "format": "uuid",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UserGameStatistics": {
         "type": "object",
@@ -3125,43 +4787,42 @@
             "format": "double"
           },
           "mostPlayedRole": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "mostPlayedArmies": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PlayedArmyData"
-            }
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UserProfileDto": {
         "required": [
-          "id",
-          "username",
           "email",
-          "sportsmanshipScore",
-          "sportsmanshipLevel",
+          "heroImageUrl",
+          "id",
           "profilePictureUrl",
-          "heroImageUrl"
+          "sportsmanshipLevel",
+          "sportsmanshipScore",
+          "username"
         ],
         "type": "object",
         "properties": {
-          "teamRoles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TeamRoleDto"
-            }
-          },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "sportsmanshipScore": {
             "type": "integer",
@@ -3183,56 +4844,17 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          },
+          "teamRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamRoleDto"
+            },
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
-  },
-  "tags": [
-    {
-      "name": "ArmyLists"
-    },
-    {
-      "name": "Auth"
-    },
-    {
-      "name": "EventAdmin"
-    },
-    {
-      "name": "EventRegistrations"
-    },
-    {
-      "name": "Events"
-    },
-    {
-      "name": "EventTypes"
-    },
-    {
-      "name": "Games"
-    },
-    {
-      "name": "Internal"
-    },
-    {
-      "name": "Matches"
-    },
-    {
-      "name": "Notifications"
-    },
-    {
-      "name": "Seasons"
-    },
-    {
-      "name": "TeamInvites"
-    },
-    {
-      "name": "TeamMatches"
-    },
-    {
-      "name": "Teams"
-    },
-    {
-      "name": "Users"
-    }
-  ]
+  }
 }

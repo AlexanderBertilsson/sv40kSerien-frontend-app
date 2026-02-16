@@ -42,7 +42,11 @@ module.exports = [
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn'],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }],
       'no-console': 'off',
       'no-undef': 'off'
     }

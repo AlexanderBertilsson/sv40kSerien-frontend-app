@@ -1,5 +1,4 @@
 // Bridge layer that adapts Colors[colorScheme] to the theme structure expected by pairing components
-import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
 import { colors as baseColors } from '@/src/constants/theme';
 

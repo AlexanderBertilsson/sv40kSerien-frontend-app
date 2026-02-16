@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import ThemedText from './ThemedText';
 import { ArmyListModal } from './modals/armyListModal';
 import { hexToRgba } from '../constants/Colors';
+import { FactionIcon } from './FactionIcon';
 
 // Extended user interface for UserRow component
 export interface UserRowData {
@@ -87,9 +88,14 @@ export function UserRow({
           <ThemedText style={[styles.playerName, { color: theme.text }]}>
             {user.username}
           </ThemedText>
-          <ThemedText style={[styles.faction, { color: theme.text }]}>
-            {user.faction}{user.detachment ? ` - ${user.detachment}` : ''}
-          </ThemedText>
+          {user.faction && (
+            <View style={styles.factionRow}>
+              <FactionIcon faction={user.faction} size={14} color={theme.text} style={{ opacity: 0.8 }} />
+              <ThemedText style={[styles.faction, { color: theme.text }]}>
+                {user.faction}{user.detachment ? ` - ${user.detachment}` : ''}
+              </ThemedText>
+            </View>
+          )}
           
           {user.armyId && <TouchableOpacity onPress={() => setIsModalVisible(true)}>
             <ThemedText style={styles.armyListLink}>
@@ -171,6 +177,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     flexWrap: 'wrap',
+  },
+  factionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   faction: {
     fontSize: 12,

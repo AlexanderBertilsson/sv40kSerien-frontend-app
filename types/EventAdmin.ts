@@ -82,9 +82,15 @@ export interface GameDto {
   player2Score: number;
   player2DifferentialScore: number;
   playedDate?: string | null;
-  missionName?: string | null;
-  deployment?: string | null;
+  mission?: PrimaryMissionDto | null;
+  layout?: LayoutDto | null;
   winnerId?: string | null;
+}
+
+export interface PairingStateDto {
+  id: string;
+  status: string; // "pending", "in_progress", "completed"
+  state: string | null;
 }
 
 export interface TeamMatchDto {
@@ -104,6 +110,47 @@ export interface TeamMatchDto {
   isBye: boolean;
   status: TeamMatchStatus;
   games?: GameDto[];
+  pairingState?: PairingStateDto | null;
+}
+
+export interface LayoutDto {
+  id: string;
+  name: string;
+  imageUrl: string;
+  deployment: Deployment;
+}
+
+export interface RoundConfigDto {
+  eventId: string;
+  roundNumber: number;
+  deployment: Deployment;
+  primaryMission?: { id: number; name: string } | null;
+  layouts: LayoutOptionDto[];
+}
+
+export interface EventRegistrationMemberDto {
+  registrationId: number;
+  userId: string;
+  username: string;
+  profilePictureUrl: string;
+  sportsmanshipLevel: number;
+  eventRole: string;
+  isAdmin: boolean;
+  isCaptain: boolean;
+  armyList?: {
+    id: string;
+    name: string;
+    factionName: string;
+    detachmentName?: string;
+    points: number;
+    lastUpdated: string;
+  } | null;
+}
+
+export interface EventTeamRegistrationResponseDto {
+  eventId: string;
+  teamId: string;
+  members: EventRegistrationMemberDto[];
 }
 
 export type PlayerRole = 'Attacker' | 'Defender';
@@ -122,6 +169,27 @@ export interface SubmitPairingsRequest {
   pairings: PairingRequest[];
 }
 
+// Pairing game API request types
+export interface SelectDefenderRequest {
+  teamId: string;
+  defenderId: string;
+}
+
+export interface SelectAttackersRequest {
+  teamId: string;
+  attackerIds: string[];
+}
+
+export interface RefuseAttackerRequest {
+  teamId: string;
+  attackerId: string;
+}
+
+export interface SelectLayoutRequest {
+  teamId: string;
+  layoutId: string;
+}
+
 export interface PlayerScoreEntry {
   playerId: string;
   score: number;
@@ -129,4 +197,42 @@ export interface PlayerScoreEntry {
 
 export interface ReportScoreRequest {
   results: PlayerScoreEntry[];
+}
+
+// Deployment enum values from API
+export type Deployment =
+  | 'search_and_destroy'
+  | 'tipping_point'
+  | 'hammer_and_anvil'
+  | 'dawn_of_war'
+  | 'crucible_of_battle'
+  | 'sweeping_engagement';
+
+export interface PrimaryMissionDto {
+  id: number;
+  name: string;
+}
+
+export interface LayoutOptionDto {
+  id: string;
+  name: string;
+  imageUrl: string;
+  deployment: Deployment;
+}
+
+export interface ConfigurationOptionsDto {
+  deployments: Deployment[];
+  primaryMissions: PrimaryMissionDto[];
+  layouts: LayoutOptionDto[];
+}
+
+export interface RoundConfigRequestItem {
+  roundNumber: number;
+  deployment: Deployment;
+  primaryMissionId: number;
+  layoutIds: string[];
+}
+
+export interface AddRoundConfigRequest {
+  rounds: RoundConfigRequestItem[];
 }

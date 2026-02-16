@@ -5,6 +5,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FontAwesome } from '@expo/vector-icons';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors, hexToRgba } from '@/src/constants/Colors';
+import { FactionIcon } from '@/src/components/FactionIcon';
 
 export interface MatchPlayer {
   id: string;
@@ -12,6 +13,13 @@ export interface MatchPlayer {
   profileImage?: string;
   faction?: string;
   armyListUrl?: string;
+}
+
+export interface MatchGameLayout {
+  id: string;
+  name: string;
+  imageUrl: string;
+  deployment: string;
 }
 
 export interface MatchGame {
@@ -30,6 +38,7 @@ export interface MatchGame {
   player2DifferentialScore?: number;
   missionName?: string | null;
   deployment?: string | null;
+  layout?: MatchGameLayout | null;
   winnerId?: string | null;
 }
 
@@ -94,6 +103,19 @@ export function MatchCard({
     return theme.text;
   };
 
+  const getDiffColor = (myScore: number, opponentScore: number) => {
+    if (myScore > opponentScore) return theme.success;
+    if (myScore < opponentScore) return theme.error;
+    return theme.info;
+  };
+
+  // Tally team scores from individual games when match isn't completed yet
+  const talliedTeam1Score = match.games?.reduce((sum, g) => sum + (g.player1DifferentialScore || 0), 0) ?? 0;
+  const talliedTeam2Score = match.games?.reduce((sum, g) => sum + (g.player2DifferentialScore || 0), 0) ?? 0;
+  const hasGames = match.games && match.games.length > 0;
+  const displayTeam1Score = !match.isCompleted && hasGames ? talliedTeam1Score : match.team1Score;
+  const displayTeam2Score = !match.isCompleted && hasGames ? talliedTeam2Score : match.team2Score;
+
   const hasExpandedContent = expandable && (
     match.games?.length || 
     match.primaryMission || 
@@ -156,14 +178,25 @@ export function MatchCard({
           ) : (
             <>
               <MaterialCommunityIcons name="sword-cross" size={24} color={theme.tint} />
-              <ThemedText 
-                style={[
-                  styles.score, 
-                  { color: match.isCompleted ? getScoreColor(match.team1Score, match.team2Score) : theme.text }
-                ]}
-              >
-                {match.team1Score} - {match.team2Score}
-              </ThemedText>
+              <View style={styles.teamScoreRow}>
+                <ThemedText
+                  style={[
+                    styles.score,
+                    { color: (match.isCompleted || hasGames) ? getDiffColor(displayTeam1Score, displayTeam2Score) : theme.text }
+                  ]}
+                >
+                  {displayTeam1Score}
+                </ThemedText>
+                <ThemedText style={styles.score}> - </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.score,
+                    { color: (match.isCompleted || hasGames) ? getDiffColor(displayTeam2Score, displayTeam1Score) : theme.text }
+                  ]}
+                >
+                  {displayTeam2Score}
+                </ThemedText>
+              </View>
             </>
           )}
         </View>
@@ -248,26 +281,90 @@ export function MatchCard({
                 const player1ArmyListId = game.player1ArmyListId || player1?.armyListUrl;
                 const player2ArmyListId = game.player2ArmyListId || player2?.armyListUrl;
 
+                if (isMobile) {
+                  return (
+                    <Pressable
+                      key={game.id || index}
+                      style={[styles.gameRowMobile, { borderColor: hexToRgba(theme.icon, 0.3) }]}
+                      onPress={onGamePress ? () => onGamePress(game) : undefined}
+                      disabled={!onGamePress}
+                    >
+                      {/* Player 1 row - left aligned: score, image, icon, (name, faction), army list */}
+                      <View style={styles.mobilePlayerRowLeft}>
+                        <ThemedText style={[
+                          styles.mobilePlayerScore,
+                          { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
+                        ]}>
+                          {game.player1DifferentialScore}
+                        </ThemedText>
+                        {player1Faction && (
+                          <FactionIcon faction={player1Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
+                        )}
+                        <View style={styles.mobilePlayerDetails}>
+                          <ThemedText style={styles.playerName}>{player1Name || 'Player 1'}</ThemedText>
+                          {player1Faction && (
+                            <ThemedText style={styles.faction}>{player1Faction}</ThemedText>
+                          )}
+                        </View>
+                        <View style={{ flex: 1 }} />
+                        {player1ArmyListId && onArmyListPress && (
+                          <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
+                            <ThemedText style={styles.armyListLink}>Army List</ThemedText>
+                          </Pressable>
+                        )}
+                      </View>
+
+                      {/* Crossed swords divider */}
+                      <View style={styles.mobileVsDivider}>
+                        <MaterialCommunityIcons name="sword-cross" size={18} color={theme.tint} />
+                      </View>
+
+                      {/* Player 2 row - right aligned: army list, (name, faction), icon, image, score */}
+                      <View style={styles.mobilePlayerRowRight}>
+                        {player2ArmyListId && onArmyListPress && (
+                          <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
+                            <ThemedText style={styles.armyListLink}>Army List</ThemedText>
+                          </Pressable>
+                        )}
+                        <View style={{ flex: 1 }} />
+                        <View style={[styles.mobilePlayerDetails, styles.playerDetailsRight]}>
+                          <ThemedText style={[styles.playerName, styles.textAlignRight]}>
+                            {player2Name || 'Player 2'}
+                          </ThemedText>
+                          {player2Faction && (
+                            <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>
+                          )}
+                        </View>
+                        {player2Faction && (
+                          <FactionIcon faction={player2Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
+                        )}
+                        <ThemedText style={[
+                          styles.mobilePlayerScore,
+                          { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
+                        ]}>
+                          {game.player2DifferentialScore}
+                        </ThemedText>
+                      </View>
+                    </Pressable>
+                  );
+                }
+
                 return (
-                  <Pressable 
-                    key={game.id || index} 
+                  <Pressable
+                    key={game.id || index}
                     style={styles.gameRow}
                     onPress={onGamePress ? () => onGamePress(game) : undefined}
                     disabled={!onGamePress}
                   >
                     <View style={styles.playerInfo}>
-                      {player1?.profileImage ? (
-                        <Image source={{ uri: player1.profileImage }} style={styles.playerImage} />
-                      ) : (
-                        <View style={[styles.playerImagePlaceholder, { backgroundColor: theme.icon }]}>
-                          <ThemedText style={styles.playerImageText}>
-                            {player1Name?.charAt(0) || '?'}
-                          </ThemedText>
-                        </View>
+                      {player1Faction && (
+                        <FactionIcon faction={player1Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
                       )}
                       <View style={styles.playerDetails}>
                         <ThemedText style={styles.playerName}>{player1Name || 'Player 1'}</ThemedText>
-                        {player1Faction && <ThemedText style={styles.faction}>{player1Faction}</ThemedText>}
+                        {player1Faction && (
+                          <ThemedText style={styles.faction}>{player1Faction}</ThemedText>
+                        )}
                         {player1ArmyListId && onArmyListPress && (
                           <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
                             <ThemedText style={styles.armyListLink}>View Army List</ThemedText>
@@ -278,12 +375,21 @@ export function MatchCard({
 
                     <View style={styles.gameScoreContainer}>
                       <MaterialCommunityIcons name="sword-cross" size={20} color={theme.tint} />
-                      <ThemedText style={[
-                        styles.gameScore,
-                        { color: getScoreColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
-                      ]}>
-                        {game.player1DifferentialScore} - {game.player2DifferentialScore}
-                      </ThemedText>
+                      <View style={styles.gameScoreRow}>
+                        <ThemedText style={[
+                          styles.gameScore,
+                          { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
+                        ]}>
+                          {game.player1DifferentialScore}
+                        </ThemedText>
+                        <ThemedText style={styles.gameScoreDash}> - </ThemedText>
+                        <ThemedText style={[
+                          styles.gameScore,
+                          { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
+                        ]}>
+                          {game.player2DifferentialScore}
+                        </ThemedText>
+                      </View>
                     </View>
 
                     <View style={[styles.playerInfo, styles.playerInfoRight]}>
@@ -291,21 +397,17 @@ export function MatchCard({
                         <ThemedText style={[styles.playerName, styles.textAlignRight]}>
                           {player2Name || 'Player 2'}
                         </ThemedText>
-                        {player2Faction && <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>}
+                        {player2Faction && (
+                          <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>
+                        )}
                         {player2ArmyListId && onArmyListPress && (
                           <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
                             <ThemedText style={[styles.armyListLink, styles.textAlignRight]}>View Army List</ThemedText>
                           </Pressable>
                         )}
                       </View>
-                      {player2?.profileImage ? (
-                        <Image source={{ uri: player2.profileImage }} style={styles.playerImage} />
-                      ) : (
-                        <View style={[styles.playerImagePlaceholder, { backgroundColor: theme.icon }]}>
-                          <ThemedText style={styles.playerImageText}>
-                            {player2Name?.charAt(0) || '?'}
-                          </ThemedText>
-                        </View>
+                      {player2Faction && (
+                        <FactionIcon faction={player2Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
                       )}
                     </View>
                   </Pressable>
@@ -407,10 +509,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flexShrink: 0,
   },
+  teamScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   score: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 4,
   },
   byeText: {
     fontWeight: '600',
@@ -478,6 +584,36 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     gap: 8,
   },
+  gameRowMobile: {
+    marginBottom: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    gap: 4,
+  },
+  mobilePlayerRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  mobilePlayerRowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  mobilePlayerDetails: {
+    flexShrink: 1,
+  },
+  mobileVsDivider: {
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  mobilePlayerScore: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    minWidth: 28,
+    textAlign: 'center',
+  },
   playerInfo: {
     flex: 1,
     flexDirection: 'row',
@@ -486,23 +622,6 @@ const styles = StyleSheet.create({
   },
   playerInfoRight: {
     justifyContent: 'flex-end',
-  },
-  playerImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  playerImagePlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playerImageText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
   },
   playerDetails: {
     marginHorizontal: 8,
@@ -517,6 +636,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     flexWrap: 'wrap',
+  },
+  factionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  factionRowRight: {
+    justifyContent: 'flex-end',
   },
   faction: {
     fontSize: 12,
@@ -533,10 +660,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: '20%',
   },
+  gameScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   gameScore: {
     fontSize: 16,
     fontWeight: '600',
-    marginTop: 4,
+  },
+  gameScoreDash: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   confirmButton: {
     flexDirection: 'row',

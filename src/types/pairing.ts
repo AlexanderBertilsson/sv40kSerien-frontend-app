@@ -2,9 +2,11 @@
 
 export interface Player {
   id: string;
-  initials: string;
   color: string;
   team: 'A' | 'B';
+  username?: string;
+  profilePictureUrl?: string;
+  faction?: string;
 }
 
 export interface Team {
@@ -21,8 +23,11 @@ export type PlayerState =
   | 'refused'        // Refused by opponent
   | 'paired';        // Permanently paired
 
-// Table layout types (5 unique layouts for 5 tables)
-export type TableLayout = 'layout1' | 'layout2' | 'layout3' | 'layout4' | 'layout5';
+export interface TableLayout {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
 
 export interface Pairing {
   id: string;
@@ -30,7 +35,7 @@ export interface Pairing {
   teamAPlayer: Player;
   teamBPlayer: Player;
   createdInRound: 1 | 2 | 3;
-  layout?: TableLayout;  // Selected table layout
+  layout?: TableLayout;
 }
 
 export type Phase =
@@ -93,6 +98,61 @@ export interface PairingState {
   showReveal: boolean;
 }
 
+// Multiplayer types
+
+// Server uses '1' | '2' for team identifiers
+export type ServerTeamId = '1' | '2';
+
+export type ActionMessage =
+  | { action: 'defender_played'; team: ServerTeamId }
+  | { action: 'attacker_1_played'; team: ServerTeamId }
+  | { action: 'attacker_2_played'; team: ServerTeamId }
+  | { action: 'refusal_played'; team: ServerTeamId }
+  | { action: 'layout_selected'; team: ServerTeamId; tableNumber: number };
+
+export interface ServerRoundState {
+  team1Defender: string | null;
+  team2Defender: string | null;
+  team1Attackers: string[];
+  team2Attackers: string[];
+  team1Refused: string | null;
+  team2Refused: string | null;
+  team1Layout: string | null;
+  team2Layout: string | null;
+  team1LayoutTable: number | null;
+  team2LayoutTable: number | null;
+}
+
+export interface ServerPairingResult {
+  tableNumber: number;
+  team1Player: string;
+  team2Player: string;
+  layoutId: string | null;
+  createdInRound: number;
+}
+
+export interface ServerPairingState {
+  currentPhase: Phase;
+  coinflipWinner: ServerTeamId | null;
+  currentLayoutPicker: ServerTeamId | null;
+  round1: ServerRoundState;
+  round2: ServerRoundState;
+  pairings: ServerPairingResult[];
+  availableLayoutIds: string[];
+}
+
+export type PairingTransactionType =
+  | 'select_defender'
+  | 'select_attacker_1'
+  | 'select_attacker_2'
+  | 'refuse_attacker'
+  | 'select_layout';
+
+export interface PairingTransactionLog {
+  transactionType: PairingTransactionType;
+  entityId: string;
+}
+
 // Initial state helpers
 const createInitialRoundState = (): RoundState => ({
   round: 1,
@@ -105,7 +165,7 @@ const createInitialRoundState = (): RoundState => ({
   tableChoiceToken: null,
 });
 
-export const createInitialPairingState = (teamA: Team, teamB: Team): PairingState => ({
+export const createInitialPairingState = (teamA: Team, teamB: Team, layouts: TableLayout[]): PairingState => ({
   teamA,
   teamB,
   playerStates: new Map(),
@@ -113,7 +173,7 @@ export const createInitialPairingState = (teamA: Team, teamB: Team): PairingStat
   round1: createInitialRoundState(),
   round2: { ...createInitialRoundState(), round: 2 },
   pairings: [],
-  availableLayouts: ['layout1', 'layout2', 'layout3', 'layout4', 'layout5'],
+  availableLayouts: layouts,
   coinflipWinner: null,
   currentLayoutPicker: null,
   pendingLayoutForTable: null,

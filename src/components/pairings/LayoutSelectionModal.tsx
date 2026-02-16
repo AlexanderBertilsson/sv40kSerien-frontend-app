@@ -4,15 +4,23 @@ import { usePairingTheme } from '@/src/theme/pairingTheme';
 import { TableLayout, Pairing } from '@/src/types/pairing';
 import { Button } from './styled';
 import PlayerCard from './PlayerCard';
+import { FactionIcon, hasFactionIcon } from '@/src/components/FactionIcon';
 
-// Layout image imports
-const layoutImages: Record<TableLayout, any> = {
+// Fallback demo layout images (used when imageUrl is empty)
+const DEMO_LAYOUT_IMAGES: Record<string, any> = {
   layout1: require('@/assets/docs/layouts/layout1.png'),
   layout2: require('@/assets/docs/layouts/layout2.png'),
   layout3: require('@/assets/docs/layouts/layout3.png'),
   layout4: require('@/assets/docs/layouts/layout4.png'),
   layout5: require('@/assets/docs/layouts/layout5.png'),
 };
+
+function getLayoutImageSource(layout: TableLayout): any {
+  if (layout.imageUrl) {
+    return { uri: layout.imageUrl };
+  }
+  return DEMO_LAYOUT_IMAGES[layout.id] || null;
+}
 
 interface LayoutSelectionModalProps {
   visible: boolean;
@@ -52,6 +60,9 @@ export default function LayoutSelectionModal({
   if (!visible) return null;
 
   const sortedPairings = [...pairings].sort((a, b) => a.tableNumber - b.tableNumber);
+
+  // Find the pairing for the current table being selected
+  const currentPairing = pairings.find(p => p.tableNumber === tableNumber);
 
   // Calculate grid dimensions based on available layouts
   const layoutCount = availableLayouts.length;
@@ -137,12 +148,59 @@ export default function LayoutSelectionModal({
           {/* Content container - centered with flex */}
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             {viewMode === 'layouts' ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+              <View style={{ alignItems: 'center', gap: 12 }}>
+                {/* Current pairing indicator with arrow */}
+                {currentPairing && (
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={{ color: theme.colors.gray[400], fontSize: 9, marginBottom: 4 }}>
+                      SELECTING FOR
+                    </Text>
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                      borderWidth: 2,
+                      borderColor: '#f59e0b',
+                      borderRadius: theme.borderRadius.md,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      gap: 8,
+                    }}>
+                      {currentPairing.teamAPlayer.faction && hasFactionIcon(currentPairing.teamAPlayer.faction) ? (
+                        <FactionIcon faction={currentPairing.teamAPlayer.faction} size={20} color="#3b82f6" />
+                      ) : (
+                        <Text style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: 10 }} numberOfLines={1}>
+                          {currentPairing.teamAPlayer.faction || currentPairing.teamAPlayer.username || 'A'}
+                        </Text>
+                      )}
+                      <View style={{
+                        backgroundColor: '#f59e0b',
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 4,
+                      }}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 11 }}>
+                          T{tableNumber}
+                        </Text>
+                      </View>
+                      {currentPairing.teamBPlayer.faction && hasFactionIcon(currentPairing.teamBPlayer.faction) ? (
+                        <FactionIcon faction={currentPairing.teamBPlayer.faction} size={20} color="#ef4444" />
+                      ) : (
+                        <Text style={{ color: '#ef4444', fontWeight: 'bold', fontSize: 10 }} numberOfLines={1}>
+                          {currentPairing.teamBPlayer.faction || currentPairing.teamBPlayer.username || 'B'}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                )}
+
+                {/* Layout grid */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
                 {availableLayouts.map((layout) => {
-                  const isSelected = selectedLayout === layout;
+                  const isSelected = selectedLayout?.id === layout.id;
                   return (
                     <Pressable
-                      key={layout}
+                      key={layout.id}
                       onPress={() => setSelectedLayout(layout)}
                       style={{
                         borderWidth: 3,
@@ -154,7 +212,7 @@ export default function LayoutSelectionModal({
                       }}
                     >
                       <Image
-                        source={layoutImages[layout]}
+                        source={getLayoutImageSource(layout)}
                         style={{ width: imageWidth, height: imageHeight }}
                         resizeMode="contain"
                       />
@@ -169,15 +227,16 @@ export default function LayoutSelectionModal({
                         }}
                       >
                         <Text style={{ color: theme.colors.white, fontSize: 8, fontWeight: 'bold' as any, textAlign: 'center' }}>
-                          {layout.replace('layout', 'L')}
+                          {layout.name}
                         </Text>
                       </View>
                     </Pressable>
                   );
                 })}
+                </View>
               </View>
             ) : (
-              /* Pairings view - layout image between initials */
+              /* Pairings view - layout image between faction icons */
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
                 {sortedPairings.length === 0 ? (
                   <Text style={{ color: theme.colors.white, fontSize: 14, textAlign: 'center' }}>
@@ -192,10 +251,14 @@ export default function LayoutSelectionModal({
                         gap: 2,
                       }}
                     >
-                      {/* Team A initials above */}
-                      <Text style={{ color: '#3b82f6', fontWeight: 'bold' as any, fontSize: 12 }}>
-                        {pairing.teamAPlayer.initials}
-                      </Text>
+                      {/* Team A faction icon above */}
+                      {pairing.teamAPlayer.faction && hasFactionIcon(pairing.teamAPlayer.faction) ? (
+                        <FactionIcon faction={pairing.teamAPlayer.faction} size={18} color="#3b82f6" />
+                      ) : (
+                        <Text style={{ color: '#3b82f6', fontWeight: 'bold' as any, fontSize: 10 }} numberOfLines={1}>
+                          {pairing.teamAPlayer.faction || pairing.teamAPlayer.username || 'A'}
+                        </Text>
+                      )}
 
                       {/* Layout image */}
                       <View
@@ -208,7 +271,7 @@ export default function LayoutSelectionModal({
                       >
                         {pairing.layout ? (
                           <Image
-                            source={layoutImages[pairing.layout]}
+                            source={getLayoutImageSource(pairing.layout)}
                             style={{ width: imageWidth, height: imageHeight }}
                             resizeMode="contain"
                           />
@@ -231,10 +294,14 @@ export default function LayoutSelectionModal({
                         </View>
                       </View>
 
-                      {/* Team B initials below */}
-                      <Text style={{ color: '#ef4444', fontWeight: 'bold' as any, fontSize: 12 }}>
-                        {pairing.teamBPlayer.initials}
-                      </Text>
+                      {/* Team B faction icon below */}
+                      {pairing.teamBPlayer.faction && hasFactionIcon(pairing.teamBPlayer.faction) ? (
+                        <FactionIcon faction={pairing.teamBPlayer.faction} size={18} color="#ef4444" />
+                      ) : (
+                        <Text style={{ color: '#ef4444', fontWeight: 'bold' as any, fontSize: 10 }} numberOfLines={1}>
+                          {pairing.teamBPlayer.faction || pairing.teamBPlayer.username || 'B'}
+                        </Text>
+                      )}
                     </View>
                   ))
                 )}
@@ -248,7 +315,7 @@ export default function LayoutSelectionModal({
               <>
                 <Text style={{ color: theme.colors.white, fontSize: 11, textAlign: 'center' }}>
                   {selectedLayout
-                    ? `Selected: ${selectedLayout.replace('layout', 'Layout ')}`
+                    ? `Selected: ${selectedLayout.name}`
                     : `Tap a layout for Table ${tableNumber}`}
                 </Text>
                 {selectedLayout && (
@@ -372,7 +439,7 @@ export default function LayoutSelectionModal({
               }}
             >
               {selectedLayout
-                ? `Selected: ${selectedLayout.replace('layout', 'Layout ')}`
+                ? `Selected: ${selectedLayout.name}`
                 : 'Tap a layout to select'}
             </Text>
           )}
@@ -380,6 +447,52 @@ export default function LayoutSelectionModal({
 
         {viewMode === 'layouts' ? (
           <>
+            {/* Current pairing indicator with arrow */}
+            {currentPairing && (
+              <View style={{ alignItems: 'center', marginBottom: theme.spacing.md }}>
+                <Text style={{ color: theme.colors.gray[500], fontSize: 11, marginBottom: 6 }}>
+                  SELECTING LAYOUT FOR
+                </Text>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                  borderWidth: 2,
+                  borderColor: '#f59e0b',
+                  borderRadius: theme.borderRadius.md,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  gap: 12,
+                }}>
+                  {currentPairing.teamAPlayer.faction && hasFactionIcon(currentPairing.teamAPlayer.faction) ? (
+                    <FactionIcon faction={currentPairing.teamAPlayer.faction} size={28} color="#3b82f6" />
+                  ) : (
+                    <Text style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>
+                      {currentPairing.teamAPlayer.faction || currentPairing.teamAPlayer.username || 'A'}
+                    </Text>
+                  )}
+                  <View style={{
+                    backgroundColor: '#f59e0b',
+                    paddingHorizontal: 12,
+                    paddingVertical: 4,
+                    borderRadius: 6,
+                  }}>
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
+                      Table {tableNumber}
+                    </Text>
+                  </View>
+                  {currentPairing.teamBPlayer.faction && hasFactionIcon(currentPairing.teamBPlayer.faction) ? (
+                    <FactionIcon faction={currentPairing.teamBPlayer.faction} size={28} color="#ef4444" />
+                  ) : (
+                    <Text style={{ color: '#ef4444', fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>
+                      {currentPairing.teamBPlayer.faction || currentPairing.teamBPlayer.username || 'B'}
+                    </Text>
+                  )}
+                </View>
+               
+              </View>
+            )}
+
             {/* Layout grid */}
             <View
               style={{
@@ -390,10 +503,10 @@ export default function LayoutSelectionModal({
               }}
             >
               {availableLayouts.map((layout) => {
-                const isSelected = selectedLayout === layout;
+                const isSelected = selectedLayout?.id === layout.id;
                 return (
                   <Pressable
-                    key={layout}
+                    key={layout.id}
                     onPress={() => setSelectedLayout(layout)}
                     style={{
                       borderWidth: 3,
@@ -404,7 +517,7 @@ export default function LayoutSelectionModal({
                     }}
                   >
                     <Image
-                      source={layoutImages[layout]}
+                      source={getLayoutImageSource(layout)}
                       style={{
                         width: imageWidth,
                         height: imageHeight,
@@ -429,7 +542,7 @@ export default function LayoutSelectionModal({
                           textAlign: 'center',
                         }}
                       >
-                        {layout.replace('layout', 'Layout ')}
+                        {layout.name}
                       </Text>
                     </View>
                   </Pressable>
@@ -481,7 +594,7 @@ export default function LayoutSelectionModal({
                 </View>
                 {pairing.layout && (
                   <Text style={{ color: theme.colors.gray[500], fontSize: 10 }}>
-                    {pairing.layout.replace('layout', 'Layout ')}
+                    {pairing.layout.name}
                   </Text>
                 )}
               </View>

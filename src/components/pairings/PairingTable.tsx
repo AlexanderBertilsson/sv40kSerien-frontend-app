@@ -71,7 +71,7 @@ export default function PairingTable({ pairing, showRound = true, compact = fals
                   color: theme.colors.gray[700],
                 }}
               >
-                {pairing.layout.replace('layout', 'L')}
+                {pairing.layout.name}
               </Text>
             </View>
           )}
@@ -177,7 +177,7 @@ export default function PairingTable({ pairing, showRound = true, compact = fals
             }}
             numberOfLines={1}
           >
-            {pairing.teamAPlayer.initials}
+            {pairing.teamAPlayer.username || pairing.teamAPlayer.faction || 'Player A'}
           </Text>
           <View style={{ width: 24 }} />
           <Text
@@ -190,7 +190,7 @@ export default function PairingTable({ pairing, showRound = true, compact = fals
             }}
             numberOfLines={1}
           >
-            {pairing.teamBPlayer.initials}
+            {pairing.teamBPlayer.username || pairing.teamBPlayer.faction || 'Player B'}
           </Text>
         </View>
       )}

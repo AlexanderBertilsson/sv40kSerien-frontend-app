@@ -1,14 +1,18 @@
 import { Stack } from "expo-router";
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/src/constants/Colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 
 export default function TeamLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   return <Stack
     screenOptions={{
         headerShown: true,
+        headerStatusBarHeight: insets.top + 56,
         headerStyle: {
           backgroundColor: theme.background,
         },
@@ -19,7 +23,7 @@ export default function TeamLayout() {
         contentStyle: {
           backgroundColor: theme.background,
         },
-      }}
+      } as NativeStackNavigationOptions & { headerStatusBarHeight: number }}
     >
       <Stack.Screen
         name="index"

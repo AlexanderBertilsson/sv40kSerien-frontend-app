@@ -15,7 +15,7 @@ export default function DeviceDrawer() {
                 title: '',
                 headerStyle: {
                     backgroundColor: 'transparent',
-                    ...({ position: 'absolute', elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }),
+                    ...({  elevation: 0, shadowOpacity: 0, borderBottomWidth: 0 }),
                 },
                 headerTintColor: theme.text,
                 headerTransparent: true,

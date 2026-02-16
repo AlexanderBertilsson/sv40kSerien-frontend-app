@@ -1,0 +1,129 @@
+{
+  "event": "UPDATE",
+  "meta": {
+    "id": "eea2f410-cdb6-4f6f-8a1c-85be2a6739bc"
+  },
+  "payload": {
+    "id": "eea2f410-cdb6-4f6f-8a1c-85be2a6739bc",
+    "table": "pairing_states",
+    "record": {
+      "id": "96612b9e-52f2-4c5d-b8bf-a3335c2e7ccb",
+      "state": {
+        "Round1": {
+          "Team1Layout": null,
+          "Team2Layout": null,
+          "Team1Refused": null,
+          "Team2Refused": null,
+          "Team1Defender": "52b87c76-46a8-4a15-a159-1cfe571420b2",
+          "Team2Defender": "29c36317-b1e8-4dc7-8025-a7a5235d4da6",
+          "Team1Attackers": [
+            "e0fc492c-5001-7025-b089-b85b68dd1088",
+            "062ac823-a68b-4119-adcb-96e62a93f618"
+          ],
+          "Team2Attackers": [
+            "f09cb96c-d0c1-70c4-fedb-8ce9782882de",
+            "eeea20b6-deeb-4cba-883c-74751f269bca"
+          ],
+          "Team1LayoutTable": null,
+          "Team2LayoutTable": null
+        },
+        "Round2": {
+          "Team1Layout": null,
+          "Team2Layout": null,
+          "Team1Refused": null,
+          "Team2Refused": null,
+          "Team1Defender": null,
+          "Team2Defender": null,
+          "Team1Attackers": [],
+          "Team2Attackers": [],
+          "Team1LayoutTable": null,
+          "Team2LayoutTable": null
+        },
+        "Pairings": [],
+        "CurrentPhase": "round1-refuse",
+        "CoinflipWinner": "2",
+        "AvailableLayoutIds": [
+          "019c1e9c-7c00-79f7-8792-fa068d5cc244",
+          "019c1e9c-7c0f-72ff-bdef-e3e999d1f12a",
+          "019c1e9c-7c0f-7acd-bfc5-b4e0db657860",
+          "019c1e9c-7c0f-785a-83d2-6fbf3b024c1c",
+          "019c1e9c-7c0f-7701-81ac-fb3c0a312b44"
+        ],
+        "Team1AvailablePlayers": [
+          "7ee33e72-cbf7-4cb1-9bc7-f2f091141b4b",
+          "447b3247-d746-4f5a-859c-ec5f21930f87"
+        ],
+        "Team2AvailablePlayers": [
+          "2ee3ef2f-4941-43a3-a6ad-7e3c702818c1",
+          "d74f27a9-e354-45a6-a2b1-999372d3c8d3"
+        ]
+      },
+      "status": "pending",
+      "team1_id": "f02821db-512f-4d23-9bad-b278bfaf8127",
+      "team2_id": "243cca6d-f250-4a99-8bd4-ff24fc728786",
+      "created_at": "2026-02-03T14:21:01.576155+00:00",
+      "updated_at": "2026-02-03T15:19:41.466022+00:00",
+      "team_match_id": "83e6954e-5736-43c9-970f-9f691083967b"
+    },
+    "schema": "wha_data",
+    "operation": "UPDATE",
+    "old_record": {
+      "id": "96612b9e-52f2-4c5d-b8bf-a3335c2e7ccb",
+      "state": {
+        "Round1": {
+          "Team1Layout": null,
+          "Team2Layout": null,
+          "Team1Refused": null,
+          "Team2Refused": null,
+          "Team1Defender": "52b87c76-46a8-4a15-a159-1cfe571420b2",
+          "Team2Defender": "29c36317-b1e8-4dc7-8025-a7a5235d4da6",
+          "Team1Attackers": [],
+          "Team2Attackers": [],
+          "Team1LayoutTable": null,
+          "Team2LayoutTable": null
+        },
+        "Round2": {
+          "Team1Layout": null,
+          "Team2Layout": null,
+          "Team1Refused": null,
+          "Team2Refused": null,
+          "Team1Defender": null,
+          "Team2Defender": null,
+          "Team1Attackers": [],
+          "Team2Attackers": [],
+          "Team1LayoutTable": null,
+          "Team2LayoutTable": null
+        },
+        "Pairings": [],
+        "CurrentPhase": "round1-attackers",
+        "CoinflipWinner": null,
+        "AvailableLayoutIds": [
+          "019c1e9c-7c00-79f7-8792-fa068d5cc244",
+          "019c1e9c-7c0f-72ff-bdef-e3e999d1f12a",
+          "019c1e9c-7c0f-7acd-bfc5-b4e0db657860",
+          "019c1e9c-7c0f-785a-83d2-6fbf3b024c1c",
+          "019c1e9c-7c0f-7701-81ac-fb3c0a312b44"
+        ],
+        "Team1AvailablePlayers": [
+          "7ee33e72-cbf7-4cb1-9bc7-f2f091141b4b",
+          "062ac823-a68b-4119-adcb-96e62a93f618",
+          "447b3247-d746-4f5a-859c-ec5f21930f87",
+          "e0fc492c-5001-7025-b089-b85b68dd1088"
+        ],
+        "Team2AvailablePlayers": [
+          "eeea20b6-deeb-4cba-883c-74751f269bca",
+          "2ee3ef2f-4941-43a3-a6ad-7e3c702818c1",
+          "d74f27a9-e354-45a6-a2b1-999372d3c8d3",
+          "f09cb96c-d0c1-70c4-fedb-8ce9782882de"
+        ]
+      },
+      "status": "pending",
+      "team1_id": "f02821db-512f-4d23-9bad-b278bfaf8127",
+      "team2_id": "243cca6d-f250-4a99-8bd4-ff24fc728786",
+      "created_at": "2026-02-03T14:21:01.576155+00:00",
+      "updated_at": "2026-02-03T15:18:40.863331+00:00",
+      "team_match_id": "83e6954e-5736-43c9-970f-9f691083967b"
+    }
+  },
+  "type": "broadcast"
+}

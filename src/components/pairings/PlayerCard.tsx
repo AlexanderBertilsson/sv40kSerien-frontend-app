@@ -1,6 +1,7 @@
 import { View, Text, useWindowDimensions } from 'react-native';
 import { Player, PlayerState } from '@/src/types/pairing';
 import { usePairingTheme } from '@/src/theme/pairingTheme';
+import { FactionIcon, hasFactionIcon } from '@/src/components/FactionIcon';
 
 interface PlayerCardProps {
   player: Player;
@@ -101,38 +102,61 @@ export default function PlayerCard({
     };
   };
 
+  // Check if we have a valid faction to display
+  const showFactionIcon = player.faction && hasFactionIcon(player.faction);
+  const displayText = player.faction || player.username || `Team ${player.team}`;
+
+  // Truncate long faction names for the badge
+  const truncatedFaction = displayText.length > 12
+    ? displayText.slice(0, 11) + '…'
+    : displayText;
+
+  // Short text for avatar fallback (first 2 chars of faction or username)
+  const avatarText = (player.faction || player.username || player.team)?.slice(0, 2).toUpperCase() || '??';
+
   const cardContent = (
     <>
-      {/* Avatar with initials */}
+      {/* Avatar with faction icon or short text fallback */}
       <View style={getAvatarStyle()}>
-        <Text
-          style={{
-            color: theme.colors.white,
-            fontSize: theme.typography.sizes.md,
-            fontWeight: theme.typography.weights.bold as any,
-          }}
-        >
-          {player.initials}
-        </Text>
+        {showFactionIcon ? (
+          <FactionIcon
+            faction={player.faction!}
+            size={avatarSize * 0.65}
+            color={theme.colors.white}
+          />
+        ) : (
+          <Text
+            style={{
+              color: theme.colors.white,
+              fontSize: theme.typography.sizes.sm,
+              fontWeight: theme.typography.weights.bold as any,
+            }}
+          >
+            {avatarText}
+          </Text>
+        )}
       </View>
 
-      {/* Team badge */}
+      {/* Faction/Team badge */}
       <View
         style={{
           paddingHorizontal: theme.spacing.xs,
           paddingVertical: 2,
           borderRadius: theme.borderRadius.sm,
           backgroundColor: player.color,
+          maxWidth: cardWidth - theme.spacing.sm * 2,
         }}
       >
         <Text
           style={{
             color: theme.colors.white,
-            fontSize: theme.typography.sizes.xs,
+            fontSize: windowHeight < 730 ? 8 : theme.typography.sizes.xs,
             fontWeight: theme.typography.weights.medium as any,
+            textAlign: 'center',
           }}
+          numberOfLines={1}
         >
-          Team {player.team}
+          {truncatedFaction}
         </Text>
       </View>
     </>

@@ -6,6 +6,7 @@ import Animated, {
   withTiming,
   withRepeat,
   withSequence,
+  interpolateColor,
 } from 'react-native-reanimated';
 import { useEffect, forwardRef } from 'react';
 import { Player } from '@/src/types/pairing';
@@ -23,6 +24,7 @@ interface CardSlotProps {
   isActive?: boolean;
   isHighlighted?: boolean;
   isRefusalSelected?: boolean;
+  isDimmed?: boolean;
 }
 
 const CardSlot = forwardRef<View, CardSlotProps>(({
@@ -33,6 +35,7 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
   isActive = true,
   isHighlighted = false,
   isRefusalSelected = false,
+  isDimmed = false,
 }, ref) => {
   const theme = usePairingTheme();
   const { height: windowHeight } = useWindowDimensions();
@@ -42,35 +45,49 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
   const cardHeight = windowHeight < 730 ? 95 : 120;
   const iconSize = windowHeight < 730 ? 32 : 40;
 
-  // Pulsing animation for highlighted slots
-  const pulseScale = useSharedValue(1);
-
-  useEffect(() => {
-    if (isHighlighted && !isRefusalSelected) {
-      // Start pulsing animation
-      pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.05, { duration: 800 }),
-          withTiming(1.0, { duration: 800 })
-        ),
-        -1, // infinite
-        true // reverse
-      );
-    } else {
-      // Stop pulsing
-      pulseScale.value = withTiming(1.0, { duration: 200 });
-    }
-  }, [isHighlighted, isRefusalSelected]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
-
   // Determine slot properties
   const isDefender = slotType.includes('Defender');
   const isBlueTeam = slotType.startsWith('blue');
   const slotColor = isBlueTeam ? '#3b82f6' : '#ef4444';
   const team = isBlueTeam ? 'A' : 'B';
+
+  // Flashing animation for highlighted slots
+  const flashProgress = useSharedValue(0);
+
+  useEffect(() => {
+    if (isHighlighted && !isRefusalSelected && !isDimmed) {
+      // Flash between team color and bright white
+      flashProgress.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 700 }),
+          withTiming(0, { duration: 700 })
+        ),
+        -1, // infinite
+      );
+    } else {
+      flashProgress.value = withTiming(0, { duration: 200 });
+    }
+  }, [isHighlighted, isRefusalSelected, isDimmed]);
+
+  const flashBrightColor = '#e8edf5';
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const borderColor = interpolateColor(
+      flashProgress.value,
+      [0, 1],
+      [slotColor, flashBrightColor],
+    );
+    const backgroundColor = interpolateColor(
+      flashProgress.value,
+      [0, 1],
+      ['transparent', 'rgba(255, 255, 255, 0.08)'],
+    );
+    return {
+      borderColor,
+      backgroundColor,
+      borderRadius: theme.borderRadius.md,
+    };
+  });
 
   // Get icon and label for empty state
   const getEmptyStateContent = () => {
@@ -103,8 +120,8 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
     if (isHighlighted) {
       return {
         borderWidth: 2,
-        borderStyle: 'solid' as any,
-        borderColor: theme.colors.warning || '#f59e0b',
+        borderStyle: 'dashed' as any,
+        borderColor: slotColor, // overridden by flash animation
       };
     }
     // Normal state
@@ -132,33 +149,43 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
 
   const borderStyle = getBorderStyle();
 
+  const isFlashing = isHighlighted && !isRefusalSelected && !isDimmed;
+
+  // When a filled slot is highlighted/selected, make the container slightly larger
+  // so the flashing border is visible around the card
+  const needsBorderSpace = (isHighlighted || isRefusalSelected) && !isEmpty;
+  const borderPad = needsBorderSpace ? 6 : 0;
+  const containerWidth = cardWidth + borderPad;
+  const containerHeight = cardHeight + borderPad;
+
   return (
     <View ref={ref} collapsable={false}>
       <Pressable
         onPress={(event) => handlePress(event)}
         disabled={!isActive && !isHighlighted && !isRefusalSelected}
         style={{
-          height: cardHeight,
+          height: containerHeight,
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: isActive || isHighlighted || isRefusalSelected ? 1 : 0.5,
+          opacity: isDimmed ? 0.4 : (isActive || isHighlighted || isRefusalSelected ? 1 : 0.5),
         }}
       >
-        <Animated.View style={animatedStyle}>
+        <Animated.View
+          style={[
+            {
+              width: containerWidth,
+              height: containerHeight,
+              borderRadius: theme.borderRadius.md,
+              ...borderStyle,
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+            isFlashing ? animatedStyle : undefined,
+          ]}
+        >
           {isEmpty ? (
             // Empty state
-            <View
-              style={{
-                width: cardWidth,
-                height: cardHeight,
-                borderRadius: theme.borderRadius.md,
-                ...borderStyle,
-                backgroundColor: theme.colors.background,
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: theme.spacing.xs,
-              }}
-            >
+            <>
               <MaterialCommunityIcons
                 name={icon}
                 size={iconSize}
@@ -175,24 +202,17 @@ const CardSlot = forwardRef<View, CardSlotProps>(({
               >
                 {label}
               </Text>
-            </View>
+            </>
           ) : (
-            // Filled state - wrap with border when highlighted/selected
-            <View
-              style={{
-                borderRadius: theme.borderRadius.md,
-                ...(isHighlighted || isRefusalSelected ? borderStyle : {}),
-              }}
-            >
-              {faceDown ? (
-                <FaceDownCard team={team as 'A' | 'B'} width={cardWidth} height={cardHeight} />
-              ) : (
-                <PlayerCard
-                  player={player}
-                  state="available"
-                                 />
-              )}
-            </View>
+            // Filled state
+            faceDown ? (
+              <FaceDownCard team={team as 'A' | 'B'} width={cardWidth} height={cardHeight} />
+            ) : (
+              <PlayerCard
+                player={player}
+                state="available"
+              />
+            )
           )}
         </Animated.View>
       </Pressable>

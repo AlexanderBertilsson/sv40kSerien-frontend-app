@@ -17,9 +17,10 @@ export default function TeamDetailsView({ event }: TeamDetailsViewProps) {
       <ThemedText type="subtitle" style={styles.title}>
         Registered Teams ({event.numberOfRegisteredTeams})
       </ThemedText>
-      <EventParticipants 
-        roster={event.registeredTeams} 
-        theme={theme} 
+      <EventParticipants
+        roster={event.registeredTeams}
+        theme={theme}
+        eventId={event.id}
       />
     </View>
   );

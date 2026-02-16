@@ -1,16 +1,73 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import ThemedText from '../ThemedText';
 import { EventTeam } from '../../../types/Event';
+import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
+import { EventRegistrationMemberDto } from '@/types/EventAdmin';
 
-import { UserRow } from '../UserRow';
+import { UserRow, UserRowData } from '../UserRow';
 
 interface EventParticipantsProps {
   roster: EventTeam[];
   theme: any;
+  eventId?: string;
 }
 
-const EventParticipants = ({ roster, theme }: EventParticipantsProps) => {
+function TeamMembersList({ eventId, teamId, theme }: { eventId: string; teamId: string; theme: any }) {
+  const { teamRegistrationsQuery } = useTeamRegistrations(eventId, teamId);
+  const members = teamRegistrationsQuery.data?.members ?? [];
+
+  if (teamRegistrationsQuery.isLoading) {
+    return (
+      <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+        <ActivityIndicator size="small" color={theme.tint} />
+      </View>
+    );
+  }
+
+  const players = members.filter((m) => m.eventRole?.toLowerCase() === 'player');
+  const coaches = members.filter((m) => m.eventRole?.toLowerCase() !== 'player');
+
+  const toUserRowData = (m: EventRegistrationMemberDto): UserRowData => ({
+    id: m.userId,
+    username: m.username,
+    profilePictureUrl: m.profilePictureUrl,
+    armyId: m.armyList?.id,
+    faction: m.armyList?.factionName,
+    detachment: m.armyList?.detachmentName,
+    sportsmanshipLevel: m.sportsmanshipLevel,
+  });
+
+  return (
+    <>
+      {players.length > 0 && (
+        <>
+          <ThemedText type="subtitle" style={styles.membersTitle}>Players</ThemedText>
+          <View style={styles.membersGridMobile}>
+            {players.map((m) => (
+              <UserRow key={m.userId} user={toUserRowData(m)} theme={theme} showSportsmanship />
+            ))}
+          </View>
+        </>
+      )}
+      {coaches.length > 0 && (
+        <>
+          <ThemedText type="subtitle" style={styles.membersTitle}>Coaches</ThemedText>
+          <View style={styles.membersGridMobile}>
+            {coaches.map((m) => (
+              <UserRow key={m.userId} user={toUserRowData(m)} theme={theme} showSportsmanship />
+            ))}
+          </View>
+        </>
+      )}
+      {members.length === 0 && (
+        <ThemedText style={{ opacity: 0.5 }}>No members</ThemedText>
+      )}
+    </>
+  );
+}
+
+const EventParticipants = ({ roster, theme, eventId }: EventParticipantsProps) => {
   const [expandedTeams, setExpandedTeams] = useState<Set<number>>(new Set());
   
   // Toggle team expansion
@@ -102,13 +159,18 @@ const EventParticipants = ({ roster, theme }: EventParticipantsProps) => {
                 {isExpanded && (
                   <View style={styles.membersContainer}>
                     <View style={[styles.membersSeparator, { backgroundColor: theme.background }]} />
-                    <ThemedText type="subtitle" style={styles.membersTitle}>
-                      Team Members
-                    </ThemedText>
-                    
-                    <View style={styles.membersGridMobile}>
-                      {team.users.map((user) => <UserRow key={user.id} user={user} theme={theme} showSportsmanship />)}
-                    </View>
+                    {eventId ? (
+                      <TeamMembersList eventId={eventId} teamId={team.id} theme={theme} />
+                    ) : (
+                      <>
+                        <ThemedText type="subtitle" style={styles.membersTitle}>
+                          Team Members
+                        </ThemedText>
+                        <View style={styles.membersGridMobile}>
+                          {team.users.map((user) => <UserRow key={user.id} user={user} theme={theme} showSportsmanship />)}
+                        </View>
+                      </>
+                    )}
                   </View>
                 )}
               </View>

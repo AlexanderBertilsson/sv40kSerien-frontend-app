@@ -138,7 +138,6 @@ export default function EventsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <ThemedText type='title'>Events</ThemedText>
         <TouchableOpacity 
           style={[styles.createButton, { backgroundColor: theme.tint }]}
           onPress={() => setModalVisible(true)}

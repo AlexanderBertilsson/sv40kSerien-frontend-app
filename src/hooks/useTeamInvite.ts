@@ -10,7 +10,6 @@ export function useTeamInvite() {
       return res.data;
     },
     onSuccess: () => {
-        console.log("Invite accepted in useTeamInvite");
       // Invalidate notifications to refresh the list
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       // Invalidate user profile to update team info

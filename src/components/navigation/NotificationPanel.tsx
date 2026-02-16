@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Notification, TeamInvite } from '@/types/Notifications';
+import { isAxiosError } from 'axios';
+import { Notification, TeamInvite, TournamentInvite } from '@/types/Notifications';
 import { hexToRgba } from '@/src/constants/Colors';
-import { TeamInviteNotification } from '@/src/components/notifications/TeamInviteNotification';
+import { InviteNotification } from '@/src/components/notifications/InviteNotification';
+import Toast, { ToastType } from '@/src/components/common/Toast';
 import { useTeamInvite } from '@/src/hooks/useTeamInvite';
+import { useEventInviteResponse } from '@/src/hooks/useEventInviteResponse';
 import { useNotifications } from '@/src/hooks/useNotifications';
 
 interface NotificationPanelProps {
@@ -20,8 +23,14 @@ export function NotificationPanel({
   onExpandedChange,
 }: NotificationPanelProps) {
     const { notificationsQuery } = useNotifications();
-  const { acceptInvite, rejectInvite } = useTeamInvite();
+  const { acceptInvite: acceptTeamInvite, rejectInvite: rejectTeamInvite } = useTeamInvite();
+  const { acceptInviteAsync: acceptEventInviteAsync, rejectInvite: rejectEventInvite } = useEventInviteResponse();
   const [internalIsExpanded, setInternalIsExpanded] = useState(false);
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
   const isExpanded = externalIsExpanded !== undefined ? externalIsExpanded : internalIsExpanded;
   
   const toggleExpanded = (value: boolean) => {
@@ -38,17 +47,32 @@ export function NotificationPanel({
   const unreadCount = notificationsQuery.data?.length || 0;
 
   const handleAcceptTeamInvite = (inviteId: string) => {
-    acceptInvite({ inviteId });
+    acceptTeamInvite({ inviteId });
   };
 
   const handleRejectTeamInvite = (inviteId: string) => {
-    rejectInvite({ inviteId });
+    rejectTeamInvite({ inviteId });
+  };
+
+  const handleAcceptEventInvite = async (inviteId: string) => {
+    try {
+      await acceptEventInviteAsync({ inviteId });
+      setToastConfig({ visible: true, message: 'Event invite accepted!', type: 'success' });
+    } catch (error) {
+      const message = isAxiosError(error) && error.response?.status === 400 && error.response?.data
+        ? String(error.response.data)
+        : 'Failed to accept invite.';
+      setToastConfig({ visible: true, message, type: 'error' });
+    }
+  };
+
+  const handleRejectEventInvite = (inviteId: string) => {
+    rejectEventInvite({ inviteId });
   };
 
   useEffect(() => {
     // Update even if data is undefined/empty (204 response)
     if(notificationsQuery.data !== undefined){
-        console.log('Notifications updated:', notificationsQuery.data)
       setRenderNotifications(notificationsQuery.data || []);
     }
   }, [notificationsQuery.data]);
@@ -87,20 +111,42 @@ export function NotificationPanel({
   const renderNotification = (notification: Notification, index: number) => {
     switch (notification.notificationType) {
       case 'team_invite': {
-        const teamInvite = notification.payload as TeamInvite;
+        const invite = notification.payload as TeamInvite;
         return (
-          <TeamInviteNotification
+          <InviteNotification
             key={`team-invite-${index}`}
-            invite={teamInvite}
+            inviteId={invite.id}
+            senderName={invite.senderName}
+            senderId={invite.senderId}
+            inviteMessage="invited you to join"
+            targetName={invite.team.name}
+            logoUrl={invite.team.logoUrl}
+            subtitle={`Sportsmanship: ${invite.team.sportsmanshipLvl}`}
             theme={theme}
             onAccept={handleAcceptTeamInvite}
             onReject={handleRejectTeamInvite}
           />
         );
       }
-      case 'tournament_invite':
-        // Placeholder for future implementation
-        return null;
+      case 'event_invite': {
+        const invite = notification.payload as TournamentInvite;
+        return (
+          <InviteNotification
+            key={`event-invite-${index}`}
+            inviteId={invite.id}
+            senderName={invite.senderName}
+            senderId={invite.senderId}
+            inviteMessage={`invited you as ${invite.eventRole} in`}
+            targetName={invite.event.title}
+            targetHref={`/events/${invite.event.id}`}
+            logoUrl={invite.team.logoUrl}
+            subtitle={invite.event.eventType ? `${invite.event.eventType} · ${invite.team.name}` : invite.team.name}
+            theme={theme}
+            onAccept={handleAcceptEventInvite}
+            onReject={handleRejectEventInvite}
+          />
+        );
+      }
       default:
         return null;
     }
@@ -177,6 +223,14 @@ export function NotificationPanel({
           </ScrollView>
         </Animated.View>
       )}
+
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        position="bottom-left"
+        onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
+      />
     </View>
   );
 }

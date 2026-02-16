@@ -1,32 +1,41 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { TeamInvite } from '@/types/Notifications';
 import { hexToRgba } from '@/src/constants/Colors';
 import { Link } from 'expo-router';
 
-interface TeamInviteNotificationProps {
-  invite: TeamInvite;
+interface InviteNotificationProps {
+  inviteId: string;
+  senderName: string;
+  senderId: string;
+  /** e.g. "invited you to join" */
+  inviteMessage: string;
+  /** Primary entity name (team name or event name) */
+  targetName: string;
+  /** Link destination for the primary entity */
+  targetHref?: string;
+  /** Optional logo/image URL */
+  logoUrl?: string;
+  /** Optional subtitle line below the target name */
+  subtitle?: string;
   theme: any;
-  // eslint-disable-next-line no-unused-vars
   onAccept?: (inviteId: string) => void;
-  // eslint-disable-next-line no-unused-vars
   onReject?: (inviteId: string) => void;
 }
 
-export function TeamInviteNotification({
-  invite,
+export function InviteNotification({
+  inviteId,
+  senderName,
+  senderId,
+  inviteMessage,
+  targetName,
+  targetHref,
+  logoUrl,
+  subtitle,
   theme,
   onAccept,
   onReject,
-}: TeamInviteNotificationProps) {
-
-  const acceptButtonRef = useRef<View>(null);
-
-  const handleAcceptPress = () => {
-    onAccept?.(invite.id);
-  };
-
+}: InviteNotificationProps) {
   return (
     <View
       style={[
@@ -39,48 +48,56 @@ export function TeamInviteNotification({
     >
       <View style={styles.inviteHeader}>
         <View style={styles.senderInfo}>
-          <Link href={`/user/${invite.senderId}`} asChild>
+          <Link href={`/user/${senderId}`} asChild>
             <Pressable>
               <Text style={[styles.senderName, { color: theme.tint }]}>
-                {invite.senderName}
+                {senderName}
               </Text>
             </Pressable>
           </Link>
           <Text style={[styles.inviteText, { color: theme.text }]}>
-            invited you to join
+            {inviteMessage}
           </Text>
         </View>
       </View>
 
-      <View style={styles.teamInfo}>
-        {invite.team.logoUrl && (
+      <View style={styles.targetInfo}>
+        {logoUrl && (
           <Image
-            source={{ uri: invite.team.logoUrl }}
-            style={styles.teamLogo}
+            source={{ uri: logoUrl }}
+            style={styles.targetLogo}
             resizeMode="cover"
           />
         )}
-        <View style={styles.teamDetails}>
-          <Text style={[styles.teamName, { color: theme.text }]}>
-            {invite.team.name}
-          </Text>
-          <View style={styles.sportsmanshipBadge}>
-            <Text style={[styles.sportsmanshipText, { color: theme.text }]}>
-              Sportsmanship: {invite.team.sportsmanshipLvl}
+        <View style={styles.targetDetails}>
+          {targetHref ? (
+            <Link href={targetHref as any} asChild>
+              <Pressable>
+                <Text style={[styles.targetName, { color: theme.tint }]}>
+                  {targetName}
+                </Text>
+              </Pressable>
+            </Link>
+          ) : (
+            <Text style={[styles.targetName, { color: theme.text }]}>
+              {targetName}
             </Text>
-          </View>
+          )}
+          {subtitle && (
+            <Text style={[styles.subtitleText, { color: theme.text }]}>
+              {subtitle}
+            </Text>
+          )}
         </View>
       </View>
 
       <View style={styles.actionButtons}>
         <Pressable
-          ref={acceptButtonRef}
           style={[
             styles.button,
-            styles.acceptButton,
             { backgroundColor: hexToRgba('#4CAF50', 0.9) },
           ]}
-          onPress={handleAcceptPress}
+          onPress={() => onAccept?.(inviteId)}
         >
           <Ionicons name="checkmark" size={18} color="#fff" />
           <Text style={styles.buttonText}>Accept</Text>
@@ -89,10 +106,9 @@ export function TeamInviteNotification({
         <Pressable
           style={[
             styles.button,
-            styles.rejectButton,
             { backgroundColor: hexToRgba('#f44336', 0.9) },
           ]}
-          onPress={() => onReject?.(invite.id)}
+          onPress={() => onReject?.(inviteId)}
         >
           <Ionicons name="close" size={18} color="#fff" />
           <Text style={styles.buttonText}>Reject</Text>
@@ -125,30 +141,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.8,
   },
-  teamInfo: {
+  targetInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingVertical: 8,
   },
-  teamLogo: {
+  targetLogo: {
     width: 48,
     height: 48,
     borderRadius: 8,
     backgroundColor: '#ccc',
   },
-  teamDetails: {
+  targetDetails: {
     flex: 1,
     gap: 4,
   },
-  teamName: {
+  targetName: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  sportsmanshipBadge: {
-    alignSelf: 'flex-start',
-  },
-  sportsmanshipText: {
+  subtitleText: {
     fontSize: 12,
     opacity: 0.7,
   },
@@ -166,12 +179,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     gap: 6,
-  },
-  acceptButton: {
-    // backgroundColor set dynamically
-  },
-  rejectButton: {
-    // backgroundColor set dynamically
   },
   buttonText: {
     color: '#fff',

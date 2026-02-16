@@ -70,15 +70,12 @@ apiClient.interceptors.response.use(
 
         if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
             originalRequest._retry = true;
-            console.log("Refreshing token...");
             // WEB FLOW (cookies)
             if (Platform.OS === "web") {
-                console.log("Refreshing token in web flow...");
                 try {
                     await axios.post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true });
                     return apiClient(originalRequest);
                 } catch (err) {
-                    console.log("Error refreshing token in web flow...");
                     return Promise.reject(err);
                 }
             }

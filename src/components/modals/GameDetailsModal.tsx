@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Modal, Pressable, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput, Image, ScrollView } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
@@ -91,15 +91,22 @@ export function GameDetailsModal({
     return theme.text;
   };
 
+  const formatDeployment = (deployment: string) => {
+    return deployment
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   if (!game) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <Pressable 
+      <Pressable
         style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
         onPress={handleClose}
       >
-        <Pressable 
+        <Pressable
           style={[styles.modalContent, { backgroundColor: theme.background }]}
           onPress={(e) => e.stopPropagation()}
         >
@@ -110,9 +117,9 @@ export function GameDetailsModal({
             </Pressable>
           </View>
 
-          <View style={styles.modalBody}>
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
             {/* Mission Info */}
-            {(game.missionName || game.deployment) && (
+            {(game.missionName || game.deployment || game.layout) && (
               <View style={[styles.missionSection, { backgroundColor: theme.secondary }]}>
                 {game.missionName && (
                   <View style={styles.missionRow}>
@@ -123,7 +130,17 @@ export function GameDetailsModal({
                 {game.deployment && (
                   <View style={styles.missionRow}>
                     <MaterialCommunityIcons name="map" size={18} color={theme.tint} />
-                    <ThemedText style={styles.missionText}>{game.deployment}</ThemedText>
+                    <ThemedText style={styles.missionText}>{formatDeployment(game.deployment)}</ThemedText>
+                  </View>
+                )}
+                {game.layout?.imageUrl && (
+                  <View style={styles.layoutImageContainer}>
+                    <ThemedText style={styles.layoutLabel}>{game.layout.name}</ThemedText>
+                    <Image
+                      source={{ uri: game.layout.imageUrl }}
+                      style={styles.layoutImage}
+                      resizeMode="contain"
+                    />
                   </View>
                 )}
               </View>
@@ -153,8 +170,8 @@ export function GameDetailsModal({
                   <ThemedText style={styles.scoreLabel}>Differential</ThemedText>
                   <ThemedText style={[
                     styles.scoreValue,
-                    { color: (game.player1DifferentialScore || 0) > 0 ? theme.success : 
-                             (game.player1DifferentialScore || 0) < 0 ? theme.error : theme.text }
+                    { color: (game.player1DifferentialScore || 0) > (game.player2DifferentialScore || 0) ? theme.success :
+                             (game.player1DifferentialScore || 0) < (game.player2DifferentialScore || 0) ? theme.error : theme.info }
                   ]}>
                     {(game.player1DifferentialScore || 0) > 0 ? '+' : ''}{game.player1DifferentialScore || 0}
                   </ThemedText>
@@ -191,8 +208,8 @@ export function GameDetailsModal({
                   <ThemedText style={styles.scoreLabel}>Differential</ThemedText>
                   <ThemedText style={[
                     styles.scoreValue,
-                    { color: (game.player2DifferentialScore || 0) > 0 ? theme.success : 
-                             (game.player2DifferentialScore || 0) < 0 ? theme.error : theme.text }
+                    { color: (game.player2DifferentialScore || 0) > (game.player1DifferentialScore || 0) ? theme.success :
+                             (game.player2DifferentialScore || 0) < (game.player1DifferentialScore || 0) ? theme.error : theme.info }
                   ]}>
                     {(game.player2DifferentialScore || 0) > 0 ? '+' : ''}{game.player2DifferentialScore || 0}
                   </ThemedText>
@@ -273,7 +290,7 @@ export function GameDetailsModal({
                 )}
               </View>
             )}
-          </View>
+          </ScrollView>
         </Pressable>
       </Pressable>
     </Modal>
@@ -316,34 +333,55 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   modalBody: {
-    gap: 12,
+    flexGrow: 0,
   },
   missionSection: {
     padding: 12,
     borderRadius: 8,
     gap: 8,
+    marginBottom: 16,
   },
   missionRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   missionText: {
     fontSize: 14,
+    textAlign: 'center',
+  },
+  layoutImageContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  layoutLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    opacity: 0.8,
+    marginBottom: 8,
+  },
+  layoutImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
   },
   playerSection: {
     padding: 16,
     borderRadius: 12,
+    marginBottom: 12,
   },
   playerHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 8,
   },
   playerName: {
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
   roleBadge: {
     flexDirection: 'row',
@@ -361,6 +399,7 @@ const styles = StyleSheet.create({
   scoreRow: {
     flexDirection: 'row',
     gap: 24,
+    marginTop: 4,
   },
   scoreItem: {
     flex: 1,
@@ -369,14 +408,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.7,
     marginBottom: 4,
+    textAlign: 'center',
   },
   scoreValue: {
     fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   vsDivider: {
     alignItems: 'center',
-    paddingVertical: 4,
+    marginBottom: 12,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -385,6 +426,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     gap: 8,
+    marginBottom: 12,
   },
   statusText: {
     fontSize: 14,
@@ -400,6 +442,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 16,
+    textAlign: 'center',
   },
   scoreInputRow: {
     flexDirection: 'row',
@@ -413,6 +456,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 8,
     opacity: 0.7,
+    textAlign: 'center',
   },
   scoreInput: {
     fontSize: 24,

@@ -11,38 +11,19 @@ import {
 } from '@/src/types/pairing';
 import { selectRandom, refuseRandom } from '@/src/utils/simpleAI';
 
-// Mock teams for POC
-const createMockTeams = (): { teamA: Team; teamB: Team } => {
-  const teamAPlayers: Player[] = [
-    { id: 'a1', initials: 'AJ', color: '#3b82f6', team: 'A' },
-    { id: 'a2', initials: 'BS', color: '#3b82f6', team: 'A' },
-    { id: 'a3', initials: 'CD', color: '#3b82f6', team: 'A' },
-    { id: 'a4', initials: 'DL', color: '#3b82f6', team: 'A' },
-    { id: 'a5', initials: 'EW', color: '#3b82f6', team: 'A' },
-  ];
+export interface PairingInitData {
+  teamA: Team;
+  teamB: Team;
+  layouts: TableLayout[];
+}
 
-  const teamBPlayers: Player[] = [
-    { id: 'b1', initials: 'FC', color: '#ef4444', team: 'B' },
-    { id: 'b2', initials: 'GK', color: '#ef4444', team: 'B' },
-    { id: 'b3', initials: 'HP', color: '#ef4444', team: 'B' },
-    { id: 'b4', initials: 'IW', color: '#ef4444', team: 'B' },
-    { id: 'b5', initials: 'JB', color: '#ef4444', team: 'B' },
-  ];
-
-  return {
-    teamA: { id: 'A', name: 'Team Alpha', players: teamAPlayers, color: '#3b82f6' },
-    teamB: { id: 'B', name: 'Team Bravo', players: teamBPlayers, color: '#ef4444' },
-  };
-};
-
-export const usePairingState = () => {
+export const usePairingState = (initData: PairingInitData) => {
   const [state, setState] = useState<PairingState>(() => {
-    const { teamA, teamB } = createMockTeams();
-    const initialState = createInitialPairingState(teamA, teamB);
+    const initialState = createInitialPairingState(initData.teamA, initData.teamB, initData.layouts);
 
     // Initialize all players as available
     const playerStates = new Map<string, PlayerState>();
-    [...teamA.players, ...teamB.players].forEach(player => {
+    [...initData.teamA.players, ...initData.teamB.players].forEach(player => {
       playerStates.set(player.id, 'available');
     });
 
@@ -309,7 +290,7 @@ export const usePairingState = () => {
       };
 
       // Remove the layout from available layouts
-      const newAvailableLayouts = prev.availableLayouts.filter(l => l !== layout);
+      const newAvailableLayouts = prev.availableLayouts.filter(l => l.id !== layout.id);
 
       return {
         ...prev,
@@ -323,16 +304,15 @@ export const usePairingState = () => {
 
   // Reset to initial state
   const reset = useCallback(() => {
-    const { teamA, teamB } = createMockTeams();
-    const initialState = createInitialPairingState(teamA, teamB);
+    const initialState = createInitialPairingState(initData.teamA, initData.teamB, initData.layouts);
 
     const playerStates = new Map<string, PlayerState>();
-    [...teamA.players, ...teamB.players].forEach(player => {
+    [...initData.teamA.players, ...initData.teamB.players].forEach(player => {
       playerStates.set(player.id, 'available');
     });
 
     setState({ ...initialState, playerStates });
-  }, []);
+  }, [initData]);
 
   return {
     state,
@@ -355,6 +335,7 @@ export const usePairingState = () => {
 };
 
 // Helper to determine next phase
+// In round 2, attackers are auto-assigned after defender selection, so we skip attacker phases
 const getNextPhase = (currentPhase: Phase): Phase => {
   const phaseFlow: Phase[] = [
     'setup',
@@ -368,8 +349,7 @@ const getNextPhase = (currentPhase: Phase): Phase => {
     'round1-complete',
     'round2-defender',
     'round2-defender-reveal',
-    'round2-attackers',
-    'round2-attackers-reveal',
+    // Skip round2-attackers and round2-attackers-reveal - attackers auto-assigned in round 2
     'round2-refuse',
     'round2-layout-select',
     'round2-complete',

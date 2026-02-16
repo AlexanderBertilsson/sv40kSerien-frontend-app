@@ -20,6 +20,7 @@ interface CompactBattleGridProps {
   highlightedSlots?: Set<SlotType>;
   selectedRefusalSlot?: SlotType | null;
   slotRefs?: React.MutableRefObject<{ [key: string]: any }>;
+  isSpectator?: boolean;
 }
 
 export default function CompactBattleGrid({
@@ -30,6 +31,7 @@ export default function CompactBattleGrid({
   highlightedSlots,
   selectedRefusalSlot,
   slotRefs,
+  isSpectator = false,
 }: CompactBattleGridProps) {
   const theme = usePairingTheme();
   const { height: windowHeight } = useWindowDimensions();
@@ -46,13 +48,15 @@ export default function CompactBattleGrid({
   const isDefenderPhase = currentPhase.includes('defender') && !currentPhase.includes('reveal');
   const isAttackerPhase = currentPhase.includes('attackers') && !currentPhase.includes('reveal');
 
-  // Active slots (user can click here)
+  // Active slots (user can click here) — none for spectators
   const activeSlots: Set<SlotType> = new Set();
-  if (isDefenderPhase) {
-    activeSlots.add('blueDefender');
-  } else if (isAttackerPhase) {
-    activeSlots.add('blueAttacker1');
-    activeSlots.add('blueAttacker2');
+  if (!isSpectator) {
+    if (isDefenderPhase) {
+      activeSlots.add('blueDefender');
+    } else if (isAttackerPhase) {
+      activeSlots.add('blueAttacker1');
+      activeSlots.add('blueAttacker2');
+    }
   }
 
   return (
@@ -87,9 +91,10 @@ export default function CompactBattleGrid({
               ref={(el) => slotRefs?.current && (slotRefs.current['blueDefender'] = el)}
               slotType="blueDefender"
               player={slots.blueDefender}
-              faceDown={false}
+              faceDown={isSpectator && !revealedSlots.has('blueDefender')}
               onSlotClick={onSlotClick}
               isActive={activeSlots.has('blueDefender')}
+              isHighlighted={activeSlots.has('blueDefender') && !slots.blueDefender}
             />
           </View>
 
@@ -107,17 +112,19 @@ export default function CompactBattleGrid({
               ref={(el) => slotRefs?.current && (slotRefs.current['blueAttacker1'] = el)}
               slotType="blueAttacker1"
               player={slots.blueAttacker1}
-              faceDown={false}
+              faceDown={isSpectator && !revealedSlots.has('blueAttacker1')}
               onSlotClick={onSlotClick}
               isActive={activeSlots.has('blueAttacker1')}
+              isHighlighted={activeSlots.has('blueAttacker1') && !slots.blueAttacker1}
             />
             <CardSlot
               ref={(el) => slotRefs?.current && (slotRefs.current['blueAttacker2'] = el)}
               slotType="blueAttacker2"
               player={slots.blueAttacker2}
-              faceDown={false}
+              faceDown={isSpectator && !revealedSlots.has('blueAttacker2')}
               onSlotClick={onSlotClick}
               isActive={activeSlots.has('blueAttacker2')}
+              isHighlighted={activeSlots.has('blueAttacker2') && !slots.blueAttacker2}
             />
           </View>
         </View>
@@ -202,9 +209,10 @@ export default function CompactBattleGrid({
               player={slots.redAttacker1}
               faceDown={!revealedSlots.has('redAttacker1')}
               onSlotClick={onSlotClick}
-              isActive={false} // AI controlled, never active for user
+              isActive={false}
               isHighlighted={highlightedSlots?.has('redAttacker1')}
               isRefusalSelected={selectedRefusalSlot === 'redAttacker1'}
+              isDimmed={!!selectedRefusalSlot && selectedRefusalSlot !== 'redAttacker1'}
             />
             <CardSlot
               ref={(el) => slotRefs?.current && (slotRefs.current['redAttacker2'] = el)}
@@ -212,9 +220,10 @@ export default function CompactBattleGrid({
               player={slots.redAttacker2}
               faceDown={!revealedSlots.has('redAttacker2')}
               onSlotClick={onSlotClick}
-              isActive={false} // AI controlled, never active for user
+              isActive={false}
               isHighlighted={highlightedSlots?.has('redAttacker2')}
               isRefusalSelected={selectedRefusalSlot === 'redAttacker2'}
+              isDimmed={!!selectedRefusalSlot && selectedRefusalSlot !== 'redAttacker2'}
             />
           </View>
 

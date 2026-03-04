@@ -7,6 +7,7 @@ import { useTeam } from '../../hooks/useTeam';
 import { UserRow } from '../UserRow';
 import { useState } from 'react';
 import { useEventRegistration, EventRegistrationBody } from '../../hooks/useEventRegistration';
+import Toast, { ToastType } from '../common/Toast';
 
 interface JoinEventModalProps {
   visible: boolean;
@@ -30,6 +31,11 @@ export function JoinEventModal({ visible, onClose, eventData, teamId }: JoinEven
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [userRoles, setUserRoles] = useState<Record<string, 'player' | 'coach'>>({});
   const [captain, setCaptain] = useState<{name: string, id: string} | null>(null);
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
 
   const handleUserSelection = (userId: string, selected: boolean) => {
     const newSelectedUsers = new Set(selectedUsers);
@@ -79,17 +85,17 @@ export function JoinEventModal({ visible, onClose, eventData, teamId }: JoinEven
 
   const handleJoinEvent = async () => {
     if (!captain) {
-      alert('Please select a captain before joining the event.');
+      setToastConfig({ visible: true, message: 'Please select a captain before joining the event.', type: 'warning' });
       return;
     }
 
     if (getPlayerCount() === 0) {
-      alert('Please select at least one player.');
+      setToastConfig({ visible: true, message: 'Please select at least one player.', type: 'warning' });
       return;
     }
 
     if (getPlayerCount() > eventData.playersPerTeam) {
-      alert(`Too many players selected. Maximum allowed: ${eventData.playersPerTeam}`);
+      setToastConfig({ visible: true, message: `Too many players selected. Maximum allowed: ${eventData.playersPerTeam}`, type: 'warning' });
       return;
     }
 
@@ -110,11 +116,11 @@ export function JoinEventModal({ visible, onClose, eventData, teamId }: JoinEven
 
     try {
       await eventRegistrationMutation.mutateAsync(registrationData);
-      alert('Successfully registered for the event!');
+      setToastConfig({ visible: true, message: 'Successfully registered for the event!', type: 'success' });
       onClose();
     } catch (error) {
       console.error('Registration failed:', error);
-      alert('Failed to register for the event. Please try again.');
+      setToastConfig({ visible: true, message: 'Failed to register for the event. Please try again.', type: 'error' });
     }
   };
 
@@ -126,6 +132,7 @@ export function JoinEventModal({ visible, onClose, eventData, teamId }: JoinEven
   };
 
   return (
+    <>
     <Modal visible={visible} animationType="slide" transparent>
       <Pressable 
         style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
@@ -252,6 +259,14 @@ export function JoinEventModal({ visible, onClose, eventData, teamId }: JoinEven
         </Pressable>
       </Pressable>
     </Modal>
+    <Toast
+      visible={toastConfig.visible}
+      message={toastConfig.message}
+      type={toastConfig.type}
+      position="bottom-left"
+      onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
+    />
+    </>
   );
 }
 

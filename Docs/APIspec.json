@@ -543,7 +543,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -629,6 +646,46 @@
       }
     },
     "/admin/event/{id}/start": {
+      "post": {
+        "tags": [
+          "EventAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/event/{id}/complete": {
       "post": {
         "tags": [
           "EventAdmin"
@@ -855,6 +912,55 @@
         }
       }
     },
+    "/admin/event/{id}/teams/{teamId}/drop": {
+      "post": {
+        "tags": [
+          "EventAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/event/{id}/admins": {
       "post": {
         "tags": [
@@ -936,7 +1042,104 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/event/{id}/games/{gameId}/score": {
+      "put": {
+        "tags": [
+          "EventAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportScoreRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1019,7 +1222,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1073,7 +1293,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1208,7 +1445,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1231,7 +1485,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1254,7 +1525,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1375,7 +1663,73 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EventRegistrations/event/{eventId}/team/{teamId}/drop": {
+      "post": {
+        "tags": [
+          "EventRegistrations"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1605,6 +1959,55 @@
         }
       }
     },
+    "/Events/{id}/standings": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventTeamStandingsDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventTeamStandingsDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventTeamStandingsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/EventTypes": {
       "get": {
         "tags": [
@@ -1692,7 +2095,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1758,7 +2178,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1890,7 +2327,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1944,7 +2398,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -1998,7 +2469,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2052,7 +2540,75 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Pairings": {
+      "post": {
+        "tags": [
+          "Pairings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingStateDto"
+                }
+              }
+            }
           }
         }
       }
@@ -2161,7 +2717,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2184,7 +2757,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2207,7 +2797,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2301,7 +2908,27 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
           }
         }
       }
@@ -2364,7 +2991,27 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
           }
         }
       }
@@ -2396,7 +3043,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2463,17 +3127,26 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserGameStatistics"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGameStatistics"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserGameStatistics"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGameStatistics"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserGameStatistics"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGameStatistics"
+                  }
                 }
               }
             }
@@ -2534,6 +3207,77 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateTeamResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Teams/{id}/images": {
+      "put": {
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateTeamImagesDto"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateTeamImagesDto"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateTeamImagesDto"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTeamImagesResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTeamImagesResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTeamImagesResponseDto"
                 }
               }
             }
@@ -2699,6 +3443,66 @@
                   "items": {
                     "$ref": "#/components/schemas/UserDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Users/me/images": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateUserImagesDto"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateUserImagesDto"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateUserImagesDto"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserImagesResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserImagesResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserImagesResponseDto"
                 }
               }
             }
@@ -3249,6 +4053,10 @@
             "type": "number",
             "format": "float"
           },
+          "eventTeamStatus": {
+            "type": "string",
+            "nullable": true
+          },
           "users": {
             "type": "array",
             "items": {
@@ -3416,10 +4224,86 @@
             "type": "string",
             "format": "uuid"
           },
+          "eventTeamStatus": {
+            "type": "string",
+            "nullable": true
+          },
           "members": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EventRegistrationMemberDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EventTeamStandingStatus": {
+        "enum": [
+          "active",
+          "dropped"
+        ],
+        "type": "string"
+      },
+      "EventTeamStandingsDto": {
+        "type": "object",
+        "properties": {
+          "matchPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accumulatedScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "strengthOfSchedule": {
+            "type": "number",
+            "format": "double"
+          },
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchesWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchesDrawn": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchesLost": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "dropped"
+            ],
+            "type": "string",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventTeamStandingStatus"
+              }
+            ]
+          },
+          "team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamDetailsDto"
+              }
+            ],
+            "nullable": true
+          },
+          "roundResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoundResultDto"
             },
             "nullable": true
           }
@@ -3453,6 +4337,10 @@
           "playersPerTeam": {
             "type": "integer",
             "format": "int32"
+          },
+          "weighting": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false
@@ -3567,6 +4455,29 @@
             "nullable": true
           },
           "winnerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GamePairingRequest": {
+        "type": "object",
+        "properties": {
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerSideRequest"
+            },
+            "nullable": true
+          },
+          "missionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "layoutId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -3718,37 +4629,6 @@
       },
       "NotificationPayload": {
         "type": "object",
-        "additionalProperties": false
-      },
-      "PairingGameSideRequest": {
-        "type": "object",
-        "properties": {
-          "team": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "player": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "role": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PairingRequest": {
-        "type": "object",
-        "properties": {
-          "games": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PairingGameSideRequest"
-            },
-            "nullable": true
-          }
-        },
         "additionalProperties": false
       },
       "PairingResultJson": {
@@ -4052,6 +4932,14 @@
               }
             ],
             "nullable": true
+          },
+          "eventRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventRole"
+              }
+            ],
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4080,6 +4968,24 @@
           "score": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlayerSideRequest": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "player": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4265,6 +5171,29 @@
         },
         "additionalProperties": false
       },
+      "RoundResultDto": {
+        "type": "object",
+        "properties": {
+          "roundNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "differentialScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isBye": {
+            "type": "boolean"
+          },
+          "isWinner": {
+            "type": "boolean"
+          },
+          "isDraw": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "RoundStatus": {
         "enum": [
           "pending",
@@ -4316,8 +5245,8 @@
             "nullable": true
           },
           "score": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "double"
           },
           "gamesWon": {
             "type": "integer",
@@ -4390,7 +5319,7 @@
           "pairings": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PairingRequest"
+              "$ref": "#/components/schemas/GamePairingRequest"
             },
             "nullable": true
           }
@@ -4702,6 +5631,78 @@
                 "$ref": "#/components/schemas/PairingStrategy"
               }
             ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateTeamImagesDto": {
+        "type": "object",
+        "properties": {
+          "logo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
+          },
+          "banner": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateTeamImagesResponseDto": {
+        "type": "object",
+        "properties": {
+          "logoSignedUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "bannerSignedUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserImagesDto": {
+        "type": "object",
+        "properties": {
+          "profilePicture": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
+          },
+          "heroImage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageMetadataDto"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserImagesResponseDto": {
+        "type": "object",
+        "properties": {
+          "profilePictureSignedUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "heroImageSignedUrl": {
+            "type": "string",
             "nullable": true
           }
         },

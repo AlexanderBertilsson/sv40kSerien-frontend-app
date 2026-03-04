@@ -37,8 +37,45 @@ export function useEventRegistration(eventId: string) {
       // Invalidate events queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
     },
   });
 
   return { eventRegistrationMutation };
+}
+
+export function useDropEventRegistration(eventId: string) {
+  const queryClient = useQueryClient();
+  const dropMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiClient.delete(`/EventRegistrations/event/${eventId}/user/${userId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistrations', eventId] });
+    },
+  });
+
+  return { dropMutation };
+}
+
+export function useDropTeamFromEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const dropTeamMutation = useMutation({
+    mutationFn: async (teamId: string) => {
+      const res = await apiClient.post(`/EventRegistrations/event/${eventId}/team/${teamId}/drop`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistrations', eventId] });
+    },
+  });
+
+  return { dropTeamMutation };
 }

@@ -1,6 +1,7 @@
 import { View, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams, router, useNavigation } from 'expo-router';
 import { useColorScheme } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '@/src/constants/Colors';
 import ThemedText from '@/src/components/ThemedText';
 import { EventProvider, useEventContext } from '@/src/contexts/EventContext';
@@ -8,7 +9,7 @@ import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
 import { useRoundConfiguration } from '@/src/hooks/useRoundConfiguration';
 import { useRoundMatches } from '@/src/hooks/useEventState';
 import { mapApiPlayersToTeam, mapApiLayouts } from '@/src/utils/pairingMappers';
-import { useMemo, useLayoutEffect } from 'react';
+import { useMemo, useCallback, useLayoutEffect } from 'react';
 import { TableLayout, ServerTeamId } from '@/src/types/pairing';
 import { PairingInitData } from '@/src/hooks/usePairingState';
 import { useMultiplayerPairingState } from '@/src/hooks/useMultiplayerPairingState';
@@ -41,7 +42,8 @@ function MatchPairingsContent() {
   const { eventId, matchId } = useLocalSearchParams<{ eventId: string; matchId: string }>();
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const { eventTeamId, isCaptain, isEventAdmin } = useEventContext();
+  const queryClient = useQueryClient();
+  const { eventTeamId, isCaptain, isTeamAdmin } = useEventContext();
 
   // Fetch round 1 matches to find this match's data
   // TODO: Support multiple rounds by searching across rounds
@@ -60,7 +62,7 @@ function MatchPairingsContent() {
   const roundNumber = match?.roundNumber ?? 1;
   const isUserTeam1 = eventTeamId === team1Id;
   const isUserTeam2 = eventTeamId === team2Id;
-  const isAdmin = isCaptain || isEventAdmin;
+  const isAdmin = isCaptain || isTeamAdmin;
   const isOnTeam = isUserTeam1 || isUserTeam2;
   const isTeamSpectator = isOnTeam && !isAdmin;
   const isSpectator = !isOnTeam;
@@ -103,6 +105,13 @@ function MatchPairingsContent() {
 
   const myTeamId = isUserTeam1 ? team1Id! : team2Id!;
 
+  const handleDone = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
+    queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
+    queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
+    router.back();
+  }, [queryClient, eventId]);
+
   const isLoading = team1RegQuery.isLoading || team2RegQuery.isLoading || roundConfigQuery.isLoading || round1Query.isLoading;
 
   if (isLoading) {
@@ -131,6 +140,7 @@ function MatchPairingsContent() {
         initData={initData}
         pairingStateId={pairingStateId!}
         matchId={matchId!}
+        onDone={handleDone}
       />
     );
   }
@@ -144,6 +154,7 @@ function MatchPairingsContent() {
         myTeamId={myTeamId}
         myTeam={isUserTeam1 ? '1' : '2'}
         readOnly={isTeamSpectator}
+        onDone={handleDone}
       />
     );
   }
@@ -152,7 +163,7 @@ function MatchPairingsContent() {
     <PairingGame
       initData={initData}
       getLayoutImageSource={(layout: TableLayout) => ({ uri: layout.imageUrl })}
-      onReset={() => router.back()}
+      onReset={handleDone}
       mode="local"
     />
   );
@@ -163,10 +174,12 @@ function SpectatorPairingGameWrapper({
   initData,
   pairingStateId,
   matchId,
+  onDone,
 }: {
   initData: PairingInitData;
   pairingStateId: string;
   matchId: string;
+  onDone: () => void;
 }) {
   const spectator = useSpectatorPairingState({
     pairingStateId,
@@ -178,7 +191,7 @@ function SpectatorPairingGameWrapper({
     <PairingGame
       initData={initData}
       getLayoutImageSource={(layout: TableLayout) => ({ uri: layout.imageUrl })}
-      onReset={() => router.back()}
+      onReset={onDone}
       mode="spectator"
       spectatorState={spectator}
     />
@@ -193,6 +206,7 @@ function MultiplayerPairingGame({
   myTeamId,
   myTeam,
   readOnly,
+  onDone,
 }: {
   initData: PairingInitData;
   pairingStateId: string;
@@ -200,6 +214,7 @@ function MultiplayerPairingGame({
   myTeamId: string;
   myTeam: ServerTeamId;
   readOnly?: boolean;
+  onDone: () => void;
 }) {
   const multiplayer = useMultiplayerPairingState({
     pairingStateId,
@@ -214,7 +229,7 @@ function MultiplayerPairingGame({
     <PairingGame
       initData={initData}
       getLayoutImageSource={(layout: TableLayout) => ({ uri: layout.imageUrl })}
-      onReset={() => router.back()}
+      onReset={onDone}
       mode="multiplayer"
       multiplayerState={multiplayer}
       readOnly={readOnly}

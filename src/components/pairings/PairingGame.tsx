@@ -51,6 +51,10 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
                              : localPairing.getAvailablePlayers;
   const reset = localPairing.reset;
 
+  // Ref to latest pairing state — used inside setTimeout callbacks to avoid stale closures
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   // Slot-based state management (compact card slots)
   const [slots, setSlots] = useState<SlotState>({
     blueDefender: null,
@@ -338,6 +342,26 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
     // All cards should be revealed during layout-select
     setRevealedSlots(new Set(['blueDefender', 'redDefender', 'blueAttacker1', 'redAttacker1']));
   }, [state.currentPhase, state.round1, state.round2]);
+
+  // Local mode: clear slots when entering a new round or final phases
+  // (Multiplayer handles this via the server sync effect above)
+  useEffect(() => {
+    if (isMultiplayer || isSpectator) return;
+
+    if (state.currentPhase === 'round2-defender' || state.currentPhase === 'round3-auto-pair' || state.currentPhase === 'results') {
+      setSlots({
+        blueDefender: null,
+        blueAttacker1: null,
+        blueAttacker2: null,
+        redDefender: null,
+        redAttacker1: null,
+        redAttacker2: null,
+      });
+      setRevealedSlots(new Set());
+      setPlacedBlueCards(new Set());
+      setRefusalSlotSelection(null);
+    }
+  }, [state.currentPhase, isMultiplayer, isSpectator]);
 
   // Multiplayer/Spectator: reset slots when server advances to a new round or layout phase
   useEffect(() => {
@@ -943,12 +967,35 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
 
         if (isRound2) {
           // Round 2: Auto-assign remaining 2 players as attackers (skip attacker selection)
-          const teamAAvailable = localPairing.getAvailablePlayers('A');
-          const teamBAvailable = localPairing.getAvailablePlayers('B');
+          // Use stateRef to read the latest state — the closure's state is stale
+          // (selectDefender/aiSelectDefender setState calls have been batched and applied by now)
+          const currentState = stateRef.current;
+          const teamAAvailable = currentState.teamA.players.filter(
+            p => currentState.playerStates.get(p.id) === 'available'
+          );
+          const teamBAvailable = currentState.teamB.players.filter(
+            p => currentState.playerStates.get(p.id) === 'available'
+          );
 
           if (teamAAvailable.length >= 2 && teamBAvailable.length >= 2) {
             localPairing.selectAttackers([teamAAvailable[0].id, teamAAvailable[1].id], 'A');
             localPairing.selectAttackers([teamBAvailable[0].id, teamBAvailable[1].id], 'B');
+
+            // Populate slots with the auto-assigned attackers so they're visible during refuse phase
+            setSlots(prev => ({
+              ...prev,
+              blueAttacker1: teamAAvailable[0],
+              blueAttacker2: teamAAvailable[1],
+              redAttacker1: teamBAvailable[0],
+              redAttacker2: teamBAvailable[1],
+            }));
+            setRevealedSlots(prev => new Set(prev).add('blueAttacker1').add('blueAttacker2').add('redAttacker1').add('redAttacker2'));
+            setPlacedBlueCards(prev => {
+              const updated = new Set(prev);
+              updated.add(teamAAvailable[0].id);
+              updated.add(teamAAvailable[1].id);
+              return updated;
+            });
           }
           localPairing.advancePhase(); // → round2-refuse (skips attacker phases)
         } else {
@@ -1020,6 +1067,28 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
   };
 
   const handleReset = () => {
+    // Clear all local UI state
+    setSlots({
+      blueDefender: null,
+      blueAttacker1: null,
+      blueAttacker2: null,
+      redDefender: null,
+      redAttacker1: null,
+      redAttacker2: null,
+    });
+    setRevealedSlots(new Set());
+    setExpandedHand(null);
+    setSelectedHandCard(null);
+    setRefusalSlotSelection(null);
+    setModalOpen(null);
+    setShowLayoutsViewer(false);
+    setLastLayoutSelection(null);
+    setPlacedBlueCards(new Set());
+    setSelectedCardPosition(null);
+    setAnimatingCard(null);
+    setPendingSlotPlacement(null);
+    setLogMessages([]);
+
     if (onReset) {
       onReset();
     } else {
@@ -1549,7 +1618,7 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
             onOpenRedHand={handleOpenRedModal}
             currentLayoutPicker={state.currentPhase.includes('layout-select') ? state.currentLayoutPicker : null}
             coinflipWinner={state.coinflipWinner}
-            showCoinflipWinner={state.currentPhase === 'round1-refuse' && !!state.coinflipWinner}
+            showCoinflipWinner={(state.currentPhase === 'round1-refuse' || (state.currentPhase === 'round1-layout-select' && !state.currentLayoutPicker)) && !!state.coinflipWinner}
           />
         )}
 
@@ -1594,7 +1663,7 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
               />
 
               {/* Coinflip Winner / Layout Picker Marker for Team A */}
-              {(state.currentPhase === 'round1-refuse' && state.coinflipWinner === 'A') && (
+              {((state.currentPhase === 'round1-refuse' || (state.currentPhase === 'round1-layout-select' && !state.currentLayoutPicker)) && state.coinflipWinner === 'A') && (
                 <View style={{
                   backgroundColor: '#10b981',
                   paddingHorizontal: theme.spacing.sm,
@@ -1659,8 +1728,8 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
           {/* Team B Card Hand */}
           {!isMobile && state.currentPhase !== 'setup' && state.currentPhase !== 'results' && (
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing.sm }}>
-              {/* Coinflip Winner Marker for Team B during refuse */}
-              {(state.currentPhase === 'round1-refuse' && state.coinflipWinner === 'B') && (
+              {/* Coinflip Winner Marker for Team B during refuse and layout-select gap */}
+              {((state.currentPhase === 'round1-refuse' || (state.currentPhase === 'round1-layout-select' && !state.currentLayoutPicker)) && state.coinflipWinner === 'B') && (
                 <View style={{
                   backgroundColor: '#10b981',
                   paddingHorizontal: theme.spacing.sm,

@@ -59,6 +59,7 @@ export function useTeamInvite() {
 
   return {
     acceptInvite: acceptInviteMutation.mutate,
+    acceptInviteAsync: acceptInviteMutation.mutateAsync,
     rejectInvite: rejectInviteMutation.mutate,
     inviteUser: inviteUserMutation.mutate,
     inviteUserAsync: inviteUserMutation.mutateAsync,

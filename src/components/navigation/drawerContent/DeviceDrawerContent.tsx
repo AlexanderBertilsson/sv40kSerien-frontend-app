@@ -55,6 +55,15 @@ export default function DeviceDrawerContent(props: any) {
           }}
           theme={theme}
         />
+        <DrawerItem
+          label="Pairings (AI)"
+          iconName="people-outline"
+          onPress={() => {
+            navigation.dispatch(DrawerActions.closeDrawer());
+            router.push("/pairings");
+          }}
+          theme={theme}
+        />
         {isAuthenticated
         ? <DrawerItem
             label="Logout"

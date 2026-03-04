@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
 import { Colors, hexToRgba } from '../../constants/Colors';
 import { useReportGameScore } from '../../hooks/useEventState';
+import { useAdminUpdateGameScore } from '../../hooks/useEventAdmin';
 import { MatchGame } from '../match/MatchCard';
 import { ReportScoreRequest } from '../../../types/EventAdmin';
 
@@ -14,18 +15,23 @@ interface GameDetailsModalProps {
   eventId: string;
   game: MatchGame | null;
   currentUserId?: string | null;
+  isEventAdmin?: boolean;
+  onScoreSubmitted?: () => void;
 }
 
-export function GameDetailsModal({ 
-  visible, 
-  onClose, 
+export function GameDetailsModal({
+  visible,
+  onClose,
   eventId,
   game,
   currentUserId,
+  isEventAdmin = false,
+  onScoreSubmitted,
 }: GameDetailsModalProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { reportScoreMutation } = useReportGameScore(eventId, game?.id || '');
+  const { adminUpdateScoreMutation } = useAdminUpdateGameScore(eventId, game?.id || '');
 
   const [player1Score, setPlayer1Score] = useState('');
   const [player2Score, setPlayer2Score] = useState('');
@@ -42,7 +48,8 @@ export function GameDetailsModal({
     return (game.player1DifferentialScore !== 0 || game.player2DifferentialScore !== 0);
   }, [game]);
 
-  const canReportScore = isPlayer && !hasReportedScore;
+  // Players can report if not yet reported; admins can always update
+  const canReportScore = (isPlayer && !hasReportedScore) || isEventAdmin;
 
   const handleSubmitScore = async () => {
     if (!game || !game.player1Id || !game.player2Id) return;
@@ -60,12 +67,20 @@ export function GameDetailsModal({
     };
 
     try {
-      await reportScoreMutation.mutateAsync(request);
+      if (isEventAdmin) {
+        await adminUpdateScoreMutation.mutateAsync(request);
+      } else {
+        await reportScoreMutation.mutateAsync(request);
+      }
+      onScoreSubmitted?.();
       handleClose();
     } catch (error) {
       console.error('Failed to report score:', error);
     }
   };
+
+  const isSubmitting = reportScoreMutation.isPending || adminUpdateScoreMutation.isPending;
+  const hasSubmitError = reportScoreMutation.isError || adminUpdateScoreMutation.isError;
 
   const handleClose = () => {
     setPlayer1Score('');
@@ -230,7 +245,9 @@ export function GameDetailsModal({
             {/* Report Score Form */}
             {canReportScore && (
               <View style={styles.reportSection}>
-                <ThemedText style={styles.reportTitle}>Report Score</ThemedText>
+                <ThemedText style={styles.reportTitle}>
+                  {isEventAdmin && hasReportedScore ? 'Update Score' : 'Report Score'}
+                </ThemedText>
                 
                 <View style={styles.scoreInputRow}>
                   <View style={styles.scoreInputContainer}>
@@ -274,16 +291,18 @@ export function GameDetailsModal({
                     { backgroundColor: isFormValid ? theme.success : hexToRgba(theme.success, 0.3) }
                   ]}
                   onPress={handleSubmitScore}
-                  disabled={!isFormValid || reportScoreMutation.isPending}
+                  disabled={!isFormValid || isSubmitting}
                 >
-                  {reportScoreMutation.isPending ? (
+                  {isSubmitting ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <ThemedText style={styles.submitButtonText}>Submit Score</ThemedText>
+                    <ThemedText style={styles.submitButtonText}>
+                      {isEventAdmin && hasReportedScore ? 'Update Score' : 'Submit Score'}
+                    </ThemedText>
                   )}
                 </TouchableOpacity>
 
-                {reportScoreMutation.isError && (
+                {hasSubmitError && (
                   <ThemedText style={[styles.errorText, { color: theme.error }]}>
                     Failed to submit score. Please try again.
                   </ThemedText>

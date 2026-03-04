@@ -8,6 +8,8 @@ import { Link } from 'expo-router';
 import { useEventContext } from '@/src/contexts/EventContext';
 import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
 import { useEventTeamInvite } from '@/src/hooks/useEventTeamInvite';
+import { useDropEventRegistration, useDropTeamFromEvent } from '@/src/hooks/useEventRegistration';
+import { useAuthContext } from '@/src/contexts/AuthContext';
 import { EventRegistrationMemberDto } from '@/types/EventAdmin';
 import SearchUsersModal from '@/src/components/modals/SearchUsersModal';
 import AlertModal, { AlertButton } from '@/src/components/common/AlertModal';
@@ -23,14 +25,17 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
 
-  const { eventTeamId, isCaptain, isEventAdmin } = useEventContext();
+  const { authUser } = useAuthContext();
+  const { eventTeamId, isCaptain, isTeamAdmin, isRegistered } = useEventContext();
   const { teamRegistrationsQuery } = useTeamRegistrations(eventId, eventTeamId);
+  const { dropMutation } = useDropEventRegistration(eventId);
+  const { dropTeamMutation } = useDropTeamFromEvent(eventId);
   const members = teamRegistrationsQuery.data?.members ?? [];
 
   const players = members.filter((m) => m.eventRole?.toLowerCase() === 'player');
   const coaches = members.filter((m) => m.eventRole?.toLowerCase() !== 'player');
 
-  const canManage = isCaptain || isEventAdmin;
+  const canManage = isCaptain || isTeamAdmin;
   const canInvitePlayers = canManage && (!maxPlayers || players.length < maxPlayers);
   const canInviteCoaches = canManage && coaches.length < 2;
 
@@ -39,6 +44,9 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
     revokeInviteAsync,
     pendingInvites,
   } = useEventTeamInvite(eventId, eventTeamId);
+
+  const pendingPlayers = pendingInvites.filter((i) => i.eventRole?.toLowerCase() !== 'coach');
+  const pendingCoaches = pendingInvites.filter((i) => i.eventRole?.toLowerCase() === 'coach');
 
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [inviteRole, setInviteRole] = useState<'player' | 'coach'>('player');
@@ -114,6 +122,104 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
     });
   };
 
+  const handleKickMember = (member: EventRegistrationMemberDto) => {
+    setAlertConfig({
+      visible: true,
+      title: 'Remove Member',
+      message: `Remove ${member.username} from the team?`,
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await dropMutation.mutateAsync(member.userId);
+              setToastConfig({
+                visible: true,
+                message: `${member.username} has been removed`,
+                type: 'success',
+              });
+            } catch (error) {
+              console.error('Failed to remove member:', error);
+              setToastConfig({
+                visible: true,
+                message: 'Failed to remove member. Please try again.',
+                type: 'error',
+              });
+            }
+          },
+        },
+      ],
+    });
+  };
+
+  const handleLeaveEvent = () => {
+    setAlertConfig({
+      visible: true,
+      title: 'Leave Event',
+      message: 'Are you sure you want to leave this event?',
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: async () => {
+            if (!authUser?.id) return;
+            try {
+              await dropMutation.mutateAsync(authUser.id);
+              setToastConfig({
+                visible: true,
+                message: 'You have left the event',
+                type: 'success',
+              });
+            } catch (error) {
+              console.error('Failed to leave event:', error);
+              setToastConfig({
+                visible: true,
+                message: 'Failed to leave event. Please try again.',
+                type: 'error',
+              });
+            }
+          },
+        },
+      ],
+    });
+  };
+
+  const handleDropTeam = () => {
+    if (!eventTeamId) return;
+    setAlertConfig({
+      visible: true,
+      title: 'Drop Team from Event',
+      message: 'Are you sure you want to drop your entire team from this event? All members will be removed.',
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Drop Team',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await dropTeamMutation.mutateAsync(eventTeamId);
+              setToastConfig({
+                visible: true,
+                message: 'Your team has been dropped from the event',
+                type: 'success',
+              });
+            } catch (error) {
+              console.error('Failed to drop team:', error);
+              setToastConfig({
+                visible: true,
+                message: 'Failed to drop team. Please try again.',
+                type: 'error',
+              });
+            }
+          },
+        },
+      ],
+    });
+  };
+
   if (!eventTeamId) {
     return (
       <View style={styles.emptyContainer}>
@@ -132,49 +238,101 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
     );
   }
 
+  const eventTeamStatus = teamRegistrationsQuery.data?.eventTeamStatus;
+  const isDropped = eventTeamStatus?.toLowerCase() === 'dropped';
+
   const linkStyle = { fontSize: 14, fontWeight: 'bold' as const, color: theme.tint };
 
-  const renderMember = (member: EventRegistrationMemberDto) => (
-    <View key={member.userId} style={styles.memberCard}>
-      <Link href={`/user/${member.userId}`} asChild>
-        <Pressable>
-          <Image
-            source={
-              member.profilePictureUrl
-                ? { uri: member.profilePictureUrl }
-                : require('@/assets/images/emoji2.png')
-            }
-            style={styles.profileImage}
-          />
-        </Pressable>
-      </Link>
+  const renderPendingInvite = (invite: typeof pendingInvites[number]) => (
+    <View key={`pending-${invite.inviteId}`} style={[styles.memberCard, { opacity: 0.6 }]}>
+      <Image
+        source={
+          invite.user.profilePictureUrl
+            ? { uri: invite.user.profilePictureUrl }
+            : require('@/assets/images/emoji2.png')
+        }
+        style={styles.profileImage}
+      />
       <View style={styles.memberInfo}>
-        <Link href={`/user/${member.userId}`} asChild>
-          <Text style={linkStyle}>{member.username}</Text>
-        </Link>
-        <View style={styles.roleRow}>
-          {member.isCaptain && (
-            <View style={[styles.badge, { backgroundColor: hexToRgba(theme.tint, 0.2) }]}>
-              <ThemedText style={{ fontSize: 10, color: theme.tint }}>Captain</ThemedText>
-            </View>
-          )}
-          {member.isAdmin && (
-            <View style={[styles.badge, { backgroundColor: hexToRgba('#FF9800', 0.2) }]}>
-              <ThemedText style={{ fontSize: 10, color: '#FF9800' }}>Admin</ThemedText>
-            </View>
-          )}
-          {member.armyList && (
-            <ThemedText style={styles.factionText}>
-              {member.armyList.factionName}
-            </ThemedText>
-          )}
+        <Text style={[styles.memberName, { color: theme.text }]}>
+          {invite.user.username}
+        </Text>
+        <View style={styles.pendingStatus}>
+          <Ionicons name="time-outline" size={12} color={theme.text} />
+          <Text style={[styles.pendingText, { color: theme.text }]}>Pending</Text>
         </View>
       </View>
+      <Pressable
+        style={[styles.cancelButton, { backgroundColor: hexToRgba(theme.text, 0.1) }]}
+        onPress={() => handleRevokeInvite(invite.inviteId, invite.user.username)}
+      >
+        <Ionicons name="close" size={20} color={theme.text} />
+      </Pressable>
     </View>
   );
 
+  const renderMember = (member: EventRegistrationMemberDto) => {
+    const showKick = canManage && member.userId !== authUser?.id && !member.isCaptain;
+    return (
+      <View key={member.userId} style={styles.memberCard}>
+        <Link href={`/user/${member.userId}`} asChild>
+          <Pressable>
+            <Image
+              source={
+                member.profilePictureUrl
+                  ? { uri: member.profilePictureUrl }
+                  : require('@/assets/images/emoji2.png')
+              }
+              style={styles.profileImage}
+            />
+          </Pressable>
+        </Link>
+        <View style={styles.memberInfo}>
+          <Link href={`/user/${member.userId}`} asChild>
+            <Text style={linkStyle}>{member.username}</Text>
+          </Link>
+          <View style={styles.roleRow}>
+            {member.isCaptain && (
+              <View style={[styles.badge, { backgroundColor: hexToRgba(theme.tint, 0.2) }]}>
+                <ThemedText style={{ fontSize: 10, color: theme.tint }}>Captain</ThemedText>
+              </View>
+            )}
+            {member.isAdmin && (
+              <View style={[styles.badge, { backgroundColor: hexToRgba('#FF9800', 0.2) }]}>
+                <ThemedText style={{ fontSize: 10, color: '#FF9800' }}>Admin</ThemedText>
+              </View>
+            )}
+            {member.armyList && (
+              <ThemedText style={styles.factionText}>
+                {member.armyList.factionName}
+              </ThemedText>
+            )}
+          </View>
+        </View>
+        {showKick && (
+          <Pressable
+            style={[styles.cancelButton, { backgroundColor: hexToRgba('#FF3B30', 0.1) }]}
+            onPress={() => handleKickMember(member)}
+          >
+            <Ionicons name="close-circle-outline" size={20} color="#FF3B30" />
+          </Pressable>
+        )}
+      </View>
+    );
+  };
+
   return (
     <>
+      {/* Dropped Banner */}
+      {isDropped && (
+        <View style={[styles.droppedBanner, { backgroundColor: hexToRgba('#FF3B30', 0.15) }]}>
+          <Ionicons name="warning-outline" size={20} color="#FF3B30" />
+          <ThemedText style={styles.droppedBannerText}>
+            Your team has been dropped from this event
+          </ThemedText>
+        </View>
+      )}
+
       {/* Players Card */}
       <View style={[styles.card, { backgroundColor: hexToRgba(theme.secondary, 0.5) }]}>
         <View style={styles.header}>
@@ -190,34 +348,8 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
         <View style={styles.membersGrid}>
           {players.map(renderMember)}
 
-          {/* Pending Invites */}
-          {canManage && pendingInvites.map((invite) => (
-            <View key={`pending-${invite.inviteId}`} style={[styles.memberCard, { opacity: 0.6 }]}>
-              <Image
-                source={
-                  invite.user.profilePictureUrl
-                    ? { uri: invite.user.profilePictureUrl }
-                    : require('@/assets/images/emoji2.png')
-                }
-                style={styles.profileImage}
-              />
-              <View style={styles.memberInfo}>
-                <Text style={[styles.memberName, { color: theme.text }]}>
-                  {invite.user.username}
-                </Text>
-                <View style={styles.pendingStatus}>
-                  <Ionicons name="time-outline" size={12} color={theme.text} />
-                  <Text style={[styles.pendingText, { color: theme.text }]}>Pending</Text>
-                </View>
-              </View>
-              <Pressable
-                style={[styles.cancelButton, { backgroundColor: hexToRgba(theme.text, 0.1) }]}
-                onPress={() => handleRevokeInvite(invite.inviteId, invite.user.username)}
-              >
-                <Ionicons name="close" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-          ))}
+          {/* Pending Player Invites */}
+          {canManage && pendingPlayers.map((invite) => renderPendingInvite(invite))}
 
           {/* Add Player Card */}
           {canInvitePlayers && (
@@ -256,6 +388,9 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
           <View style={styles.membersGrid}>
             {coaches.map(renderMember)}
 
+            {/* Pending Coach Invites */}
+            {canManage && pendingCoaches.map((invite) => renderPendingInvite(invite))}
+
             {/* Add Coach Card */}
             {canInviteCoaches && (
               <View style={styles.memberCard}>
@@ -276,6 +411,34 @@ export default function MyTeamView({ eventId, maxPlayers }: MyTeamViewProps) {
             )}
           </View>
         </View>
+      )}
+
+      {/* Leave Event Button */}
+      {isRegistered && (
+        <Pressable
+          style={[styles.leaveButton, { borderColor: '#FF3B30' }]}
+          onPress={handleLeaveEvent}
+          disabled={dropMutation.isPending}
+        >
+          <Ionicons name="exit-outline" size={18} color="#FF3B30" />
+          <Text style={styles.leaveButtonText}>
+            {dropMutation.isPending ? 'Leaving...' : 'Leave Event'}
+          </Text>
+        </Pressable>
+      )}
+
+      {/* Drop Team Button - only for captain/admin */}
+      {isRegistered && canManage && (
+        <Pressable
+          style={[styles.leaveButton, { borderColor: '#FF3B30' }]}
+          onPress={handleDropTeam}
+          disabled={dropTeamMutation.isPending}
+        >
+          <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+          <Text style={styles.leaveButtonText}>
+            {dropTeamMutation.isPending ? 'Dropping...' : 'Drop Team from Event'}
+          </Text>
+        </Pressable>
       )}
 
       <SearchUsersModal
@@ -402,5 +565,35 @@ const styles = StyleSheet.create({
   addText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  leaveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  leaveButtonText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  droppedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  droppedBannerText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: '600',
+    flex: 1,
   },
 });

@@ -224,15 +224,16 @@ export function useMultiplayerPairingState({
 
   const submitDefender = useCallback(async (playerId: string) => {
     setIsSubmitting(true);
+    setHasSubmitted(true); // Optimistic — set before await to prevent race with channel state update
     try {
       const request: SelectDefenderRequest = {
         teamId: myTeamId,
         defenderId: playerId,
       };
       await apiClient.post(`/pairings/${pairingStateId}/defender`, request);
-      setHasSubmitted(true);
       await broadcastAction({ action: 'defender_played', team: myTeam });
     } catch (error) {
+      setHasSubmitted(false); // Rollback on failure
       console.error('Failed to submit defender:', error);
       throw error;
     } finally {
@@ -242,6 +243,7 @@ export function useMultiplayerPairingState({
 
   const submitAttackers = useCallback(async (playerIds: string[]) => {
     setIsSubmitting(true);
+    setHasSubmitted(true); // Optimistic — set before await to prevent race with channel state update
     try {
       const request: SelectAttackersRequest = {
         teamId: myTeamId,
@@ -252,8 +254,8 @@ export function useMultiplayerPairingState({
       setTimeout(() => broadcastAction({ action: 'attacker_2_played', team: myTeam }), 300);
 
       await apiClient.post(`/pairings/${pairingStateId}/attackers`, request);
-      setHasSubmitted(true);
     } catch (error) {
+      setHasSubmitted(false); // Rollback on failure
       console.error('Failed to submit attackers:', error);
       throw error;
     } finally {
@@ -263,15 +265,16 @@ export function useMultiplayerPairingState({
 
   const submitRefusal = useCallback(async (playerId: string) => {
     setIsSubmitting(true);
+    setHasSubmitted(true); // Optimistic — set before await to prevent race with channel state update
     try {
       const request: RefuseAttackerRequest = {
         teamId: myTeamId,
         attackerId: playerId,
       };
       await apiClient.post(`/pairings/${pairingStateId}/refuse`, request);
-      setHasSubmitted(true);
       await broadcastAction({ action: 'refusal_played', team: myTeam });
     } catch (error) {
+      setHasSubmitted(false); // Rollback on failure
       console.error('Failed to submit refusal:', error);
       throw error;
     } finally {
@@ -281,15 +284,16 @@ export function useMultiplayerPairingState({
 
   const submitLayout = useCallback(async (tableNumber: number, layoutId: string) => {
     setIsSubmitting(true);
+    setHasSubmitted(true); // Optimistic — set before await to prevent race with channel state update
     try {
       const request: SelectLayoutRequest = {
         teamId: myTeamId,
         layoutId,
       };
       await apiClient.post(`/pairings/${pairingStateId}/layout`, request);
-      setHasSubmitted(true);
       await broadcastAction({ action: 'layout_selected', team: myTeam, tableNumber });
     } catch (error) {
+      setHasSubmitted(false); // Rollback on failure
       console.error('Failed to submit layout:', error);
       throw error;
     } finally {

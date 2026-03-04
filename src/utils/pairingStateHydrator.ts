@@ -134,20 +134,31 @@ export function hydratePairingState(
     }
   }
 
-  // Derive pendingLayoutForTable from phase and assigned layouts
+  // Derive pendingLayoutForTable from server's layout table assignments
   let pendingLayoutForTable: number | null = null;
   if (currentLayoutPicker && (serverState.currentPhase === 'round1-layout-select' || serverState.currentPhase === 'round2-layout-select')) {
     const isRound1 = serverState.currentPhase === 'round1-layout-select';
-    const tableOffset = isRound1 ? 0 : 2;
+    const serverRound = isRound1 ? serverState.round1 : serverState.round2;
 
-    // Find the table that needs a layout
-    const table1Pairing = pairings.find(p => p.tableNumber === tableOffset + 1);
-    const table2Pairing = pairings.find(p => p.tableNumber === tableOffset + 2);
+    // Use the server-provided layout table for the current picker
+    const serverPicker = serverState.currentLayoutPicker;
+    if (serverPicker === '1' && serverRound.team1LayoutTable != null) {
+      pendingLayoutForTable = serverRound.team1LayoutTable;
+    } else if (serverPicker === '2' && serverRound.team2LayoutTable != null) {
+      pendingLayoutForTable = serverRound.team2LayoutTable;
+    }
 
-    if (!table1Pairing?.layout) {
-      pendingLayoutForTable = tableOffset + 1;
-    } else if (!table2Pairing?.layout) {
-      pendingLayoutForTable = tableOffset + 2;
+    // Fallback: if server doesn't provide layout table, find first unassigned
+    if (pendingLayoutForTable == null) {
+      const tableOffset = isRound1 ? 0 : 2;
+      const table1Pairing = pairings.find(p => p.tableNumber === tableOffset + 1);
+      const table2Pairing = pairings.find(p => p.tableNumber === tableOffset + 2);
+
+      if (!table1Pairing?.layout) {
+        pendingLayoutForTable = tableOffset + 1;
+      } else if (!table2Pairing?.layout) {
+        pendingLayoutForTable = tableOffset + 2;
+      }
     }
   }
 

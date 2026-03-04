@@ -32,6 +32,7 @@ export interface EventTeam {
     teamName: string,
     logoUrl: string,
     sportsmanshipLvl: number,
+    eventTeamStatus?: string | null,
     users: [
         {
           id: string,

@@ -12,6 +12,7 @@ export function useEventInviteResponse() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['eventRegistration'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
     onError: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -25,6 +26,8 @@ export function useEventInviteResponse() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
 

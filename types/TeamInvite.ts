@@ -13,4 +13,5 @@ export interface TeamInvite {
 export interface PendingInviteDto {
   inviteId: string;
   user: User;
+  eventRole?: string;
 }

@@ -1,12 +1,15 @@
-import { View, StyleSheet, useColorScheme, Image, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { View, StyleSheet, useColorScheme, Image, ScrollView, Pressable } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
-import { Colors } from '@/src/constants/Colors';
+import { Colors, hexToRgba } from '@/src/constants/Colors';
 import { Link } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import TeamMembersPreview from '@/src/components/team/TeamMembersPreview';
 import { useLocalSearchParams } from 'expo-router';
-import { useTeam } from '@/src/hooks/useTeam';
+import { useTeam, useUpdateTeamImages } from '@/src/hooks/useTeam';
 import { useAuthContext } from '@/src/contexts/AuthContext';
+import Toast, { ToastType } from '@/src/components/common/Toast';
+import UpdateTeamImagesModal from '@/src/components/modals/UpdateTeamImagesModal';
 
 interface StatItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -19,8 +22,59 @@ export default function TeamScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { teamId } = useLocalSearchParams();
-  const { teamQuery: { data: team } } = useTeam(teamId as string);
+  const { teamQuery } = useTeam(teamId as string);
+  const team = teamQuery.data;
   const { authUser } = useAuthContext();
+  const { updateImagesMutation } = useUpdateTeamImages(teamId as string);
+
+  const isTeamMember = authUser?.teamId === teamId;
+
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
+
+  const uploadToS3 = async (signedUrl: string, imageUri: string) => {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadResponse = await fetch(signedUrl, {
+      method: 'PUT',
+      body: blob,
+      headers: { 'Content-Type': blob.type },
+    });
+    if (!uploadResponse.ok) throw new Error('Failed to upload to S3');
+  };
+
+  const isNewImage = (uri?: string) => {
+    if (!uri) return false;
+    return uri.startsWith('data:') || uri.startsWith('file://');
+  };
+
+  const handleUpdateImages = async (logoUri?: string, bannerUri?: string, imageMetadata?: any) => {
+    const hasNewLogo = isNewImage(logoUri);
+    const hasNewBanner = isNewImage(bannerUri);
+
+    if (!hasNewLogo && !hasNewBanner) return;
+
+    const result = await updateImagesMutation.mutateAsync({
+      logo: hasNewLogo ? imageMetadata.logo : null,
+      banner: hasNewBanner ? imageMetadata.banner : null,
+    });
+
+    const uploads: Promise<void>[] = [];
+    if (result.logoSignedUrl && logoUri && hasNewLogo) {
+      uploads.push(uploadToS3(result.logoSignedUrl, logoUri));
+    }
+    if (result.bannerSignedUrl && bannerUri && hasNewBanner) {
+      uploads.push(uploadToS3(result.bannerSignedUrl, bannerUri));
+    }
+    if (uploads.length > 0) await Promise.all(uploads);
+
+    await teamQuery.refetch();
+    setToastConfig({ visible: true, message: 'Team images updated', type: 'success' });
+  };
 
   if(!team){
     return null;
@@ -39,6 +93,14 @@ export default function TeamScreen() {
             style={styles.logoImage}
           />
         </View>
+        {isTeamMember && (
+          <Pressable
+            style={[styles.editImageButton, { backgroundColor: hexToRgba(theme.background, 0.8) }]}
+            onPress={() => setImageModalVisible(true)}
+          >
+            <Ionicons name="camera-outline" size={18} color={theme.text} />
+          </Pressable>
+        )}
       </View>
 
       {/* Team Info */}
@@ -92,6 +154,22 @@ export default function TeamScreen() {
           <ThemedText style={styles.noEvents}>No upcoming events</ThemedText>
         )}
       </View> */}
+
+      <UpdateTeamImagesModal
+        visible={imageModalVisible}
+        onClose={() => setImageModalVisible(false)}
+        currentLogo={team.logoUrl}
+        currentBanner={team.bannerUrl}
+        onUpdate={handleUpdateImages}
+      />
+
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        position="bottom-left"
+        onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
+      />
     </ScrollView>
   );
 }
@@ -206,5 +284,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'italic',
     opacity: 0.7,
+  },
+  editImageButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

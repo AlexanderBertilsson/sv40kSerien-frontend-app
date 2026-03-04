@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/src/components/httpClient/httpClient';
-import { EventStateDto, TeamMatchDto, SubmitPairingsRequest, ReportScoreRequest } from '@/types/EventAdmin';
+import { EventStateDto, TeamMatchDto, SubmitPairingsRequest, ReportScoreRequest, PairingStateDto } from '@/types/EventAdmin';
 
 export function useEventState(eventId: string) {
   const eventStateQuery = useQuery<EventStateDto>({
@@ -44,10 +44,32 @@ export function useSubmitPairings(eventId: string, teamMatchId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
     },
   });
 
   return { submitPairingsMutation };
+}
+
+export function useStartPairings(eventId: string) {
+  const queryClient = useQueryClient();
+
+  const startPairingsMutation = useMutation<PairingStateDto, Error, string>({
+    mutationFn: async (teamMatchId: string) => {
+      const res = await apiClient.post<PairingStateDto>(
+        '/Pairings',
+        JSON.stringify(teamMatchId),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
+    },
+  });
+
+  return { startPairingsMutation };
 }
 
 export function useReportGameScore(eventId: string, gameId: string) {
@@ -60,6 +82,7 @@ export function useReportGameScore(eventId: string, gameId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
     },
   });
 
@@ -79,6 +102,7 @@ export function useConfirmTeamMatch(eventId: string, teamMatchId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
     },
   });
 

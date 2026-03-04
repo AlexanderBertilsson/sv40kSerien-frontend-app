@@ -8,6 +8,7 @@ import { useEventContext } from '@/src/contexts/EventContext';
 import { FactionIcon } from '@/src/components/FactionIcon';
 import { useFactions, useCreateArmyList, useUpdateArmyList } from '@/src/hooks/useArmyList';
 import { FactionDto, DetachmentDto } from '@/types/ArmyList';
+import Toast, { ToastType } from '@/src/components/common/Toast';
 
 interface PlayerDetailsViewProps {
   eventId: string;
@@ -27,10 +28,18 @@ export default function PlayerDetailsView({ eventId }: PlayerDetailsViewProps) {
   const [armyListText, setArmyListText] = useState('');
   const [showFactionPicker, setShowFactionPicker] = useState(false);
   const [showDetachmentPicker, setShowDetachmentPicker] = useState(false);
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
 
   const isUpdate = !!armyList?.id;
 
-  const factions = factionsQuery.data ?? [];
+  const factions = useMemo(() => {
+    const data = factionsQuery.data ?? [];
+    return [...data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+  }, [factionsQuery.data]);
 
   const selectedFaction = useMemo(() => {
     return factions.find(f => f.id === selectedFactionId) ?? null;
@@ -89,15 +98,16 @@ export default function PlayerDetailsView({ eventId }: PlayerDetailsViewProps) {
     try {
       if (isUpdate) {
         await updateArmyListMutation.mutateAsync(payload);
+        setToastConfig({ visible: true, message: 'Army list updated successfully!', type: 'success' });
       } else {
         await createArmyListMutation.mutateAsync(payload);
+        setToastConfig({ visible: true, message: 'Army list uploaded successfully!', type: 'success' });
       }
     } catch (error) {
       console.error('Failed to submit army list:', error);
+      setToastConfig({ visible: true, message: 'Failed to submit army list. Please try again.', type: 'error' });
     }
   };
-
-  const mutationError = createArmyListMutation.isError || updateArmyListMutation.isError;
 
   if (!isAuthenticated) {
     return (
@@ -251,11 +261,13 @@ export default function PlayerDetailsView({ eventId }: PlayerDetailsViewProps) {
         )}
       </TouchableOpacity>
 
-      {mutationError && (
-        <ThemedText style={[styles.errorText, { color: theme.error }]}>
-          Failed to submit army list. Please try again.
-        </ThemedText>
-      )}
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        position="bottom-left"
+        onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
+      />
     </View>
   );
 }
@@ -318,9 +330,5 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontWeight: '600',
-  },
-  errorText: {
-    textAlign: 'center',
-    marginTop: 8,
   },
 });

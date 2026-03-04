@@ -80,6 +80,7 @@ export default function DeviceTabs() {
       <Tabs.Screen
         name="pairings"
         options={{
+          href: null,
           title: '',
           tabBarStyle: { display: 'none' },
           tabBarIcon: ({ color }) => (

@@ -93,10 +93,11 @@ export default function EventScreen() {
           <PairingsView
             eventId={event.id}
             registeredTeams={event.registeredTeams}
+            isOrganizer={isOrganizer}
           />
         );
       case 'placings':
-        return <PlacingsView />;
+        return <PlacingsView eventId={event.id} />;
       case 'admin':
         return isOrganizer ? (
           <AdminView

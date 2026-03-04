@@ -70,6 +70,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="pairings"
         options={{
+          href: null,
           title: 'Pairings',
           tabBarStyle: { display: 'none' },
           tabBarIcon: ({ color }) => (

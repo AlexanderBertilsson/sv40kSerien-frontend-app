@@ -150,6 +150,7 @@ export interface EventRegistrationMemberDto {
 export interface EventTeamRegistrationResponseDto {
   eventId: string;
   teamId: string;
+  eventTeamStatus?: string | null;
   members: EventRegistrationMemberDto[];
 }
 
@@ -161,12 +162,14 @@ export interface PairingGameSideRequest {
   role: PlayerRole;
 }
 
-export interface PairingRequest {
-  games: PairingGameSideRequest[];
+export interface GamePairingRequest {
+  sides: PairingGameSideRequest[];
+  missionId?: number | null;
+  layoutId?: string | null;
 }
 
 export interface SubmitPairingsRequest {
-  pairings: PairingRequest[];
+  pairings: GamePairingRequest[];
 }
 
 // Pairing game API request types
@@ -235,4 +238,36 @@ export interface RoundConfigRequestItem {
 
 export interface AddRoundConfigRequest {
   rounds: RoundConfigRequestItem[];
+}
+
+export interface TeamDetailsDto {
+  id: string;
+  name: string | null;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  sportsmanshipLvl: number;
+}
+
+export interface RoundResultDto {
+  roundNumber: number;
+  differentialScore: number;
+  isBye: boolean;
+  isWinner: boolean;
+  isDraw: boolean;
+}
+
+export type EventTeamStandingStatus = 'active' | 'dropped';
+
+export interface EventTeamStandingsDto {
+  matchPoints: number;
+  accumulatedScore: number;
+  strengthOfSchedule: number;
+  matchesPlayed: number;
+  matchesWon: number;
+  matchesDrawn: number;
+  matchesLost: number;
+  currentRank: number;
+  status?: EventTeamStandingStatus;
+  team: TeamDetailsDto | null;
+  roundResults: RoundResultDto[] | null;
 }

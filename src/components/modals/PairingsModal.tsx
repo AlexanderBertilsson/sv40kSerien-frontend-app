@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
 import { Colors, hexToRgba } from '../../constants/Colors';
 import { useSubmitPairings } from '../../hooks/useEventState';
 import { EventTeam } from '../../../types/Event';
-import { PlayerRole, PairingRequest, SubmitPairingsRequest } from '../../../types/EventAdmin';
+import { PlayerRole, GamePairingRequest, SubmitPairingsRequest, RoundConfigDto, LayoutOptionDto } from '../../../types/EventAdmin';
 import { FactionIcon } from '../FactionIcon';
 
 interface PairingsModalProps {
@@ -17,6 +17,8 @@ interface PairingsModalProps {
   team1: EventTeam | null;
   team2: EventTeam | null;
   onStartPairings?: () => void;
+  hasRoundConfig?: boolean;
+  roundConfig?: RoundConfigDto | null;
 }
 
 interface GamePairing {
@@ -24,23 +26,37 @@ interface GamePairing {
   player1Role: PlayerRole;
   player2Id: string | null;
   player2Role: PlayerRole;
+  layoutId: string | null;
+  missionId: number | null;
 }
 
 type ModalView = 'options' | 'manual';
 
-export function PairingsModal({ 
-  visible, 
-  onClose, 
-  eventId, 
+export function PairingsModal({
+  visible,
+  onClose,
+  eventId,
   teamMatchId,
   team1,
   team2,
   onStartPairings,
+  hasRoundConfig = true,
+  roundConfig,
 }: PairingsModalProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const [currentView, setCurrentView] = useState<ModalView>('options');
   const { submitPairingsMutation } = useSubmitPairings(eventId, teamMatchId);
+
+  // Check if all players have army lists
+  const playersWithoutArmyList = useMemo(() => {
+    const missing: string[] = [];
+    team1?.users?.forEach(u => { if (!u.armyId) missing.push(u.username); });
+    team2?.users?.forEach(u => { if (!u.armyId) missing.push(u.username); });
+    return missing;
+  }, [team1, team2]);
+
+  const canStartPairings = hasRoundConfig && playersWithoutArmyList.length === 0;
 
   // Calculate number of games from the smaller team's roster
   const numberOfGames = useMemo(() => {
@@ -55,16 +71,19 @@ export function PairingsModal({
   // Reset game pairings when modal opens or number of games changes
   useEffect(() => {
     if (visible && numberOfGames > 0) {
+      const defaultMissionId = roundConfig?.primaryMission?.id ?? null;
       setGamePairings(
         Array.from({ length: numberOfGames }, () => ({
           player1Id: null,
           player1Role: 'Attacker' as PlayerRole,
           player2Id: null,
           player2Role: 'Defender' as PlayerRole,
+          layoutId: null,
+          missionId: defaultMissionId,
         }))
       );
     }
-  }, [visible, numberOfGames]);
+  }, [visible, numberOfGames, roundConfig]);
 
   // Get available players (not yet selected in other games)
   const getAvailablePlayers = (teamUsers: EventTeam['users'], gameIndex: number, isTeam1: boolean) => {
@@ -76,7 +95,7 @@ export function PairingsModal({
     return teamUsers.filter(user => !selectedPlayerIds.includes(user.id));
   };
 
-  const updateGamePairing = (gameIndex: number, field: keyof GamePairing, value: string | PlayerRole | null) => {
+  const updateGamePairing = (gameIndex: number, field: keyof GamePairing, value: string | number | PlayerRole | null) => {
     setGamePairings(prev => {
       const updated = [...prev];
       updated[gameIndex] = { ...updated[gameIndex], [field]: value };
@@ -99,8 +118,8 @@ export function PairingsModal({
   const handleSubmit = async () => {
     if (!team1 || !team2 || !isFormValid) return;
 
-    const pairings: PairingRequest[] = gamePairings.map(game => ({
-      games: [
+    const pairings: GamePairingRequest[] = gamePairings.map(game => ({
+      sides: [
         {
           team: team1.id,
           player: game.player1Id!,
@@ -112,6 +131,8 @@ export function PairingsModal({
           role: game.player2Role,
         },
       ],
+      missionId: game.missionId,
+      layoutId: game.layoutId,
     }));
 
     const request: SubmitPairingsRequest = { pairings };
@@ -133,10 +154,29 @@ export function PairingsModal({
   const renderOptionsView = () => (
     <View style={styles.optionsContainer}>
       <ThemedText style={styles.optionsTitle}>Choose Pairing Method</ThemedText>
-      
+
+      {!hasRoundConfig && (
+        <View style={[styles.warningBanner, { backgroundColor: hexToRgba(theme.warning, 0.15) }]}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={18} color={theme.warning} />
+          <ThemedText style={[styles.warningText, { color: theme.warning }]}>
+            No round configuration set for this round.
+          </ThemedText>
+        </View>
+      )}
+
+      {playersWithoutArmyList.length > 0 && (
+        <View style={[styles.warningBanner, { backgroundColor: hexToRgba(theme.warning, 0.15) }]}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={18} color={theme.warning} />
+          <ThemedText style={[styles.warningText, { color: theme.warning }]}>
+            Missing army lists: {playersWithoutArmyList.join(', ')}
+          </ThemedText>
+        </View>
+      )}
+
       <TouchableOpacity
-        style={[styles.optionButton, { backgroundColor: theme.tint }]}
+        style={[styles.optionButton, { backgroundColor: canStartPairings ? theme.tint : hexToRgba(theme.tint, 0.3) }]}
         onPress={() => setCurrentView('manual')}
+        disabled={!canStartPairings}
       >
         <MaterialCommunityIcons name="account-group" size={32} color="#fff" />
         <ThemedText style={styles.optionButtonText}>Manual Pairings</ThemedText>
@@ -146,11 +186,12 @@ export function PairingsModal({
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.optionButton, { backgroundColor: theme.tint }]}
+        style={[styles.optionButton, { backgroundColor: canStartPairings ? theme.tint : hexToRgba(theme.tint, 0.3) }]}
         onPress={() => {
           handleClose();
           onStartPairings?.();
         }}
+        disabled={!canStartPairings}
       >
         <MaterialCommunityIcons name="shuffle-variant" size={32} color="#fff" />
         <ThemedText style={styles.optionButtonText}>Start Pairings</ThemedText>
@@ -256,6 +297,48 @@ export function PairingsModal({
     );
   };
 
+  const renderLayoutSelector = (gameIndex: number) => {
+    const layouts = roundConfig?.layouts;
+    if (!layouts || layouts.length === 0) return null;
+
+    const selectedLayoutId = gamePairings[gameIndex].layoutId;
+
+    return (
+      <View style={styles.layoutSelectorContainer}>
+        <ThemedText style={styles.selectorLabel}>Layout</ThemedText>
+        <View style={styles.layoutOptions}>
+          {layouts.map((layout: LayoutOptionDto) => {
+            const isSelected = selectedLayoutId === layout.id;
+            return (
+              <TouchableOpacity
+                key={layout.id}
+                style={[
+                  styles.layoutOption,
+                  {
+                    backgroundColor: isSelected ? hexToRgba(theme.tint, 0.3) : theme.background,
+                    borderColor: isSelected ? theme.tint : 'transparent',
+                  },
+                ]}
+                onPress={() => updateGamePairing(gameIndex, 'layoutId', isSelected ? null : layout.id)}
+              >
+                {layout.imageUrl ? (
+                  <Image source={{ uri: layout.imageUrl }} style={styles.layoutImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.layoutImagePlaceholder, { backgroundColor: hexToRgba(theme.text, 0.1) }]}>
+                    <MaterialCommunityIcons name="map" size={20} color={theme.text} />
+                  </View>
+                )}
+                <ThemedText style={styles.layoutName} numberOfLines={2}>
+                  {layout.name}
+                </ThemedText>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    );
+  };
+
   const renderManualPairingsView = () => {
     if (!team1 || !team2) {
       return (
@@ -274,11 +357,20 @@ export function PairingsModal({
           <ThemedText style={styles.manualTitle}>Manual Pairings</ThemedText>
         </View>
 
+        {roundConfig?.primaryMission && (
+          <View style={[styles.missionBanner, { backgroundColor: hexToRgba(theme.tint, 0.15) }]}>
+            <MaterialCommunityIcons name="target" size={16} color={theme.tint} />
+            <ThemedText style={styles.missionBannerText}>
+              Mission: {roundConfig.primaryMission.name}
+            </ThemedText>
+          </View>
+        )}
+
         <ScrollView style={styles.gamesScrollView} showsVerticalScrollIndicator={false}>
           {gamePairings.map((game, index) => (
             <View key={index} style={[styles.gameCard, { backgroundColor: theme.secondary }]}>
               <ThemedText style={styles.gameTitle}>Game {index + 1}</ThemedText>
-              
+
               <View style={styles.gameRow}>
                 {/* Team 1 Player Selection */}
                 <View style={styles.teamColumn}>
@@ -296,6 +388,8 @@ export function PairingsModal({
                   {renderRoleSelector(index, false)}
                 </View>
               </View>
+
+              {renderLayoutSelector(index)}
             </View>
           ))}
         </ScrollView>
@@ -396,6 +490,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 24,
+  },
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    width: '100%',
+  },
+  warningText: {
+    fontSize: 13,
+    fontWeight: '500',
+    flex: 1,
   },
   optionButton: {
     width: '100%',
@@ -517,6 +625,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  missionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  missionBannerText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  layoutSelectorContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  selectorLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+  layoutOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  layoutOption: {
+    width: 80,
+    borderRadius: 8,
+    borderWidth: 2,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  layoutImage: {
+    width: '100%',
+    height: 60,
+  },
+  layoutImagePlaceholder: {
+    width: '100%',
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  layoutName: {
+    fontSize: 10,
+    fontWeight: '500',
+    textAlign: 'center',
+    padding: 4,
   },
   errorContainer: {
     flex: 1,

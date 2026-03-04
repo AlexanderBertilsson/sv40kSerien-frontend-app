@@ -9,7 +9,7 @@ type EventContextType = {
   armyList: ArmyList | null;
   isRegistered: boolean;
   isCaptain: boolean;
-  isEventAdmin: boolean;
+  isTeamAdmin: boolean;
   isLoading: boolean;
 };
 
@@ -30,7 +30,7 @@ export function EventProvider({ eventId, children }: EventProviderProps) {
     armyList: registration?.armyList ?? null,
     isRegistered: !!registration,
     isCaptain: registration?.isCaptain ?? false,
-    isEventAdmin: registration?.isAdmin ?? false,
+    isTeamAdmin: registration?.isAdmin ?? false,
     isLoading: myRegistrationQuery.isLoading,
   }), [registration, myRegistrationQuery.isLoading]);
 

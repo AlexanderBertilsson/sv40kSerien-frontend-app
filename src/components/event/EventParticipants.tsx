@@ -130,12 +130,22 @@ const EventParticipants = ({ roster, theme, eventId }: EventParticipantsProps) =
                       </View>
                     )}
                     <View style={styles.teamDetails}>
-                      <ThemedText type="defaultSemiBold" style={styles.teamName}>
-                        {team.teamName}
-                      </ThemedText>
+                      <View style={styles.teamNameRow}>
+                        <ThemedText type="defaultSemiBold" style={[
+                          styles.teamName,
+                          team.eventTeamStatus?.toLowerCase() === 'dropped' && styles.droppedTeamName,
+                        ]}>
+                          {team.teamName}
+                        </ThemedText>
+                        {team.eventTeamStatus?.toLowerCase() === 'dropped' && (
+                          <View style={styles.droppedBadge}>
+                            <ThemedText style={styles.droppedBadgeText}>Dropped</ThemedText>
+                          </View>
+                        )}
+                      </View>
                       <View style={styles.sportsmanshipContainer}>
                         <View style={[
-                          styles.sportsmanshipBadge, 
+                          styles.sportsmanshipBadge,
                           { backgroundColor: getSportsmanshipColor(team.sportsmanshipLvl) }
                         ]}>
                           <ThemedText style={styles.sportsmanshipText}>
@@ -243,9 +253,28 @@ const styles = StyleSheet.create({
   teamDetails: {
     flex: 1,
   },
+  teamNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
   teamName: {
     fontSize: 18,
-    marginBottom: 4,
+  },
+  droppedTeamName: {
+    opacity: 0.5,
+  },
+  droppedBadge: {
+    backgroundColor: 'rgba(244, 67, 54, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  droppedBadgeText: {
+    color: '#F44336',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   sportsmanshipContainer: {
     flexDirection: 'row',

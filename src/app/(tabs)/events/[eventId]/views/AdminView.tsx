@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { View, StyleSheet, useColorScheme, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, useColorScheme, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors, hexToRgba } from '@/src/constants/Colors';
-import { Event } from '@/types/Event';
+import { Event, EventTeam } from '@/types/Event';
 import { UpdateEventRequest, RoundDto } from '@/types/EventAdmin';
 import type { RoundStatus } from '@/types/EventAdmin';
 import { EditEventModal } from '@/src/components/event';
@@ -44,7 +44,12 @@ export default function AdminView({
     startRoundMutation,
     completeRoundMutation,
     repairRoundMutation,
+    completeEventMutation,
+    dropTeamMutation,
   } = useEventAdmin(event.id);
+
+  const [droppingTeamId, setDroppingTeamId] = useState<string | null>(null);
+  const [confirmDropTeam, setConfirmDropTeam] = useState<EventTeam | null>(null);
 
   // Get event status from the event object (comes from API as string)
   const eventStatus = (event.status?.toLowerCase() || 'draft') as EventStatus;
@@ -54,6 +59,7 @@ export default function AdminView({
   const sortedRounds = [...rounds].sort((a, b) => a.roundNumber - b.roundNumber);
   const lastRound = sortedRounds[sortedRounds.length - 1];
   const canGenerateNextRound = eventStatus === 'in_progress' && (!lastRound || lastRound.status === 'completed');
+  const allRoundsCompleted = eventStatus === 'in_progress' && sortedRounds.length === event.rounds && lastRound?.status === 'completed';
 
   const isLoading = 
     openRegistrationMutation.isPending ||
@@ -63,6 +69,8 @@ export default function AdminView({
     startRoundMutation.isPending ||
     completeRoundMutation.isPending ||
     repairRoundMutation.isPending ||
+    completeEventMutation.isPending ||
+    dropTeamMutation.isPending ||
     actionLoading;
 
   const getErrorMessage = (error: Error | null): string | null => {
@@ -96,6 +104,14 @@ export default function AdminView({
     }
   };
 
+  const handleCompleteEvent = async () => {
+    try {
+      await completeEventMutation.mutateAsync();
+    } catch (error) {
+      Alert.alert('Error', getErrorMessage(error as Error) || 'Failed to complete event');
+    }
+  };
+
   const handleGeneratePairings = async () => {
     try {
       await generateRoundMutation.mutateAsync();
@@ -125,6 +141,18 @@ export default function AdminView({
       await repairRoundMutation.mutateAsync(roundNumber);
     } catch (error) {
       Alert.alert('Error', getErrorMessage(error as Error) || 'Failed to re-pair round');
+    }
+  };
+
+  const handleDropTeam = async (team: EventTeam) => {
+    setDroppingTeamId(team.id);
+    try {
+      await dropTeamMutation.mutateAsync(team.id);
+      setConfirmDropTeam(null);
+    } catch (error) {
+      Alert.alert('Error', getErrorMessage(error as Error) || 'Failed to drop team');
+    } finally {
+      setDroppingTeamId(null);
     }
   };
 
@@ -230,13 +258,25 @@ export default function AdminView({
           {/* Start Event - only when registration is closed */}
           <TouchableOpacity
             style={[
-              styles.button, 
+              styles.button,
               { backgroundColor: eventStatus === 'registration_closed' ? theme.tint : hexToRgba(theme.tint, 0.3) }
             ]}
             onPress={handleStartEvent}
             disabled={eventStatus !== 'registration_closed' || isLoading}
           >
             <ThemedText style={styles.buttonText}>Start Event</ThemedText>
+          </TouchableOpacity>
+
+          {/* Complete Event - only when in_progress and all rounds completed */}
+          <TouchableOpacity
+            style={[
+              styles.button,
+              { backgroundColor: allRoundsCompleted ? theme.success : hexToRgba(theme.success, 0.3) }
+            ]}
+            onPress={handleCompleteEvent}
+            disabled={!allRoundsCompleted || isLoading}
+          >
+            <ThemedText style={styles.buttonText}>Complete Event</ThemedText>
           </TouchableOpacity>
         </View>
       </View>
@@ -312,21 +352,51 @@ export default function AdminView({
         <ThemedText style={styles.infoText}>
           Teams: {event.numberOfRegisteredTeams} | Players: {event.numberOfRegisteredPlayers}
         </ThemedText>
-        
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: theme.tint }]}
-          onPress={() => {/* TODO: Open team management */}}
-        >
-          <ThemedText style={styles.buttonText}>Manage Teams/Players</ThemedText>
-        </TouchableOpacity>
-        
+
+        {/* Registered Teams List */}
+        {event.registeredTeams?.map((team) => (
+          <View key={team.id} style={[styles.teamCard, { borderColor: hexToRgba(theme.text, 0.15) }]}>
+            <View style={styles.teamRow}>
+              <Image
+                source={
+                  team.logoUrl
+                    ? { uri: team.logoUrl }
+                    : require('@/assets/images/emoji2.png')
+                }
+                style={styles.teamLogo}
+              />
+              <View style={styles.teamInfo}>
+                <ThemedText style={styles.teamName}>{team.teamName}</ThemedText>
+                <ThemedText style={styles.teamPlayers}>
+                  {team.users.length} player{team.users.length !== 1 ? 's' : ''}
+                </ThemedText>
+              </View>
+              <TouchableOpacity
+                style={[styles.dropButton, { backgroundColor: theme.error }]}
+                onPress={() => setConfirmDropTeam(team)}
+                disabled={droppingTeamId === team.id}
+              >
+                {droppingTeamId === team.id ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <ThemedText style={styles.dropButtonText}>Drop</ThemedText>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+
+        {(!event.registeredTeams || event.registeredTeams.length === 0) && (
+          <ThemedText style={[styles.infoText, { opacity: 0.5 }]}>No teams registered</ThemedText>
+        )}
+
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.info }]}
           onPress={() => {/* TODO: Open scores management */}}
         >
           <ThemedText style={styles.buttonText}>Manage Scores</ThemedText>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.warning }]}
           onPress={() => {/* TODO: Open penalties management */}}
@@ -352,6 +422,32 @@ export default function AdminView({
         numberOfRounds={event.rounds}
         playersPerTeam={event.eventType?.playersPerTeam}
       />
+
+      {/* Drop Team Confirmation */}
+      {confirmDropTeam && (
+        <View style={styles.confirmOverlay}>
+          <View style={[styles.confirmModal, { backgroundColor: theme.secondary }]}>
+            <ThemedText type="subtitle">Drop Team?</ThemedText>
+            <ThemedText style={styles.confirmText}>
+              Drop {confirmDropTeam.teamName} from this event? The team and all its members will be removed.
+            </ThemedText>
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity
+                style={[styles.confirmButton, { borderColor: theme.tint }]}
+                onPress={() => setConfirmDropTeam(null)}
+              >
+                <ThemedText style={{ color: theme.tint }}>Cancel</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmButton, { backgroundColor: theme.error }]}
+                onPress={() => handleDropTeam(confirmDropTeam)}
+              >
+                <ThemedText style={styles.buttonText}>Drop Team</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Delete Confirmation */}
       {confirmDeleteVisible && (
@@ -488,5 +584,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
+  },
+  teamCard: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  teamRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  teamLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+  },
+  teamInfo: {
+    flex: 1,
+  },
+  teamName: {
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  teamPlayers: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  dropButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 6,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  dropButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

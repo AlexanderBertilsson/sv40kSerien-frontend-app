@@ -9,7 +9,7 @@ import { Colors } from '@/src/constants/Colors';
 import { useRef } from 'react';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '@/src/hooks/useUser';
+import { useUser, useUpdateUserImages } from '@/src/hooks/useUser';
 import { useTeam } from '@/src/hooks/useTeam';
 import { useUserStats } from '@/src/hooks/useUserStats';
 import { useMe } from '@/src/hooks/useMe';
@@ -32,21 +32,49 @@ export default function UserScreen() {
   }>({ visible: false, message: '', type: 'info' });
 
   const isOwnProfile = currentUser?.id === userId;
+  const { updateImagesMutation } = useUpdateUserImages();
+
+  const uploadToS3 = async (signedUrl: string, imageUri: string) => {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const uploadResponse = await fetch(signedUrl, {
+      method: 'PUT',
+      body: blob,
+      headers: { 'Content-Type': blob.type },
+    });
+    if (!uploadResponse.ok) throw new Error('Failed to upload to S3');
+  };
+
+  const isNewImage = (uri?: string) => {
+    if (!uri) return false;
+    return uri.startsWith('data:') || uri.startsWith('file://');
+  };
 
   const handleProfileUpdate = async (profilePictureUri?: string, heroImageUri?: string, imageMetadata?: any) => {
     try {
-      // TODO: Implement API call to update profile images with imageMetadata
-      console.log('TODO: Updating profile:', { profilePictureUri, heroImageUri, imageMetadata });
-      
-      // Example of what the API call would look like:
-      // const response = await apiClient.put('/users/me/images', {
-      //   images: imageMetadata,
-      // });
-      // Then upload to S3 using signed URLs similar to team creation
-      
-      // For now, just show success and refetch
+      const hasNewProfilePicture = isNewImage(profilePictureUri);
+      const hasNewHeroImage = isNewImage(heroImageUri);
+
+      if (!hasNewProfilePicture && !hasNewHeroImage) {
+        return;
+      }
+
+      const result = await updateImagesMutation.mutateAsync({
+        profilePicture: hasNewProfilePicture ? imageMetadata.profilePicture : null,
+        heroImage: hasNewHeroImage ? imageMetadata.heroImage : null,
+      });
+
+      const uploads: Promise<void>[] = [];
+      if (result.profilePictureSignedUrl && profilePictureUri && hasNewProfilePicture) {
+        uploads.push(uploadToS3(result.profilePictureSignedUrl, profilePictureUri));
+      }
+      if (result.heroImageSignedUrl && heroImageUri && hasNewHeroImage) {
+        uploads.push(uploadToS3(result.heroImageSignedUrl, heroImageUri));
+      }
+      if (uploads.length > 0) await Promise.all(uploads);
+
       await userQuery.refetch();
-      
+
       setToastConfig({
         visible: true,
         message: 'Profile updated successfully',

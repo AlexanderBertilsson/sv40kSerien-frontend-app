@@ -1,15 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, useColorScheme, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { router } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors } from '@/src/constants/Colors';
-import { useEventState, useRoundMatches, useConfirmTeamMatch } from '@/src/hooks/useEventState';
+import { useEventState, useRoundMatches, useConfirmTeamMatch, useStartPairings } from '@/src/hooks/useEventState';
+import { useRoundConfiguration } from '@/src/hooks/useRoundConfiguration';
 import { RoundDto, TeamMatchDto } from '@/types/EventAdmin';
 import { MatchCard, MatchData, MatchGame } from '@/src/components/match/MatchCard';
 import { ArmyListModal } from '@/src/components/modals/armyListModal';
 import { PairingsModal } from '@/src/components/modals/PairingsModal';
 import { GameDetailsModal } from '@/src/components/modals/GameDetailsModal';
 import { ConfirmModal } from '@/src/components/modals/ConfirmModal';
+import Toast, { ToastType } from '@/src/components/common/Toast';
 import { EventTeam } from '@/types/Event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
 import { useEventContext } from '@/src/contexts/EventContext';
@@ -17,13 +20,20 @@ import { useEventContext } from '@/src/contexts/EventContext';
 interface PairingsViewProps {
   eventId: string;
   registeredTeams?: EventTeam[];
+  isOrganizer?: boolean;
 }
 
-export default function PairingsView({ eventId, registeredTeams = [] }: PairingsViewProps) {
+export default function PairingsView({ eventId, registeredTeams = [], isOrganizer = false }: PairingsViewProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const queryClient = useQueryClient();
   const { authUser } = useAuthContext();
-  const { eventTeamId, isCaptain, isEventAdmin } = useEventContext();
+  const { eventTeamId, isCaptain, isTeamAdmin } = useEventContext();
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({ visible: false, message: '', type: 'info' });
   
   const { eventStateQuery } = useEventState(eventId);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
@@ -32,6 +42,8 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
   const [selectedGame, setSelectedGame] = useState<MatchGame | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { roundMatchesQuery } = useRoundMatches(eventId, selectedRound);
+  const { roundConfigQuery } = useRoundConfiguration(eventId, selectedRound);
+  const { startPairingsMutation } = useStartPairings(eventId);
 
   // Get team data for a match from registered teams
   const getTeamData = (teamId: string): EventTeam | null => {
@@ -144,8 +156,12 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
     try {
       await confirmMatchMutation.mutateAsync();
       setShowConfirmModal(false);
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventStandings', eventId] });
+      setToastConfig({ visible: true, message: 'Match result confirmed!', type: 'success' });
     } catch (error) {
       console.error('Failed to confirm match:', error);
+      setToastConfig({ visible: true, message: 'Failed to confirm match result. Please try again.', type: 'error' });
     }
   };
 
@@ -154,34 +170,54 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
   };
 
   const handleMatchPress = (item: TeamMatchDto) => {
-    // Only allow pairings if no games exist and not a bye
+    // Only allow manual pairings if no games exist, not a bye, and no active pairing state
     if (!hasGames(item) && !item.isBye) {
       setSelectedMatch(item);
     }
   };
 
-  const handleStartPairings = () => {
-    if (selectedMatch) {
-      const matchId = selectedMatch.id;
-      setSelectedMatch(null);
+  const handleStartPairings = async (matchId: string) => {
+    try {
+      await startPairingsMutation.mutateAsync(matchId);
       router.push(`/events/${eventId}/pairings/${matchId}`);
+    } catch (error) {
+      console.error('Failed to start pairings:', error);
+      setToastConfig({ visible: true, message: 'Failed to start pairings. Please try again.', type: 'error' });
     }
+  };
+
+  const handleReconnectPairings = (matchId: string) => {
+    router.push(`/events/${eventId}/pairings/${matchId}`);
   };
 
   const handleGamePress = (game: MatchGame) => {
     setSelectedGame(game);
   };
 
+  const handleScoreSubmitted = () => {
+    queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+    queryClient.invalidateQueries({ queryKey: ['eventStandings', eventId] });
+    setToastConfig({ visible: true, message: 'Score submitted successfully!', type: 'success' });
+  };
+
   const renderMatchItem = ({ item }: { item: TeamMatchDto }) => {
     const isMyMatch = isUserMatch(item);
     const matchData = transformToMatchData(item);
-    const isAdmin = isCaptain || isEventAdmin;
-    // Only allow starting pairings for admins on their own match
-    const canSetPairings = isMyMatch && isAdmin && !hasGames(item) && !item.isBye;
+    const isAdmin = isCaptain || isTeamAdmin;
+    const pairingStatus = item.pairingState?.status;
+
+    // Show "Start Pairings" when admin on own match, no games, no active pairing state (or pending)
+    const canStartPairings = !!isMyMatch && isAdmin && !hasGames(item) && !item.isBye && (!pairingStatus || pairingStatus === 'pending');
+    // Event organizer can manage pairings for any match
+    const canOrganizerManage = isOrganizer && !hasGames(item) && !item.isBye && (!pairingStatus || pairingStatus === 'pending');
+    // Show "Reconnect to Pairing" when admin on own match, pairing is in progress
+    const canReconnect = !!isMyMatch && isAdmin && pairingStatus === 'in_progress' && !hasGames(item);
+    // Allow opening manual pairings modal
+    const canSetManualPairings = canStartPairings || canOrganizerManage;
     // Show confirm button if it's user's match, has games, all games completed, and match not yet completed
-    const showConfirm = !!isMyMatch && hasGames(item) && allGamesCompleted(item) && item.status !== 'completed';
+    const showConfirm = !!isMyMatch && isAdmin && hasGames(item) && allGamesCompleted(item) && item.status !== 'completed';
     // Spectate: non-user matches, or own match for non-admins, with in_progress pairing state
-    const canSpectate = (!isMyMatch || (isMyMatch && !isAdmin)) && item.pairingState?.status === 'in_progress' && !item.isBye;
+    const canSpectate = (!isMyMatch || (isMyMatch && !isAdmin)) && pairingStatus === 'in_progress' && !item.isBye;
 
     return (
       <View>
@@ -190,12 +226,33 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
           isHighlighted={!!isMyMatch}
           expandable={hasGames(item)}
           onArmyListPress={handleArmyListPress}
-          onPress={canSetPairings ? () => handleMatchPress(item) : undefined}
+          onPress={canSetManualPairings ? () => handleMatchPress(item) : undefined}
           onGamePress={handleGamePress}
           showConfirmButton={showConfirm}
           onConfirmResult={handleConfirmResult}
           isConfirming={confirmMatchMutation.isPending}
         />
+        {(canStartPairings || canOrganizerManage) && (
+          <TouchableOpacity
+            style={[styles.pairingsButton, { backgroundColor: theme.tint }]}
+            onPress={() => handleStartPairings(item.id)}
+            disabled={startPairingsMutation.isPending}
+          >
+            {startPairingsMutation.isPending ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <ThemedText style={styles.pairingsButtonText}>Start Pairings</ThemedText>
+            )}
+          </TouchableOpacity>
+        )}
+        {canReconnect && (
+          <TouchableOpacity
+            style={[styles.pairingsButton, { backgroundColor: theme.tint }]}
+            onPress={() => handleReconnectPairings(item.id)}
+          >
+            <ThemedText style={styles.pairingsButtonText}>Reconnect to Pairing</ThemedText>
+          </TouchableOpacity>
+        )}
         {canSpectate && (
           <TouchableOpacity
             style={[styles.spectateButton, { borderColor: theme.tint }]}
@@ -290,7 +347,14 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
         teamMatchId={selectedMatch?.id || ''}
         team1={selectedMatch ? getTeamData(selectedMatch.team1Id) : null}
         team2={selectedMatch?.team2Id ? getTeamData(selectedMatch.team2Id) : null}
-        onStartPairings={handleStartPairings}
+        onStartPairings={() => {
+          if (selectedMatch) {
+            setSelectedMatch(null);
+            handleStartPairings(selectedMatch.id);
+          }
+        }}
+        hasRoundConfig={!!roundConfigQuery.data}
+        roundConfig={roundConfigQuery.data}
       />
 
       <GameDetailsModal
@@ -299,6 +363,8 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
         eventId={eventId}
         game={selectedGame}
         currentUserId={authUser?.id}
+        isEventAdmin={isOrganizer}
+        onScoreSubmitted={handleScoreSubmitted}
       />
 
       <ConfirmModal
@@ -310,6 +376,14 @@ export default function PairingsView({ eventId, registeredTeams = [] }: Pairings
         confirmText="Confirm"
         cancelText="Cancel"
         isLoading={confirmMatchMutation.isPending}
+      />
+
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        position="bottom-left"
+        onHide={() => setToastConfig({ visible: false, message: '', type: 'info' })}
       />
     </View>
   );
@@ -351,6 +425,18 @@ const styles = StyleSheet.create({
   },
   matchesList: {
     gap: 12,
+  },
+  pairingsButton: {
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center' as const,
+  },
+  pairingsButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#fff',
   },
   spectateButton: {
     marginTop: 8,

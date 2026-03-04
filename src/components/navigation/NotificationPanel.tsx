@@ -23,7 +23,7 @@ export function NotificationPanel({
   onExpandedChange,
 }: NotificationPanelProps) {
     const { notificationsQuery } = useNotifications();
-  const { acceptInvite: acceptTeamInvite, rejectInvite: rejectTeamInvite } = useTeamInvite();
+  const { acceptInviteAsync: acceptTeamInviteAsync, rejectInvite: rejectTeamInvite } = useTeamInvite();
   const { acceptInviteAsync: acceptEventInviteAsync, rejectInvite: rejectEventInvite } = useEventInviteResponse();
   const [internalIsExpanded, setInternalIsExpanded] = useState(false);
   const [toastConfig, setToastConfig] = useState<{
@@ -46,8 +46,16 @@ export function NotificationPanel({
 
   const unreadCount = notificationsQuery.data?.length || 0;
 
-  const handleAcceptTeamInvite = (inviteId: string) => {
-    acceptTeamInvite({ inviteId });
+  const handleAcceptTeamInvite = async (inviteId: string) => {
+    try {
+      await acceptTeamInviteAsync({ inviteId });
+      setToastConfig({ visible: true, message: 'Team invite accepted!', type: 'success' });
+    } catch (error) {
+      const message = isAxiosError(error) && error.response?.status === 400 && error.response?.data
+        ? String(error.response.data)
+        : 'Failed to accept team invite.';
+      setToastConfig({ visible: true, message, type: 'error' });
+    }
   };
 
   const handleRejectTeamInvite = (inviteId: string) => {

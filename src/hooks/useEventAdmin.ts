@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/src/components/httpClient/httpClient';
-import { RoundDto, EventStateDto } from '@/types/EventAdmin';
+import { RoundDto, EventStateDto, ReportScoreRequest } from '@/types/EventAdmin';
 
 export function useEventAdmin(eventId: string) {
   const queryClient = useQueryClient();
@@ -100,6 +100,24 @@ export function useEventAdmin(eventId: string) {
     onSuccess: invalidateEvent,
   });
 
+  // POST /admin/event/{id}/complete
+  const completeEventMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.post(`/admin/event/${eventId}/complete`);
+      return res.data;
+    },
+    onSuccess: invalidateEvent,
+  });
+
+  // POST /admin/event/{id}/teams/{teamId}/drop
+  const dropTeamMutation = useMutation<boolean, Error, string>({
+    mutationFn: async (teamId: string) => {
+      const res = await apiClient.post<boolean>(`/admin/event/${eventId}/teams/${teamId}/drop`);
+      return res.data;
+    },
+    onSuccess: invalidateEvent,
+  });
+
   return {
     eventStateQuery,
     openRegistrationMutation,
@@ -111,5 +129,25 @@ export function useEventAdmin(eventId: string) {
     repairRoundMutation,
     addAdminMutation,
     removeAdminMutation,
+    completeEventMutation,
+    dropTeamMutation,
   };
+}
+
+export function useAdminUpdateGameScore(eventId: string, gameId: string) {
+  const queryClient = useQueryClient();
+
+  const adminUpdateScoreMutation = useMutation<boolean, Error, ReportScoreRequest>({
+    mutationFn: async (request: ReportScoreRequest) => {
+      const res = await apiClient.put<boolean>(`/admin/event/${eventId}/games/${gameId}/score`, request);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['eventStandings', eventId] });
+    },
+  });
+
+  return { adminUpdateScoreMutation };
 }

@@ -108,6 +108,8 @@ export interface TeamMatchDto {
   isDraw: boolean;
   winnerId?: string | null;
   isBye: boolean;
+  team1ConfirmedById?: string | null;
+  team2ConfirmedById?: string | null;
   status: TeamMatchStatus;
   games?: GameDto[];
   pairingState?: PairingStateDto | null;

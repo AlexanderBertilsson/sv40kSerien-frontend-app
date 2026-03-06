@@ -297,17 +297,27 @@ export function PairingsModal({
     );
   };
 
+  const getAvailableLayouts = (layouts: LayoutOptionDto[], gameIndex: number) => {
+    const selectedLayoutIds = gamePairings
+      .filter((_, idx) => idx !== gameIndex)
+      .map(g => g.layoutId)
+      .filter(Boolean);
+
+    return layouts.filter(layout => !selectedLayoutIds.includes(layout.id));
+  };
+
   const renderLayoutSelector = (gameIndex: number) => {
     const layouts = roundConfig?.layouts;
     if (!layouts || layouts.length === 0) return null;
 
+    const availableLayouts = getAvailableLayouts(layouts, gameIndex);
     const selectedLayoutId = gamePairings[gameIndex].layoutId;
 
     return (
       <View style={styles.layoutSelectorContainer}>
         <ThemedText style={styles.selectorLabel}>Layout</ThemedText>
         <View style={styles.layoutOptions}>
-          {layouts.map((layout: LayoutOptionDto) => {
+          {availableLayouts.map((layout: LayoutOptionDto) => {
             const isSelected = selectedLayoutId === layout.id;
             return (
               <TouchableOpacity

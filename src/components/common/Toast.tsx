@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Animated, Pressable, useColorScheme } from 'react-native';
+import { StyleSheet, Animated, Pressable, useColorScheme, Platform } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/src/constants/Colors';
@@ -94,7 +94,7 @@ export default function Toast({
   const iconColor = theme[type];
   const positionStyle = getPositionStyle(position);
 
-  return (
+  const toastElement = (
     <Animated.View
       style={[
         styles.container,
@@ -107,7 +107,7 @@ export default function Toast({
         },
       ]}
     >
-      <Pressable 
+      <Pressable
         style={styles.content}
         onPress={handleHide}
       >
@@ -121,6 +121,14 @@ export default function Toast({
       </Pressable>
     </Animated.View>
   );
+
+  // On web, render via portal to escape parent transforms that break position: fixed
+  if (Platform.OS === 'web' && typeof document !== 'undefined') {
+    const { createPortal } = require('react-dom');
+    return createPortal(toastElement, document.body);
+  }
+
+  return toastElement;
 }
 
 function getPositionStyle(position: ToastPosition): any {

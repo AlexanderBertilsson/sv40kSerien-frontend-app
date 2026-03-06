@@ -214,8 +214,12 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
     const canReconnect = !!isMyMatch && isAdmin && pairingStatus === 'in_progress' && !hasGames(item);
     // Allow opening manual pairings modal
     const canSetManualPairings = canStartPairings || canOrganizerManage;
-    // Show confirm button if it's user's match, has games, all games completed, and match not yet completed
-    const showConfirm = !!isMyMatch && isAdmin && hasGames(item) && allGamesCompleted(item) && item.status !== 'completed';
+    // Show confirm button if it's user's match, has games, all games completed, match not yet completed, and team hasn't already confirmed
+    const myTeamConfirmed = isMyMatch && (
+      (item.team1Id === eventTeamId && !!item.team1ConfirmedById) ||
+      (item.team2Id === eventTeamId && !!item.team2ConfirmedById)
+    );
+    const showConfirm = !!isMyMatch && isAdmin && hasGames(item) && allGamesCompleted(item) && item.status !== 'completed' && !myTeamConfirmed;
     // Spectate: non-user matches, or own match for non-admins, with in_progress pairing state
     const canSpectate = (!isMyMatch || (isMyMatch && !isAdmin)) && pairingStatus === 'in_progress' && !item.isBye;
 

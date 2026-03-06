@@ -206,10 +206,10 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
     const isAdmin = isCaptain || isTeamAdmin;
     const pairingStatus = item.pairingState?.status;
 
-    // Show "Start Pairings" when admin on own match, no games, no active pairing state (or pending)
-    const canStartPairings = !!isMyMatch && isAdmin && !hasGames(item) && !item.isBye && (!pairingStatus || pairingStatus === 'pending');
+    // Show "Start Pairings" when admin on own match, no games, no active pairing state (or pending), and match not completed
+    const canStartPairings = !!isMyMatch && isAdmin && !hasGames(item) && !item.isBye && item.status !== 'completed' && (!pairingStatus || pairingStatus === 'pending');
     // Event organizer can manage pairings for any match
-    const canOrganizerManage = isOrganizer && !hasGames(item) && !item.isBye && (!pairingStatus || pairingStatus === 'pending');
+    const canOrganizerManage = isOrganizer && !hasGames(item) && !item.isBye && item.status !== 'completed' && (!pairingStatus || pairingStatus === 'pending');
     // Show "Reconnect to Pairing" when admin on own match, pairing is in progress
     const canReconnect = !!isMyMatch && isAdmin && pairingStatus === 'in_progress' && !hasGames(item);
     // Allow opening manual pairings modal

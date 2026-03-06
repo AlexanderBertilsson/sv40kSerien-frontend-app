@@ -7,7 +7,7 @@ import ThemedText from '@/src/components/ThemedText';
 import { EventProvider, useEventContext } from '@/src/contexts/EventContext';
 import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
 import { useRoundConfiguration } from '@/src/hooks/useRoundConfiguration';
-import { useRoundMatches } from '@/src/hooks/useEventState';
+import { useTeamMatch } from '@/src/hooks/useEventState';
 import { mapApiPlayersToTeam, mapApiLayouts } from '@/src/utils/pairingMappers';
 import { useMemo, useCallback, useLayoutEffect } from 'react';
 import { TableLayout, ServerTeamId } from '@/src/types/pairing';
@@ -45,28 +45,20 @@ function MatchPairingsContent() {
   const queryClient = useQueryClient();
   const { eventTeamId, isCaptain, isTeamAdmin } = useEventContext();
 
-  // Fetch round 1 matches to find this match's data
-  // TODO: Support multiple rounds by searching across rounds
-  const { roundMatchesQuery: round1Query } = useRoundMatches(eventId!, 1);
+  const { teamMatchQuery } = useTeamMatch(matchId);
+  const match = teamMatchQuery.data;
 
-  const match = useMemo(() => {
-    if (round1Query.data) {
-      const found = round1Query.data.find(m => m.id === matchId);
-      if (found) return { match: found, roundNumber: 1 };
-    }
-    return null;
-  }, [round1Query.data, matchId]);
-
-  const team1Id = match?.match.team1Id;
-  const team2Id = match?.match.team2Id;
-  const roundNumber = match?.roundNumber ?? 1;
+  const team1Id = match?.team1Id;
+  const team2Id = match?.team2Id;
+  // TODO: Derive round number from roundId once the API supports it
+  const roundNumber = 1;
   const isUserTeam1 = eventTeamId === team1Id;
   const isUserTeam2 = eventTeamId === team2Id;
   const isAdmin = isCaptain || isTeamAdmin;
   const isOnTeam = isUserTeam1 || isUserTeam2;
   const isTeamSpectator = isOnTeam && !isAdmin;
   const isSpectator = !isOnTeam;
-  const pairingStateId = match?.match.pairingState?.id;
+  const pairingStateId = match?.pairingState?.id;
   const isMultiplayer = !!pairingStateId;
 
   // Fetch both teams' registrations
@@ -86,14 +78,14 @@ function MatchPairingsContent() {
       // Spectator: team1 = A (blue), team2 = B (red) — natural server order
       teamAMembers = team1RegQuery.data.members;
       teamBMembers = team2RegQuery.data.members;
-      teamAName = match.match.team1Name;
-      teamBName = match.match.team2Name || 'Team 2';
+      teamAName = match.team1Name;
+      teamBName = match.team2Name || 'Team 2';
     } else {
       // Participant: user's team = A (blue), opponent = B (red)
       teamAMembers = isUserTeam1 ? team1RegQuery.data.members : team2RegQuery.data.members;
       teamBMembers = isUserTeam1 ? team2RegQuery.data.members : team1RegQuery.data.members;
-      teamAName = isUserTeam1 ? match.match.team1Name : (match.match.team2Name || 'Opponent');
-      teamBName = isUserTeam1 ? (match.match.team2Name || 'Opponent') : match.match.team1Name;
+      teamAName = isUserTeam1 ? match.team1Name : (match.team2Name || 'Opponent');
+      teamBName = isUserTeam1 ? (match.team2Name || 'Opponent') : match.team1Name;
     }
 
     const teamA = mapApiPlayersToTeam(teamAMembers, 'A', teamAName, '#3b82f6');
@@ -106,13 +98,14 @@ function MatchPairingsContent() {
   const myTeamId = isUserTeam1 ? team1Id! : team2Id!;
 
   const handleDone = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['teamMatch', matchId] });
     queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] });
     queryClient.invalidateQueries({ queryKey: ['eventState', eventId] });
     queryClient.invalidateQueries({ queryKey: ['eventRegistration', 'me', eventId] });
     router.back();
-  }, [queryClient, eventId]);
+  }, [queryClient, eventId, matchId]);
 
-  const isLoading = team1RegQuery.isLoading || team2RegQuery.isLoading || roundConfigQuery.isLoading || round1Query.isLoading;
+  const isLoading = teamMatchQuery.isLoading || team1RegQuery.isLoading || team2RegQuery.isLoading || roundConfigQuery.isLoading;
 
   if (isLoading) {
     return (

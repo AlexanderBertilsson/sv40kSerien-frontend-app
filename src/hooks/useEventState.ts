@@ -30,6 +30,19 @@ export function useRoundMatches(eventId: string, roundNumber: number | null) {
   return { roundMatchesQuery };
 }
 
+export function useTeamMatch(teamMatchId: string | undefined) {
+  const teamMatchQuery = useQuery<TeamMatchDto>({
+    queryKey: ['teamMatch', teamMatchId],
+    queryFn: async () => {
+      const res = await apiClient.get<TeamMatchDto>(`/TeamMatches/${teamMatchId}`);
+      return res.data;
+    },
+    enabled: !!teamMatchId,
+  });
+
+  return { teamMatchQuery };
+}
+
 export function useSubmitPairings(eventId: string, teamMatchId: string) {
   const queryClient = useQueryClient();
 

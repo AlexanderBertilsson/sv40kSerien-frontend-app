@@ -13,7 +13,7 @@ export interface EventDetails  {
     playersPerTeam: number
   },
   createdByUserId: string,
-  numberOfPlayers: number,
+  maxParticipants?: number | null,
   startDate: string,
   endDate: string,
   playerPack?: string,

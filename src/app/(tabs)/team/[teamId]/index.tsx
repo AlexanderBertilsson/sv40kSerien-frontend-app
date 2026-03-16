@@ -3,13 +3,14 @@ import { View, StyleSheet, useColorScheme, Image, ScrollView, Pressable } from '
 import ThemedText from '@/src/components/ThemedText';
 import { Colors, hexToRgba } from '@/src/constants/Colors';
 import { Link } from 'expo-router';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import TeamMembersPreview from '@/src/components/team/TeamMembersPreview';
 import { useLocalSearchParams } from 'expo-router';
 import { useTeam, useUpdateTeamImages } from '@/src/hooks/useTeam';
 import { useAuthContext } from '@/src/contexts/AuthContext';
 import Toast, { ToastType } from '@/src/components/common/Toast';
 import UpdateTeamImagesModal from '@/src/components/modals/UpdateTeamImagesModal';
+import { getSportsmanshipColor } from '@/src/components/common/SportsmanshipBar';
 
 interface StatItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -107,12 +108,11 @@ export default function TeamScreen() {
       <View style={styles.teamInfo}>
         <ThemedText style={styles.teamName}>{team.name}</ThemedText>
         <View style={styles.statsContainer}>
-          <StatItem
-            icon="star"
-            value={team.sportsmanshipLvl.toString()}
-            label="Sportsmanship"
-            theme={theme}
-          />
+          <View style={styles.statItem}>
+            <MaterialCommunityIcons name="star-four-points" size={24} color={getSportsmanshipColor(team.sportsmanshipLvl)} />
+            <ThemedText style={[styles.statValue, { color: getSportsmanshipColor(team.sportsmanshipLvl) }]}>{team.sportsmanshipLvl}</ThemedText>
+            <ThemedText style={[styles.statLabel, { color: theme.text }]}>Sportsmanship</ThemedText>
+          </View>
           <StatItem
             icon="trophy"
             // value={`${team.gameStats.winRate}%`}

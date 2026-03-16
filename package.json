@@ -13,8 +13,9 @@
     "lint:fix": "eslint . --fix",
     "build:dev": "copy .env.development .env && npx expo export --platform web --output-dir dist --clear",
     "build:staging": "copy .env.staging .env && npx expo export --platform web --output-dir dist --clear",
-    "build:prod": "copy .env.production .env && npx expo export --platform web --output-dir dist --clear",
-    "deploy:staging": "npm run build:staging && aws s3 sync dist/ s3://wha-client-staging-web-app --delete && aws cloudfront create-invalidation --distribution-id E3BF09I57S5OM3 --paths \"/*\""
+    "build:prod": "copy .env.prod .env && npx expo export --platform web --output-dir dist --clear",
+    "deploy:staging": "npm run build:staging && aws s3 sync dist/ s3://wha-client-staging-web-app --delete && aws cloudfront create-invalidation --distribution-id E3BF09I57S5OM3 --paths \"/*\"",
+    "deploy:prod": "npm run build:prod && aws s3 sync dist/ s3://wha-client-prod-web-app --delete && aws cloudfront create-invalidation --distribution-id E3LQWVNXRIL22Z --paths \"/*\""
   },
   "jest": {
     "preset": "jest-expo"

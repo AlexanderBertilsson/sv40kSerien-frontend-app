@@ -6,6 +6,7 @@ import { Colors } from '@/src/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import UpdateProfileModal from '../modals/UpdateProfileModal';
+import { SportsmanshipBar } from '../common/SportsmanshipBar';
 
 interface ProfileHeaderProps {
   username: string;
@@ -40,6 +41,7 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
       await onProfileUpdate(newProfilePicture, newHeroImage, imageMetadata);
     }
   };
+  console.log("progress", progress)
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -85,18 +87,8 @@ export function ProfileHeader({ username, title, team, sportsmanship, sportsmans
           </View>
 
           <View style={[styles.sportsmanshipContainer, { borderTopColor: theme.icon }]}>
-            <View style={styles.sportsmanshipHeader}>
-              <ThemedText style={[styles.sportsmanshipLabel, { color: theme.icon }]}>Sportsmanship Level</ThemedText>
-              <View style={styles.levelBadge}>
-                <ThemedText style={[styles.levelText, { color: theme.text }]}>{level}</ThemedText>
-              </View>
-            </View>
-            <View style={styles.progressContainer}>
-              <View style={[styles.progressTrack, { backgroundColor: theme.background }]}>
-                <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: theme.tint }]} />
-              </View>
-              <ThemedText style={styles.progressText}>{progress}%</ThemedText>
-            </View>
+            <ThemedText style={[styles.sportsmanshipLabel, { color: theme.icon, marginBottom: 10 }]}>Sportsmanship</ThemedText>
+            <SportsmanshipBar level={level} progress={progress} />
           </View>
         </View>
       </View>
@@ -206,46 +198,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     paddingTop: 16,
   },
-  sportsmanshipHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
   sportsmanshipLabel: {
     fontSize: 14,
     lineHeight: 18,
-  },
-  levelBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  levelText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  progressTrack: {
-    flex: 1,
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 12,
-    width: 36,
-    textAlign: 'right',
   },
 });

@@ -121,7 +121,7 @@ export default function EventScreen() {
   useEffect(() => {
     if (event) {
       // Event conditions
-      setIsEventFull(event.numberOfRegisteredTeams >= event.numberOfPlayers / 5);
+      setIsEventFull(event.maxParticipants ? event.numberOfRegisteredTeams >= event.maxParticipants : false);
       setIsUserRegistered(event.registeredTeams.some(team => team.users.some(user => user.id === authUser?.id)));
       setIsTeamRegistered(event.registeredTeams.some(team => team.id === authUser?.teamId));
       setIsEventPast(event.startDate < new Date().toISOString());
@@ -135,7 +135,7 @@ export default function EventScreen() {
         endDate: event.endDate,
         location: event.location,
         playerPack: event.playerPack,
-        maxParticipants: event.numberOfPlayers,
+        maxParticipants: event.maxParticipants ?? null,
         eventTypeId: event.eventType?.id,
         hideLists: event.hideLists ?? false,
         seasonId: event.seasonId ?? null,
@@ -144,10 +144,11 @@ export default function EventScreen() {
     }
   }, [event, authUser]);
 
-  const handleUpdateEvent = async () => {
+  const handleUpdateEvent = async (override?: Partial<UpdateEventRequest>) => {
     if (!eventId) return;
-    
-    const result = await updateEventMutation.mutateAsync({ id: eventId, data: editedEvent });
+
+    const data = override ? { ...editedEvent, ...override } : editedEvent;
+    const result = await updateEventMutation.mutateAsync({ id: eventId, data });
     if (result) {
       setEditModalVisible(false);
     }

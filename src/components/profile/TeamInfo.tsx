@@ -1,9 +1,11 @@
 import { View, StyleSheet, useColorScheme, Pressable } from 'react-native';
 import { Image } from 'expo-image';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
 import { Colors } from '@/src/constants/Colors';
 import { useState } from 'react';
 import { Link } from 'expo-router';
+import { getSportsmanshipColor } from '../common/SportsmanshipBar';
 
 interface TeamInfoProps {
 teamName: string;
@@ -72,7 +74,10 @@ export function TeamInfo({ teamName, teamLogo, sportsmanshipLvl, teamId }: TeamI
 
             <View style={styles.infoRow}>
               <ThemedText style={labelStyle}>Sportsmanship:</ThemedText>
-              <ThemedText style={valueStyle}>{sportsmanshipLvl}</ThemedText>
+              <View style={styles.sportsmanshipValue}>
+                <MaterialCommunityIcons name="star-four-points" size={14} color={getSportsmanshipColor(sportsmanshipLvl)} />
+                <ThemedText style={[valueStyle, { color: getSportsmanshipColor(sportsmanshipLvl), fontWeight: 'bold' }]}>{sportsmanshipLvl}</ThemedText>
+              </View>
             </View>
           </View>
         </View>
@@ -135,6 +140,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     lineHeight: 18,
+  },
+  sportsmanshipValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   link: {
     fontWeight: 'bold'

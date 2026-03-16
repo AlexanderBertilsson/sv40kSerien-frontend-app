@@ -9,12 +9,13 @@ export interface User {
   email: string;
   profilePictureUrl: string;
   heroImageUrl: string;
-  sportsmanshipScore: number;
+  sportsmanshipProgress: number;
   sportsmanshipLevel: number;
   teamId: string;
 }
 
 export interface Profile extends User {
+    isOrganizer?: boolean;
     teamRoles?: {
         role: string;
         teamId: string;

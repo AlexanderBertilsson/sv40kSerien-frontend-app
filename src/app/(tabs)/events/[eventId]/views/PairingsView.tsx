@@ -12,10 +12,12 @@ import { ArmyListModal } from '@/src/components/modals/armyListModal';
 import { PairingsModal } from '@/src/components/modals/PairingsModal';
 import { GameDetailsModal } from '@/src/components/modals/GameDetailsModal';
 import { ConfirmModal } from '@/src/components/modals/ConfirmModal';
+import { SportsmanshipRatingModal } from '@/src/components/modals/SportsmanshipRatingModal';
 import Toast, { ToastType } from '@/src/components/common/Toast';
 import { EventTeam } from '@/types/Event';
 import { useAuthContext } from '@/src/contexts/AuthContext';
 import { useEventContext } from '@/src/contexts/EventContext';
+import { useSportsmanshipStatuses } from '@/src/hooks/useSportsmanship';
 
 interface PairingsViewProps {
   eventId: string;
@@ -41,6 +43,7 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
   const [selectedMatch, setSelectedMatch] = useState<TeamMatchDto | null>(null);
   const [selectedGame, setSelectedGame] = useState<MatchGame | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [sportsmanshipGame, setSportsmanshipGame] = useState<MatchGame | null>(null);
   const { roundMatchesQuery } = useRoundMatches(eventId, selectedRound);
   const { roundConfigQuery } = useRoundConfiguration(eventId, selectedRound);
   const { startPairingsMutation } = useStartPairings(eventId);
@@ -82,6 +85,25 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
     }
     return matches;
   }, [roundMatchesQuery.data, eventTeamId]);
+
+  // Find the user's game in the current round if the game has a score reported
+  const userGameIds = useMemo(() => {
+    if (!authUser?.id || !eventTeamId || !sortedMatches.length) return [];
+    const userMatch = sortedMatches.find(m => m.team1Id === eventTeamId || m.team2Id === eventTeamId);
+    if (!userMatch?.games) return [];
+    const ids: string[] = [];
+    for (const game of userMatch.games) {
+      if (!game.id) continue;
+      const isUserInGame = game.player1Id === authUser.id || game.player2Id === authUser.id;
+      const hasScore = game.player1DifferentialScore !== 0 || game.player2DifferentialScore !== 0;
+      if (isUserInGame && hasScore) {
+        ids.push(game.id);
+      }
+    }
+    return ids;
+  }, [sortedMatches, authUser?.id, eventTeamId]);
+
+  const { unratedGameIds } = useSportsmanshipStatuses(userGameIds);
 
   const isUserMatch = (match: TeamMatchDto) => {
     return eventTeamId && (match.team1Id === eventTeamId || match.team2Id === eventTeamId);
@@ -156,8 +178,12 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
     try {
       await confirmMatchMutation.mutateAsync();
       setShowConfirmModal(false);
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['eventStandings', eventId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['roundMatches', eventId] }),
+        queryClient.invalidateQueries({ queryKey: ['eventState', eventId] }),
+        queryClient.invalidateQueries({ queryKey: ['event', eventId] }),
+        queryClient.invalidateQueries({ queryKey: ['eventStandings', eventId] }),
+      ]);
       setToastConfig({ visible: true, message: 'Match result confirmed!', type: 'success' });
     } catch (error) {
       console.error('Failed to confirm match:', error);
@@ -192,6 +218,15 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
 
   const handleGamePress = (game: MatchGame) => {
     setSelectedGame(game);
+  };
+
+  const handleSportsmanshipPress = (game: MatchGame) => {
+    setSportsmanshipGame(game);
+  };
+
+  const handleSportsmanshipClose = () => {
+    setSportsmanshipGame(null);
+    queryClient.invalidateQueries({ queryKey: ['sportsmanship'] });
   };
 
   const handleScoreSubmitted = () => {
@@ -235,6 +270,8 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
           showConfirmButton={showConfirm}
           onConfirmResult={handleConfirmResult}
           isConfirming={confirmMatchMutation.isPending}
+          unratedGameIds={unratedGameIds}
+          onSportsmanshipPress={handleSportsmanshipPress}
         />
         {(canStartPairings || canOrganizerManage) && (
           <TouchableOpacity
@@ -369,6 +406,19 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
         currentUserId={authUser?.id}
         isEventAdmin={isOrganizer}
         onScoreSubmitted={handleScoreSubmitted}
+      />
+
+      <SportsmanshipRatingModal
+        visible={!!sportsmanshipGame}
+        onClose={handleSportsmanshipClose}
+        gameId={sportsmanshipGame?.id || ''}
+        opponentName={
+          sportsmanshipGame
+            ? (sportsmanshipGame.player1Id === authUser?.id
+                ? (sportsmanshipGame.player2Name || 'Opponent')
+                : (sportsmanshipGame.player1Name || 'Opponent'))
+            : ''
+        }
       />
 
       <ConfirmModal

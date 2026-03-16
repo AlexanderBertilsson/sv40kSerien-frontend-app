@@ -76,7 +76,7 @@ export class WhaClientStack extends cdk.Stack {
         },
         origins: [{
           id: 'S3Origin',
-          domainName: webBucket.bucketDomainName,
+          domainName: webBucket.bucketRegionalDomainName,
           originAccessControlId: originAccessControl.attrId,
           s3OriginConfig: {
             originAccessIdentity: '', // Empty for OAC

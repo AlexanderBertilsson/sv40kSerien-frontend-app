@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
 import { EventTeam } from '../../../types/Event';
 import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
 import { EventRegistrationMemberDto } from '@/types/EventAdmin';
+import { getSportsmanshipColor } from '../common/SportsmanshipBar';
 
 import { UserRow, UserRowData } from '../UserRow';
 
@@ -83,19 +85,6 @@ const EventParticipants = ({ roster, theme, eventId }: EventParticipantsProps) =
     });
   };
 
-  const getSportsmanshipColor = (level: number) => {
-    if (level >= 4) return '#4CAF50'; // Green for high sportsmanship
-    if (level >= 3) return '#FFC107'; // Yellow for medium sportsmanship
-    return '#F44336'; // Red for low sportsmanship
-  };
-
-  const getSportsmanshipLabel = (level: number) => {
-    if (level >= 4) return 'Excellent';
-    if (level >= 3) return 'Good';
-    if (level >= 2) return 'Fair';
-    return 'Poor';
-  };
-
   return (
     <View style={styles.sectionContainer}>
       <ThemedText type="subtitle">Participants ({roster?.length || 0} Teams)</ThemedText>
@@ -148,8 +137,9 @@ const EventParticipants = ({ roster, theme, eventId }: EventParticipantsProps) =
                           styles.sportsmanshipBadge,
                           { backgroundColor: getSportsmanshipColor(team.sportsmanshipLvl) }
                         ]}>
+                          <MaterialCommunityIcons name="star-four-points" size={12} color="#fff" />
                           <ThemedText style={styles.sportsmanshipText}>
-                            {getSportsmanshipLabel(team.sportsmanshipLvl)} ({team.sportsmanshipLvl}/5)
+                            {team.sportsmanshipLvl}
                           </ThemedText>
                         </View>
                       </View>
@@ -281,6 +271,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sportsmanshipBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,

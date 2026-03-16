@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from './ThemedText';
 import { ArmyListModal } from './modals/armyListModal';
 import { hexToRgba } from '../constants/Colors';
 import { FactionIcon } from './FactionIcon';
+import { getSportsmanshipColor } from './common/SportsmanshipBar';
 
 // Extended user interface for UserRow component
 export interface UserRowData {
@@ -34,18 +36,6 @@ export function UserRow({
   selectable = false,
   onSelectionChange
 }: UserRowProps) {
-  const getSportsmanshipColor = (level: number) => {
-    if (level >= 4) return '#4CAF50'; // Green for high sportsmanship
-    if (level >= 3) return '#FFC107'; // Yellow for medium sportsmanship
-    return '#F44336'; // Red for low sportsmanship
-  };
-
-  const getSportsmanshipLabel = (level: number) => {
-    if (level >= 4) return 'Excellent';
-    if (level >= 3) return 'Good';
-    if (level >= 2) return 'Fair';
-    return 'Poor';
-  };
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -108,13 +98,13 @@ export function UserRow({
       {/* Optional Sportsmanship Badge */}
       {showSportsmanship && user.sportsmanshipLevel !== undefined && (
         <View style={[
-          styles.memberBadge, 
+          styles.memberBadge,
           { backgroundColor: getSportsmanshipColor(user.sportsmanshipLevel) }
         ]}>
+          <MaterialCommunityIcons name="star-four-points" size={12} color="#fff" />
           <ThemedText style={styles.memberBadgeText}>
-            {getSportsmanshipLabel(user.sportsmanshipLevel)}
+            {user.sportsmanshipLevel}
           </ThemedText>
-          
         </View>
       )}
       {user.armyId && <ArmyListModal
@@ -195,14 +185,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   memberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    borderWidth: 1,
   },
   memberBadgeText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: 'bold',
     color: '#fff',
   },
 });

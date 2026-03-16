@@ -9,7 +9,7 @@ export interface Team {
         id: string;
         username: string;
         email: string;
-        sportsmanshipScore: number;
+        sportsmanshipProgress: number;
         sportsmanshipLevel: number;
         profilePictureUrl: string;
         heroImageUrl: string;

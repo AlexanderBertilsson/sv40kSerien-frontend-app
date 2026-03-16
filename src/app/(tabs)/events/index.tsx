@@ -7,6 +7,7 @@ import { useEvents } from '@/src/hooks/useEvents';
 import { useEventManagement } from '@/src/hooks/useEventManagement';
 import { useEventTypes } from '@/src/hooks/useEventTypes';
 import { useSeasons } from '@/src/hooks/useSeasons';
+import { useAuthContext } from '@/src/contexts/AuthContext';
 import { EventDetails } from '@/types/EventDetails';
 import { CreateEventRequest, PairingStrategy } from '@/types/EventAdmin';
 
@@ -21,20 +22,20 @@ const getErrorMessage = (error: Error | unknown): string => {
 export default function EventsScreen() {
   const colorScheme = useColorScheme() ?? 'dark'; // Set dark as default
   const theme = Colors[colorScheme];
+  const { authUser } = useAuthContext();
   const { eventsQuery } = useEvents({ upcomingOnly: true });
   const { createEventMutation } = useEventManagement();
-  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes();
-  const { seasonsQuery } = useSeasons();
+  const [modalVisible, setModalVisible] = useState(false);
+  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes(modalVisible);
+  const { seasonsQuery } = useSeasons(modalVisible);
   const seasons = seasonsQuery.data || [];
-  
+
   // Extract data from queries
   const events = eventsQuery.data || [];
   const loading = eventsQuery.isLoading;
   const error = eventsQuery.error;
   const createLoading = createEventMutation.isPending;
   const createError = createEventMutation.error;
-  
-  const [modalVisible, setModalVisible] = useState(false);
   const [seasonDropdownVisible, setSeasonDropdownVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -118,8 +119,10 @@ export default function EventsScreen() {
           📅 {new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}
         </ThemedText>
         <ThemedText style={styles.eventDetailText}>🎯 {item.rounds} rounds</ThemedText>
-        <ThemedText style={styles.eventDetailText}>👥 {item.numberOfRegisteredPlayers} / {item.numberOfPlayers}</ThemedText>
-        <ThemedText style={styles.eventDetailText}>🚩 {item.numberOfRegisteredTeams} / {item.numberOfPlayers/item.eventType.playersPerTeam}</ThemedText>
+        <ThemedText style={styles.eventDetailText}>👥 {item.numberOfRegisteredPlayers}</ThemedText>
+        <ThemedText style={styles.eventDetailText}>
+          🚩 {item.numberOfRegisteredTeams}{item.maxParticipants ? ` / ${item.maxParticipants}` : ''}
+        </ThemedText>
       </View>
       
       {item.winningTeamId && (<View style={styles.eventStats}>
@@ -137,14 +140,16 @@ export default function EventsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={[styles.createButton, { backgroundColor: theme.tint }]}
-          onPress={() => setModalVisible(true)}
-        >
-          <ThemedText style={{ color: '#fff' }}>Create Event</ThemedText>
-        </TouchableOpacity>
-      </View>
+      {authUser?.isOrganizer && (
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[styles.createButton, { backgroundColor: theme.tint }]}
+            onPress={() => setModalVisible(true)}
+          >
+            <ThemedText style={{ color: '#fff' }}>Create Event</ThemedText>
+          </TouchableOpacity>
+        </View>
+      )}
       
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
       

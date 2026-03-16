@@ -141,10 +141,10 @@ export default function PlacingsView({ eventId }: PlacingsViewProps) {
                   {Array.from({ length: roundCount }, (_, i) => {
                     const round = entry.roundResults?.find((r) => r.roundNumber === i + 1);
                     const score = round?.differentialScore ?? null;
-                    const scoreColor = !round ? theme.icon : round.isWinner ? theme.success : round.isDraw ? theme.info : theme.error;
+                    const scoreColor = !round || !round.isCompleted ? theme.icon : round.isWinner ? theme.success : round.isDraw ? theme.info : theme.error;
                     return (
                       <ThemedText key={`r-${i}`} style={[styles.cell, styles.roundCol, { color: scoreColor }]}>
-                        {round ? (round.isBye ? 'BYE' : `${score}`) : '-'}
+                        {!round || !round.isCompleted ? '-' : round.isBye ? 'BYE' : `${score}`}
                       </ThemedText>
                     );
                   })}

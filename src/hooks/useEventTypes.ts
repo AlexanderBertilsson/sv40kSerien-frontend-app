@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/src/components/httpClient/httpClient';
 import { EventType } from '@/types/EventAdmin';
 
-export function useEventTypes() {
+export function useEventTypes(enabled: boolean = true) {
   const eventTypesQuery = useQuery<EventType[]>({
     queryKey: ['eventTypes'],
     queryFn: async () => {
@@ -10,6 +10,7 @@ export function useEventTypes() {
       return res.data;
     },
     staleTime: 60 * 60 * 1000, // 1 hour - event types rarely change
+    enabled,
   });
 
   return {

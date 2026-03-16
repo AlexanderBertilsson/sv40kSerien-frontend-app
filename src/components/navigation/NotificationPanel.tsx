@@ -129,7 +129,7 @@ export function NotificationPanel({
             inviteMessage="invited you to join"
             targetName={invite.team.name}
             logoUrl={invite.team.logoUrl}
-            subtitle={`Sportsmanship: ${invite.team.sportsmanshipLvl}`}
+            subtitle={`Sportsmanship Lvl: ${invite.team.sportsmanshipLvl}`}
             theme={theme}
             onAccept={handleAcceptTeamInvite}
             onReject={handleRejectTeamInvite}

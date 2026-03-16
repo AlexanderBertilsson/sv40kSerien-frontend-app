@@ -78,6 +78,8 @@ interface MatchCardProps {
   showConfirmButton?: boolean;
   onConfirmResult?: () => void;
   isConfirming?: boolean;
+  unratedGameIds?: Set<string>;
+  onSportsmanshipPress?: (game: MatchGame) => void;
 }
 
 export function MatchCard({ 
@@ -90,18 +92,14 @@ export function MatchCard({
   showConfirmButton = false,
   onConfirmResult,
   isConfirming = false,
+  unratedGameIds,
+  onSportsmanshipPress,
 }: MatchCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
-
-  const getScoreColor = (score1: number, score2: number) => {
-    if (score1 > score2) return theme.success;
-    if (score1 < score2) return theme.error;
-    return theme.text;
-  };
 
   const getDiffColor = (myScore: number, opponentScore: number) => {
     if (myScore > opponentScore) return theme.success;
@@ -281,136 +279,162 @@ export function MatchCard({
                 const player1ArmyListId = game.player1ArmyListId || player1?.armyListUrl;
                 const player2ArmyListId = game.player2ArmyListId || player2?.armyListUrl;
 
+                const showSportsmanship = game.id && unratedGameIds?.has(game.id) && onSportsmanshipPress;
+
                 if (isMobile) {
                   return (
+                    <View key={game.id || index}>
+                      <Pressable
+                        style={[styles.gameRowMobile, { borderColor: hexToRgba(theme.icon, 0.3) }]}
+                        onPress={onGamePress ? () => onGamePress(game) : undefined}
+                        disabled={!onGamePress}
+                      >
+                        {/* Player 1 row - left aligned: score, image, icon, (name, faction), army list */}
+                        <View style={styles.mobilePlayerRowLeft}>
+                          <ThemedText style={[
+                            styles.mobilePlayerScore,
+                            { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
+                          ]}>
+                            {game.player1DifferentialScore}
+                          </ThemedText>
+                          {player1Faction && (
+                            <FactionIcon faction={player1Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
+                          )}
+                          <View style={styles.mobilePlayerDetails}>
+                            <ThemedText style={styles.playerName}>{player1Name || 'Player 1'}</ThemedText>
+                            {player1Faction && (
+                              <ThemedText style={styles.faction}>{player1Faction}</ThemedText>
+                            )}
+                          </View>
+                          <View style={{ flex: 1 }} />
+                          {player1ArmyListId && onArmyListPress && (
+                            <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
+                              <ThemedText style={styles.armyListLink}>Army List</ThemedText>
+                            </Pressable>
+                          )}
+                        </View>
+
+                        {/* Crossed swords divider */}
+                        <View style={styles.mobileVsDivider}>
+                          <MaterialCommunityIcons name="sword-cross" size={18} color={theme.tint} />
+                        </View>
+
+                        {/* Player 2 row - right aligned: army list, (name, faction), icon, image, score */}
+                        <View style={styles.mobilePlayerRowRight}>
+                          {player2ArmyListId && onArmyListPress && (
+                            <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
+                              <ThemedText style={styles.armyListLink}>Army List</ThemedText>
+                            </Pressable>
+                          )}
+                          <View style={{ flex: 1 }} />
+                          <View style={[styles.mobilePlayerDetails, styles.playerDetailsRight]}>
+                            <ThemedText style={[styles.playerName, styles.textAlignRight]}>
+                              {player2Name || 'Player 2'}
+                            </ThemedText>
+                            {player2Faction && (
+                              <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>
+                            )}
+                          </View>
+                          {player2Faction && (
+                            <FactionIcon faction={player2Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
+                          )}
+                          <ThemedText style={[
+                            styles.mobilePlayerScore,
+                            { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
+                          ]}>
+                            {game.player2DifferentialScore}
+                          </ThemedText>
+                        </View>
+                      </Pressable>
+                      {showSportsmanship && (
+                        <TouchableOpacity
+                          style={[styles.sportsmanshipButton, { borderColor: '#F59E0B' }]}
+                          onPress={() => onSportsmanshipPress(game)}
+                        >
+                          <MaterialCommunityIcons name="star-outline" size={16} color="#F59E0B" />
+                          <ThemedText style={[styles.sportsmanshipButtonText, { color: '#F59E0B' }]}>
+                            Rate Sportsmanship
+                          </ThemedText>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  );
+                }
+
+                return (
+                  <View key={game.id || index}>
                     <Pressable
-                      key={game.id || index}
-                      style={[styles.gameRowMobile, { borderColor: hexToRgba(theme.icon, 0.3) }]}
+                      style={styles.gameRow}
                       onPress={onGamePress ? () => onGamePress(game) : undefined}
                       disabled={!onGamePress}
                     >
-                      {/* Player 1 row - left aligned: score, image, icon, (name, faction), army list */}
-                      <View style={styles.mobilePlayerRowLeft}>
-                        <ThemedText style={[
-                          styles.mobilePlayerScore,
-                          { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
-                        ]}>
-                          {game.player1DifferentialScore}
-                        </ThemedText>
+                      <View style={styles.playerInfo}>
                         {player1Faction && (
                           <FactionIcon faction={player1Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
                         )}
-                        <View style={styles.mobilePlayerDetails}>
+                        <View style={styles.playerDetails}>
                           <ThemedText style={styles.playerName}>{player1Name || 'Player 1'}</ThemedText>
                           {player1Faction && (
                             <ThemedText style={styles.faction}>{player1Faction}</ThemedText>
                           )}
+                          {player1ArmyListId && onArmyListPress && (
+                            <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
+                              <ThemedText style={styles.armyListLink}>View Army List</ThemedText>
+                            </Pressable>
+                          )}
                         </View>
-                        <View style={{ flex: 1 }} />
-                        {player1ArmyListId && onArmyListPress && (
-                          <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
-                            <ThemedText style={styles.armyListLink}>Army List</ThemedText>
-                          </Pressable>
-                        )}
                       </View>
 
-                      {/* Crossed swords divider */}
-                      <View style={styles.mobileVsDivider}>
-                        <MaterialCommunityIcons name="sword-cross" size={18} color={theme.tint} />
+                      <View style={styles.gameScoreContainer}>
+                        <MaterialCommunityIcons name="sword-cross" size={20} color={theme.tint} />
+                        <View style={styles.gameScoreRow}>
+                          <ThemedText style={[
+                            styles.gameScore,
+                            { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
+                          ]}>
+                            {game.player1DifferentialScore}
+                          </ThemedText>
+                          <ThemedText style={styles.gameScoreDash}> - </ThemedText>
+                          <ThemedText style={[
+                            styles.gameScore,
+                            { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
+                          ]}>
+                            {game.player2DifferentialScore}
+                          </ThemedText>
+                        </View>
                       </View>
 
-                      {/* Player 2 row - right aligned: army list, (name, faction), icon, image, score */}
-                      <View style={styles.mobilePlayerRowRight}>
-                        {player2ArmyListId && onArmyListPress && (
-                          <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
-                            <ThemedText style={styles.armyListLink}>Army List</ThemedText>
-                          </Pressable>
-                        )}
-                        <View style={{ flex: 1 }} />
-                        <View style={[styles.mobilePlayerDetails, styles.playerDetailsRight]}>
+                      <View style={[styles.playerInfo, styles.playerInfoRight]}>
+                        <View style={[styles.playerDetails, styles.playerDetailsRight]}>
                           <ThemedText style={[styles.playerName, styles.textAlignRight]}>
                             {player2Name || 'Player 2'}
                           </ThemedText>
                           {player2Faction && (
                             <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>
                           )}
+                          {player2ArmyListId && onArmyListPress && (
+                            <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
+                              <ThemedText style={[styles.armyListLink, styles.textAlignRight]}>View Army List</ThemedText>
+                            </Pressable>
+                          )}
                         </View>
                         {player2Faction && (
                           <FactionIcon faction={player2Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
                         )}
-                        <ThemedText style={[
-                          styles.mobilePlayerScore,
-                          { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
-                        ]}>
-                          {game.player2DifferentialScore}
-                        </ThemedText>
                       </View>
                     </Pressable>
-                  );
-                }
-
-                return (
-                  <Pressable
-                    key={game.id || index}
-                    style={styles.gameRow}
-                    onPress={onGamePress ? () => onGamePress(game) : undefined}
-                    disabled={!onGamePress}
-                  >
-                    <View style={styles.playerInfo}>
-                      {player1Faction && (
-                        <FactionIcon faction={player1Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
-                      )}
-                      <View style={styles.playerDetails}>
-                        <ThemedText style={styles.playerName}>{player1Name || 'Player 1'}</ThemedText>
-                        {player1Faction && (
-                          <ThemedText style={styles.faction}>{player1Faction}</ThemedText>
-                        )}
-                        {player1ArmyListId && onArmyListPress && (
-                          <Pressable onPress={() => onArmyListPress(player1ArmyListId)}>
-                            <ThemedText style={styles.armyListLink}>View Army List</ThemedText>
-                          </Pressable>
-                        )}
-                      </View>
-                    </View>
-
-                    <View style={styles.gameScoreContainer}>
-                      <MaterialCommunityIcons name="sword-cross" size={20} color={theme.tint} />
-                      <View style={styles.gameScoreRow}>
-                        <ThemedText style={[
-                          styles.gameScore,
-                          { color: getDiffColor(game.player1DifferentialScore || 0, game.player2DifferentialScore || 0) }
-                        ]}>
-                          {game.player1DifferentialScore}
+                    {showSportsmanship && (
+                      <TouchableOpacity
+                        style={[styles.sportsmanshipButton, { borderColor: '#F59E0B' }]}
+                        onPress={() => onSportsmanshipPress(game)}
+                      >
+                        <MaterialCommunityIcons name="star-outline" size={16} color="#F59E0B" />
+                        <ThemedText style={[styles.sportsmanshipButtonText, { color: '#F59E0B' }]}>
+                          Rate Sportsmanship
                         </ThemedText>
-                        <ThemedText style={styles.gameScoreDash}> - </ThemedText>
-                        <ThemedText style={[
-                          styles.gameScore,
-                          { color: getDiffColor(game.player2DifferentialScore || 0, game.player1DifferentialScore || 0) }
-                        ]}>
-                          {game.player2DifferentialScore}
-                        </ThemedText>
-                      </View>
-                    </View>
-
-                    <View style={[styles.playerInfo, styles.playerInfoRight]}>
-                      <View style={[styles.playerDetails, styles.playerDetailsRight]}>
-                        <ThemedText style={[styles.playerName, styles.textAlignRight]}>
-                          {player2Name || 'Player 2'}
-                        </ThemedText>
-                        {player2Faction && (
-                          <ThemedText style={[styles.faction, styles.textAlignRight]}>{player2Faction}</ThemedText>
-                        )}
-                        {player2ArmyListId && onArmyListPress && (
-                          <Pressable onPress={() => onArmyListPress(player2ArmyListId)}>
-                            <ThemedText style={[styles.armyListLink, styles.textAlignRight]}>View Army List</ThemedText>
-                          </Pressable>
-                        )}
-                      </View>
-                      {player2Faction && (
-                        <FactionIcon faction={player2Faction} size={28} color={theme.text} style={{ opacity: 0.5 }} />
-                      )}
-                    </View>
-                  </Pressable>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 );
               })}
             </View>
@@ -685,6 +709,22 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  sportsmanshipButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  sportsmanshipButtonText: {
+    fontSize: 12,
     fontWeight: '600',
   },
 });

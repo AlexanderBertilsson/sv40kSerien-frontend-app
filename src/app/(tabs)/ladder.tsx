@@ -2,12 +2,14 @@ import { View, StyleSheet, ScrollView, Image, Text, TouchableOpacity, Modal, Fla
 import { Link } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { useState, useEffect } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors } from '@/src/constants/Colors';
 import { useLadder } from '@/src/hooks/useLadder';
 import { useSeasons } from '@/src/hooks/useSeasons';
 import { Season } from '@/types/Season';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getSportsmanshipColor } from '@/src/components/common/SportsmanshipBar';
 
 
 export default function LadderScreen() {
@@ -125,9 +127,11 @@ export default function LadderScreen() {
                 Losses: <ThemedText style={{ color: theme.tint }}>{row.gamesLost}</ThemedText> | 
                 Score: <ThemedText style={{ color: theme.tint }}>{row.score}</ThemedText>
               </ThemedText>
-              <ThemedText style={styles.teamStats}>
-                Sportsmanship: <ThemedText style={{ color: theme.tint }}>{row.team.sportsmanshipLvl}</ThemedText>
-              </ThemedText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <ThemedText style={styles.teamStats}>Sportsmanship:</ThemedText>
+                <MaterialCommunityIcons name="star-four-points" size={13} color={getSportsmanshipColor(row.team.sportsmanshipLvl)} />
+                <ThemedText style={[styles.teamStats, { color: getSportsmanshipColor(row.team.sportsmanshipLvl), fontWeight: 'bold' }]}>{row.team.sportsmanshipLvl}</ThemedText>
+              </View>
             </View>
           </View>
         </View>

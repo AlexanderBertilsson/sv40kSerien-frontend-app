@@ -1,5 +1,6 @@
 import { View, StyleSheet, Image, Pressable, Text } from 'react-native';
 import { useState } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '@/src/components/ThemedText';
 import { Colors } from '@/src/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -8,6 +9,7 @@ import { User } from '@/types/User';
 import { hexToRgba } from '@/src/constants/Colors';
 import { Profile } from '@/types/User';
 import { Ionicons } from '@expo/vector-icons';
+import { getSportsmanshipColor } from '../common/SportsmanshipBar';
 import SearchUsersModal from '../modals/SearchUsersModal';
 import { useTeamInvite } from '@/src/hooks/useTeamInvite';
 import { usePendingTeamInvites } from '@/src/hooks/usePendingTeamInvites';
@@ -132,7 +134,10 @@ export default function TeamMembersPreview({ members, teamId, authUser }: TeamMe
                 <Link href={`/user/${member.id}`} asChild>
                   <Text style={linkStyle}>{member.username}</Text>
                 </Link>
-                <ThemedText style={styles.memberRole}>{member.sportsmanshipLevel}</ThemedText>
+                <View style={styles.sportsmanshipRow}>
+                  <MaterialCommunityIcons name="star-four-points" size={12} color={getSportsmanshipColor(member.sportsmanshipLevel)} />
+                  <ThemedText style={[styles.memberRole, { color: getSportsmanshipColor(member.sportsmanshipLevel) }]}>{member.sportsmanshipLevel}</ThemedText>
+                </View>
               </View>
             </View>
           ))}
@@ -242,9 +247,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  sportsmanshipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
   memberRole: {
     fontSize: 12,
-    opacity: 0.7,
+    fontWeight: '600',
   },
   link: {
     fontWeight: 'bold'

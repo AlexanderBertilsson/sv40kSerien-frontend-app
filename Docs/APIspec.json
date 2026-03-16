@@ -2117,6 +2117,115 @@
         }
       }
     },
+    "/Games/{gameId}/sportsmanship": {
+      "post": {
+        "tags": [
+          "Games"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitSportsmanshipRatingRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitSportsmanshipRatingRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitSportsmanshipRatingRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/internal/create-user": {
       "post": {
         "tags": [
@@ -3871,9 +3980,10 @@
             "type": "string",
             "format": "uuid"
           },
-          "numberOfPlayers": {
+          "maxParticipants": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "startDate": {
             "type": "string",
@@ -4050,8 +4160,8 @@
             "nullable": true
           },
           "sportsmanshipLvl": {
-            "type": "number",
-            "format": "float"
+            "type": "integer",
+            "format": "int32"
           },
           "eventTeamStatus": {
             "type": "string",
@@ -5190,6 +5300,9 @@
           },
           "isDraw": {
             "type": "boolean"
+          },
+          "isCompleted": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -5322,6 +5435,16 @@
               "$ref": "#/components/schemas/GamePairingRequest"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubmitSportsmanshipRatingRequest": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5725,7 +5848,7 @@
           "id",
           "profilePictureUrl",
           "sportsmanshipLevel",
-          "sportsmanshipScore",
+          "sportsmanshipProgress",
           "username"
         ],
         "type": "object",
@@ -5742,7 +5865,7 @@
             "type": "string",
             "nullable": true
           },
-          "sportsmanshipScore": {
+          "sportsmanshipProgress": {
             "type": "integer",
             "format": "int32"
           },
@@ -5818,7 +5941,7 @@
           "id",
           "profilePictureUrl",
           "sportsmanshipLevel",
-          "sportsmanshipScore",
+          "sportsmanshipProgress",
           "username"
         ],
         "type": "object",
@@ -5835,7 +5958,7 @@
             "type": "string",
             "nullable": true
           },
-          "sportsmanshipScore": {
+          "sportsmanshipProgress": {
             "type": "integer",
             "format": "int32"
           },
@@ -5862,6 +5985,9 @@
               "$ref": "#/components/schemas/TeamRoleDto"
             },
             "nullable": true
+          },
+          "isOrganizer": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

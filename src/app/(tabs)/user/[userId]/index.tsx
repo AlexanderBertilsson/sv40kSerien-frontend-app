@@ -140,7 +140,7 @@ export default function UserScreen() {
           username={userQuery.data.username}
           title={""}
           team={teamQuery.data?.name}
-          sportsmanship={userQuery.data.sportsmanshipScore}
+          sportsmanship={userQuery.data.sportsmanshipProgress}
           sportsmanshipLevel={userQuery.data.sportsmanshipLevel}
           profilePicture={userQuery.data.profilePictureUrl}
           heroImage={userQuery.data.heroImageUrl}

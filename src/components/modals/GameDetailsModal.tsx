@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput, Image, ScrollView } from 'react-native';
 import { useColorScheme } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '../ThemedText';
 import { Colors, hexToRgba } from '../../constants/Colors';
 import { useReportGameScore } from '../../hooks/useEventState';
 import { useAdminUpdateGameScore } from '../../hooks/useEventAdmin';
+import { useGetSportsmanshipRating } from '../../hooks/useSportsmanship';
 import { MatchGame } from '../match/MatchCard';
 import { ReportScoreRequest } from '../../../types/EventAdmin';
+import { SportsmanshipRatingModal } from './SportsmanshipRatingModal';
 
 interface GameDetailsModalProps {
   visible: boolean;
@@ -30,11 +33,17 @@ export function GameDetailsModal({
 }: GameDetailsModalProps) {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
+  const queryClient = useQueryClient();
   const { reportScoreMutation } = useReportGameScore(eventId, game?.id || '');
   const { adminUpdateScoreMutation } = useAdminUpdateGameScore(eventId, game?.id || '');
+  const { hasRated: hasSportsmanshipRating, query: sportsmanshipQuery } = useGetSportsmanshipRating(
+    game?.id || '',
+    visible && !!game?.id && !!currentUserId
+  );
 
   const [player1Score, setPlayer1Score] = useState('');
   const [player2Score, setPlayer2Score] = useState('');
+  const [showSportsmanshipModal, setShowSportsmanshipModal] = useState(false);
 
   // Check if current user is a player in this game
   const isPlayer = useMemo(() => {
@@ -69,11 +78,12 @@ export function GameDetailsModal({
     try {
       if (isEventAdmin) {
         await adminUpdateScoreMutation.mutateAsync(request);
+        onScoreSubmitted?.();
+        handleClose();
       } else {
         await reportScoreMutation.mutateAsync(request);
+        setShowSportsmanshipModal(true);
       }
-      onScoreSubmitted?.();
-      handleClose();
     } catch (error) {
       console.error('Failed to report score:', error);
     }
@@ -82,9 +92,24 @@ export function GameDetailsModal({
   const isSubmitting = reportScoreMutation.isPending || adminUpdateScoreMutation.isPending;
   const hasSubmitError = reportScoreMutation.isError || adminUpdateScoreMutation.isError;
 
+  const opponentName = useMemo(() => {
+    if (!currentUserId || !game) return '';
+    return game.player1Id === currentUserId
+      ? (game.player2Name || 'Player 2')
+      : (game.player1Name || 'Player 1');
+  }, [currentUserId, game]);
+
+  const handleSportsmanshipClose = () => {
+    setShowSportsmanshipModal(false);
+    queryClient.invalidateQueries({ queryKey: ['sportsmanship', game?.id] });
+    onScoreSubmitted?.();
+    handleClose();
+  };
+
   const handleClose = () => {
     setPlayer1Score('');
     setPlayer2Score('');
+    setShowSportsmanshipModal(false);
     onClose();
   };
 
@@ -242,6 +267,19 @@ export function GameDetailsModal({
               </View>
             )}
 
+            {/* Rate Sportsmanship Button */}
+            {isPlayer && hasReportedScore && !hasSportsmanshipRating && !sportsmanshipQuery.isLoading && (
+              <TouchableOpacity
+                style={[styles.sportsmanshipButton, { borderColor: '#F59E0B' }]}
+                onPress={() => setShowSportsmanshipModal(true)}
+              >
+                <MaterialCommunityIcons name="star-outline" size={20} color="#F59E0B" />
+                <ThemedText style={[styles.sportsmanshipButtonText, { color: '#F59E0B' }]}>
+                  Rate Sportsmanship
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+
             {/* Report Score Form */}
             {canReportScore && (
               <View style={styles.reportSection}>
@@ -312,6 +350,13 @@ export function GameDetailsModal({
           </ScrollView>
         </Pressable>
       </Pressable>
+
+      <SportsmanshipRatingModal
+        visible={showSportsmanshipModal}
+        onClose={handleSportsmanshipClose}
+        gameId={game?.id || ''}
+        opponentName={opponentName}
+      />
     </Modal>
   );
 }
@@ -504,6 +549,21 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: 'center',
     marginTop: 8,
+  },
+  sportsmanshipButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  sportsmanshipButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 

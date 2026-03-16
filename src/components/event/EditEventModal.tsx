@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, FlatList } from 'react-native';
 import ThemedText from '@/src/components/ThemedText';
 import { hexToRgba } from '@/src/constants/Colors';
@@ -37,11 +37,20 @@ const EditEventModal = ({
   numberOfRounds,
   playersPerTeam,
 }: EditEventModalProps) => {
-  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes();
-  const { seasonsQuery } = useSeasons();
+  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes(visible);
+  const { seasonsQuery } = useSeasons(visible);
   const seasons = seasonsQuery.data || [];
   const [seasonDropdownVisible, setSeasonDropdownVisible] = useState(false);
   const [activeView, setActiveView] = useState<ModalView>('event');
+  const [startDateText, setStartDateText] = useState(editedEvent.startDate ? editedEvent.startDate.split('T')[0] : '');
+  const [endDateText, setEndDateText] = useState(editedEvent.endDate ? editedEvent.endDate.split('T')[0] : '');
+
+  useEffect(() => {
+    if (visible) {
+      setStartDateText(editedEvent.startDate ? editedEvent.startDate.split('T')[0] : '');
+      setEndDateText(editedEvent.endDate ? editedEvent.endDate.split('T')[0] : '');
+    }
+  }, [visible]);
 
   const canShowRoundConfig = !!eventId && !!numberOfRounds && numberOfRounds > 0 && !!playersPerTeam;
 
@@ -163,8 +172,16 @@ const EditEventModal = ({
                 <ThemedText>Start Date</ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-                  value={editedEvent.startDate ? editedEvent.startDate.split('T')[0] : ''}
-                  onChangeText={(text) => setEditedEvent({...editedEvent, startDate: text ? new Date(text).toISOString() : null})}
+                  value={startDateText}
+                  onChangeText={setStartDateText}
+                  onBlur={() => {
+                    const parsed = new Date(startDateText);
+                    if (startDateText && !isNaN(parsed.getTime())) {
+                      setEditedEvent({...editedEvent, startDate: parsed.toISOString()});
+                    } else if (!startDateText) {
+                      setEditedEvent({...editedEvent, startDate: null});
+                    }
+                  }}
                   placeholder="YYYY-MM-DD"
                   placeholderTextColor={hexToRgba(theme.text, 0.5)}
                 />
@@ -172,8 +189,16 @@ const EditEventModal = ({
                 <ThemedText>End Date</ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
-                  value={editedEvent.endDate ? editedEvent.endDate.split('T')[0] : ''}
-                  onChangeText={(text) => setEditedEvent({...editedEvent, endDate: text ? new Date(text).toISOString() : null})}
+                  value={endDateText}
+                  onChangeText={setEndDateText}
+                  onBlur={() => {
+                    const parsed = new Date(endDateText);
+                    if (endDateText && !isNaN(parsed.getTime())) {
+                      setEditedEvent({...editedEvent, endDate: parsed.toISOString()});
+                    } else if (!endDateText) {
+                      setEditedEvent({...editedEvent, endDate: null});
+                    }
+                  }}
                   placeholder="YYYY-MM-DD"
                   placeholderTextColor={hexToRgba(theme.text, 0.5)}
                 />

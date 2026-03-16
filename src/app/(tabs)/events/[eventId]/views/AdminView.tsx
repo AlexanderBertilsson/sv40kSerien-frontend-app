@@ -12,7 +12,7 @@ interface AdminViewProps {
   event: Event;
   editedEvent: UpdateEventRequest;
   setEditedEvent: React.Dispatch<React.SetStateAction<UpdateEventRequest>>;
-  onUpdateEvent: () => Promise<void>;
+  onUpdateEvent: (override?: Partial<UpdateEventRequest>) => Promise<void>;
   onDeleteEvent: () => Promise<void>;
   actionLoading: boolean;
   actionError: Error | null;
@@ -210,6 +210,15 @@ export default function AdminView({
           <ThemedText style={styles.buttonText}>Edit Event Details</ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
+          style={[styles.button, { backgroundColor: event.hideLists ? theme.success : theme.warning }]}
+          onPress={() => onUpdateEvent({ hideLists: !event.hideLists })}
+          disabled={isLoading}
+        >
+          <ThemedText style={styles.buttonText}>
+            {event.hideLists ? 'Show Army Lists' : 'Hide Army Lists'}
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.error }]}
           onPress={() => setConfirmDeleteVisible(true)}
         >
@@ -350,7 +359,7 @@ export default function AdminView({
       <View style={[styles.section, { backgroundColor: theme.secondary }]}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>Attendee Management</ThemedText>
         <ThemedText style={styles.infoText}>
-          Teams: {event.numberOfRegisteredTeams} | Players: {event.numberOfRegisteredPlayers}
+          Teams: {event.numberOfRegisteredTeams}{event.maxParticipants ? ` / ${event.maxParticipants}` : ''} | Players: {event.numberOfRegisteredPlayers}
         </ThemedText>
 
         {/* Registered Teams List */}

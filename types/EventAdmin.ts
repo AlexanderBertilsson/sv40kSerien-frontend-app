@@ -256,6 +256,7 @@ export interface RoundResultDto {
   isBye: boolean;
   isWinner: boolean;
   isDraw: boolean;
+  isCompleted: boolean;
 }
 
 export type EventTeamStandingStatus = 'active' | 'dropped';

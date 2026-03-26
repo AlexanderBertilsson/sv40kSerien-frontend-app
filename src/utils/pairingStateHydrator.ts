@@ -148,7 +148,24 @@ export function hydratePairingState(
       pendingLayoutForTable = serverRound.team2LayoutTable;
     }
 
-    // Fallback: if server doesn't provide layout table, find first unassigned
+    // Infer from the current picker's defender — layouts are always picked
+    // for the table where the picker's defender is playing.
+    if (pendingLayoutForTable == null) {
+      const pickerDefenderId = serverState.currentLayoutPicker === '1'
+        ? serverRound.team1Defender
+        : serverRound.team2Defender;
+      if (pickerDefenderId) {
+        const defenderPairing = pairings.find(p =>
+          (p.teamAPlayer?.id === pickerDefenderId || p.teamBPlayer?.id === pickerDefenderId)
+          && !p.layout
+        );
+        if (defenderPairing) {
+          pendingLayoutForTable = defenderPairing.tableNumber;
+        }
+      }
+    }
+
+    // Final fallback: first unassigned table in this round
     if (pendingLayoutForTable == null) {
       const tableOffset = isRound1 ? 0 : 2;
       const table1Pairing = pairings.find(p => p.tableNumber === tableOffset + 1);

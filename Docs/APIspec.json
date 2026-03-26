@@ -3760,6 +3760,14 @@
         "additionalProperties": false
       },
       "CreateEventRequest": {
+        "required": [
+          "endDate",
+          "eventTypeId",
+          "numberOfRounds",
+          "pairingStrategy",
+          "startDate",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "title": {
@@ -4087,6 +4095,11 @@
             "nullable": true
           },
           "kFactor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "weighting": {
             "type": "number",
             "format": "double",
             "nullable": true
@@ -4448,9 +4461,8 @@
             "type": "integer",
             "format": "int32"
           },
-          "weighting": {
-            "type": "number",
-            "format": "double"
+          "online": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

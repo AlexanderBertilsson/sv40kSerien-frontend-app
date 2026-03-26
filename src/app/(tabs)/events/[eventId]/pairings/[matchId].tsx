@@ -7,7 +7,7 @@ import ThemedText from '@/src/components/ThemedText';
 import { EventProvider, useEventContext } from '@/src/contexts/EventContext';
 import { useTeamRegistrations } from '@/src/hooks/useTeamRegistrations';
 import { useRoundConfiguration } from '@/src/hooks/useRoundConfiguration';
-import { useTeamMatch } from '@/src/hooks/useEventState';
+import { useTeamMatch, useEventState } from '@/src/hooks/useEventState';
 import { mapApiPlayersToTeam, mapApiLayouts } from '@/src/utils/pairingMappers';
 import { useMemo, useCallback, useLayoutEffect } from 'react';
 import { TableLayout, ServerTeamId } from '@/src/types/pairing';
@@ -50,8 +50,14 @@ function MatchPairingsContent() {
 
   const team1Id = match?.team1Id;
   const team2Id = match?.team2Id;
-  // TODO: Derive round number from roundId once the API supports it
-  const roundNumber = 1;
+
+  // Derive round number from the match's roundId via event state
+  const { eventStateQuery } = useEventState(eventId);
+  const roundNumber = useMemo(() => {
+    if (!match?.roundId || !eventStateQuery.data?.rounds) return 1;
+    const round = eventStateQuery.data.rounds.find(r => r.id === match.roundId);
+    return round?.roundNumber ?? 1;
+  }, [match?.roundId, eventStateQuery.data?.rounds]);
   const isUserTeam1 = eventTeamId === team1Id;
   const isUserTeam2 = eventTeamId === team2Id;
   const isAdmin = isCaptain || isTeamAdmin;
@@ -105,7 +111,7 @@ function MatchPairingsContent() {
     router.back();
   }, [queryClient, eventId, matchId]);
 
-  const isLoading = teamMatchQuery.isLoading || team1RegQuery.isLoading || team2RegQuery.isLoading || roundConfigQuery.isLoading;
+  const isLoading = teamMatchQuery.isLoading || team1RegQuery.isLoading || team2RegQuery.isLoading || roundConfigQuery.isLoading || eventStateQuery.isLoading;
 
   if (isLoading) {
     return (

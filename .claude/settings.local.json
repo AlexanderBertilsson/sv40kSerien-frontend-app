@@ -6,7 +6,9 @@
       "Bash(find:*)",
       "Bash(curl:*)",
       "Bash(xargs:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(start:*)",
+      "Bash(npm audit:*)"
     ]
   }
 }

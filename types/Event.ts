@@ -25,6 +25,9 @@ export interface Event {
   pairingStrategy?: string | null,
   status?: string,
   currentRoundNumber?: number,
+  initialTar?: number | null,
+  kFactor?: number | null,
+  weighting?: number | null,
 }
 
 export interface EventTeam {

@@ -61,13 +61,17 @@ export default function PairingsView({ eventId, registeredTeams = [], isOrganize
       .sort((a: RoundDto, b: RoundDto) => a.roundNumber - b.roundNumber);
   }, [eventStateQuery.data?.rounds]);
 
-  // Auto-select the latest round with pairings
+  // Auto-select the current round (or latest round with pairings as fallback)
   useEffect(() => {
     if (roundsWithPairings.length > 0 && selectedRound === null) {
-      const latestRound = roundsWithPairings[roundsWithPairings.length - 1];
-      setSelectedRound(latestRound.roundNumber);
+      const currentRoundNumber = eventStateQuery.data?.event?.currentRoundNumber;
+      const currentRound = currentRoundNumber
+        ? roundsWithPairings.find((r: RoundDto) => r.roundNumber === currentRoundNumber)
+        : null;
+      const fallback = roundsWithPairings[roundsWithPairings.length - 1];
+      setSelectedRound((currentRound || fallback).roundNumber);
     }
-  }, [roundsWithPairings, selectedRound]);
+  }, [roundsWithPairings, selectedRound, eventStateQuery.data?.event?.currentRoundNumber]);
 
   // Sort matches with user's team at top and transform to MatchData
   const sortedMatches = useMemo(() => {

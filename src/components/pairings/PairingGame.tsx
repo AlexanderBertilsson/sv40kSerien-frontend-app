@@ -1318,11 +1318,20 @@ export default function PairingGame({ initData, getLayoutImageSource, onComplete
                 )}
               </View>
             ))}
+            {isMobile && (
+              <View style={{ justifyContent: 'flex-end', paddingBottom: theme.spacing.xs }}>
+                <Button onPress={handleReset} variant="primary">
+                  {onReset ? 'Done' : 'Start Over'}
+                </Button>
+              </View>
+            )}
           </View>
 
-          <Button onPress={handleReset} variant="primary">
-            {onReset ? 'Done' : 'Start Over'}
-          </Button>
+          {!isMobile && (
+            <Button onPress={handleReset} variant="primary">
+              {onReset ? 'Done' : 'Start Over'}
+            </Button>
+          )}
         </View>
       );
     }
